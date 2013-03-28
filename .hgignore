@@ -1,0 +1,8 @@
+# Ignorefile for Mason-Project
+syntax: glob
+
+*~
+.idea*
+Projekt.org
+out*
+trunk.iml
