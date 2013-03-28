@@ -37,20 +37,15 @@ final class Simulation(var s: Long) extends SimState(s) {
      *
      * One line of resources goes from the one corner to the other.
      */
-    for ( i <- 0 until resources.getHeight) {
-      for (j <- 0 until resources.getWidth) {
+    for (i <- 0 until resources.getHeight; j <- 0 until resources.getWidth if i == j) {
+      val brushWidth: Int = 1
 
-        if (i == j) {
-          val brushWidth: Int = 1
-
-          val xPos: IntBag = new IntBag()
-          val yPos: IntBag = new IntBag()
-          resources.getNeighborsMaxDistance(i, j, brushWidth, false, xPos, yPos)
-          val list = toTupleList(xPos, yPos)
-          for ((x, y) <- list)
-            resources set(x, y, maxResAmount)
-        }
-      }
+      val xPos: IntBag = new IntBag()
+      val yPos: IntBag = new IntBag()
+      resources.getNeighborsMaxDistance(i, j, brushWidth, false, xPos, yPos)
+      val list = toTupleList(xPos, yPos)
+      for ((x, y) <- list)
+        resources set(x, y, maxResAmount)
     }
     //////////////////// Setup of the ant colonies ////////////////////
     tribes(0) = generateTribe(this, new Int2D(0, 0))
