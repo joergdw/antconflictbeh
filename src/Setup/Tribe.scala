@@ -8,7 +8,7 @@ import sim.engine.{SimState, Steppable}
  * @param tribeID Identifier for the tribe the ant belongs to
  * @param simulation Simulation the tribe participates
  * @param homePhero Pheromone-map of the tribe for going home
- *@param resPhero Pheromone-map of the tribe for searching food
+ * @param resPhero Pheromone-map of the tribe for searching food
  * @param warPhero Pheromone-map of the tribe for war-communication
  */
 final class Tribe(val tribeID: Int,

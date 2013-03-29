@@ -44,18 +44,19 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     wie für die Nahrungssuche. Bis dahin wird leider nur bei der Nahrungssuche
     Erkundungsarbeit geleistet.
 
-** TODO Sonstiges [1/7]
+** TODO Sonstiges [2/3]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone
- 2) [ ] Pheromonverdunstung
+ 2) [X] Pheromonverdunstung
  3) [ ] /Optional:/ Pheromondiffussion
- 4) [ ] /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
- 5) [ ] /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem
+ 4) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
+ 5) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem
     Weg. (Eventuell wird dann eine „Vergrößerung“ der Königin auf mehrere Felder
     benötigt, damit die Ameisen bei großer Populationszahl noch an sie
     herankommen)
- 6) [ ] /Optional:/ Queen kann auch sterben und verhält sich in noch mehr
+ 6) /Optional:/ Queen kann auch sterben und verhält sich in noch mehr
     Punkten wie eine normale Ameise.
- 7) [ ] /Optional:/ Ameisen können altersbedingt sterben.
+ 7) /Optional:/ Ameisen können altersbedingt sterben.
+
 ** TODO Benutzeroberfläche und Simulationskontrolle [3/5]
  1) [ ] Statistikfenster für jeden Stamm, das folgende Werte und deren Entwicklung anzeigt:
     - Die (derzeitige) Bevölkerungsstärke
@@ -65,7 +66,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  3) [X] Ameisenstämme sollen in unterschiedlichen Farben dargestellt werden.
  4) [X] Es kann auch eine Ressourcen-Karte angezeigt werden, anhand der man
     sehen kann, wie viele Ressourcen auf einem Feld sind.
- 5) [ ] /Optional:/ Der Farbton im Ameisenfenster zeigt an, wie viele Individuen
+ 5) /Optional:/ Der Farbton im Ameisenfenster zeigt an, wie viele Individuen
     welches Stammes dort sind. (Bis zu einem Maximalwert)
  6) /Optional:/ Jeder Stamm hält seine Pheromonkarte in einem Fenster, mit
     veschiedenen Reitern. Je Reiter eine Karte. (Das macht dann nach
