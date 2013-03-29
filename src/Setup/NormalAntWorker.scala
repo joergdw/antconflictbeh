@@ -4,7 +4,7 @@ import sim.engine.SimState
 
 final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) {
 
-  override def receiveHit(opponent: AntWorker) = {
+  override def receiveHit(opponent: AntWorker) {
     hitpoints = hitpoints - opponent.attack
 
     // Ant should die if no hitpoints left and drop resources
@@ -18,9 +18,9 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
   }
 
   /** actions when ant want to fight – dependent of the ant-type */
-  override def actMilitarily(state: SimState) = {}
+  override def actMilitarily(state: SimState) {}
 
-  override def step(state: SimState) = {
+  override def step(state: SimState) {
     // TODO: Add more behaviour
     actEconomically(state)
   }

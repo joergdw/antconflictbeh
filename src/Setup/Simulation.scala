@@ -28,7 +28,7 @@ final class Simulation(var s: Long) extends SimState(s) {
   val ants: SparseGrid2D = new SparseGrid2D(height, width) // agents: multiples can be on one field
   val resources: IntGrid2D = new IntGrid2D(height, width, 0) // resource-spots
 
-  override def start() = {
+  override def start() {
     super.start()
 
     ///////////////// Setup of the maps //////////////////////////////

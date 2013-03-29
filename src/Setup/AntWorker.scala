@@ -38,7 +38,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     *
     * In any other case the ant cares for food.
     */
-  final def actEconomically(state: SimState) = {
+  final def actEconomically(state: SimState) {
 
     val backpack_full: Boolean = transporting >= backpack
     val is_bored: Boolean = boredom == 0
@@ -65,7 +65,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     * The next field is the neighbour-field with the best home-pheromones.
     * Neighbour fields without foreign-colony ants take precedence (to avoid enemy-contact).
     */
-  final def followHomeWay() = {
+  final def followHomeWay() {
     val list: List[Int2D] = nearPos(1) sortBy smellHomePhero
     val noEnemList = list filterNot enemySensedOn
     val nextPos = if (noEnemList isEmpty) list.head else noEnemList.head
@@ -80,7 +80,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     * With a certain probability (in function of the sim.explorationRate) it is any of the
     * neighbour fields.
     */
-  final def careForFood() = {
+  final def careForFood() {
     val list: List[Int2D] = (nearPos(1) sortBy smellResPhero).reverse
     val nextPos: Int2D = if (sim.random.nextDouble() <= (1.0d - sim.explorationRate))
                            list.head
@@ -96,7 +96,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
   /**
    * Adapts the home-pheromones of the current field.
    */
-  final def adaptHomePhero() = {
+  final def adaptHomePhero() {
     val (x, y) = currentPos
     val currentValue = smellHomePhero(Helpers.toInd2D(x, y))
 
@@ -107,7 +107,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     tribe.homePhero.set(x, y, adaptedValue)
   }
 
-  final def adaptResPhero() = {
+  final def adaptResPhero() {
     val bestNeighbour = (nearPos(1) sortBy smellResPhero).reverse.head
     val adaptedValue = resOnPosition + sim.gamma * smellResPhero(bestNeighbour)
 
@@ -139,7 +139,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     sim.ants.setObjectLocation(this, newPos)
   }
 
-  final def moveTo(newPos: (Int, Int)): Unit = {
+  final def moveTo(newPos: (Int, Int)) {
     moveTo(toInd2D(newPos))
   }
 
@@ -150,7 +150,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     *
     * @param opponent
     */
-  def hit(opponent: AntWorker) = {
+  def hit(opponent: AntWorker) {
     opponent.receiveHit(this)
   }
 
@@ -167,7 +167,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
   /** Drops the resources on the current place. If the queen is there, she
    * receives them.
    */
-  final def dropResources() = {
+  final def dropResources() {
     val pos = currentPos
     if (pos == tribe.queen.currentPos)
       tribe.queen.receiveRes(transporting)
@@ -181,7 +181,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
 
   /** Mines, if possible, resources. Boredom increased if no resources.
     * No boredom if try successful. */
-  final def mineRes() = {
+  final def mineRes() {
     val (x, y) = currentPos
     val spaceLeft: Boolean = backpack > transporting // space left in bag?
     if (spaceLeft && resOnPosition > 0) {

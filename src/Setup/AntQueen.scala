@@ -21,7 +21,7 @@ final class AntQueen(override val tribe: Tribe) extends Ant(tribe) {
    *
    * @param amount amount of resources the queen receives
    */
-  def receiveRes(amount: Int) = {
+  def receiveRes(amount: Int) {
     assert(amount >= 0)
 
     deposit += amount
@@ -32,7 +32,7 @@ final class AntQueen(override val tribe: Tribe) extends Ant(tribe) {
    *
    * Success iff enough resources available and maximum population not reached
    */
-  override def step(state: SimState) = {
+  override def step(state: SimState) {
     assert(0 <= productionState && productionState <= productionTime)
 
     val tmp = deposit - productionCost

@@ -28,5 +28,5 @@ final class Tribe(val tribeID: Int,
    *
    * @param state
    */
-  def step(state: SimState) = {}
+  def step(state: SimState) {}
 }
