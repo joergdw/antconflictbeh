@@ -44,10 +44,10 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     wie für die Nahrungssuche. Bis dahin wird leider nur bei der Nahrungssuche
     Erkundungsarbeit geleistet.
 
-** TODO Sonstiges [2/3]
- 1) [X] Maximaler Pheromonwert für Ressourcenpheromone
+** TODO Sonstiges [2/2]
+ 1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Pheromonverdunstung
- 3) [ ] /Optional:/ Pheromondiffussion
+ 3) /Optional:/ Pheromondiffussion
  4) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
  5) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem
     Weg. (Eventuell wird dann eine „Vergrößerung“ der Königin auf mehrere Felder

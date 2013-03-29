@@ -112,10 +112,10 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
    */
   final def adaptResPhero() {
     val bestNeighbour = (nearPos(1) sortBy resPheroOn).reverse.head
-    val adaptedValue = resOn(currentPosInt2D) + sim.gamma * resPheroOn(bestNeighbour)
+    val adaptedValue = (resOn(currentPosInt2D) + sim.gamma * resPheroOn(bestNeighbour)) / sim.maxResAmount
 
     val (x, y) = currentPos
-    tribe.resPhero.set(x, y, min(sim.maxResPhero, adaptedValue))
+    tribe.resPhero.set(x, y, min(1, adaptedValue))
   }
 
 
