@@ -28,5 +28,23 @@ final class Tribe(val tribeID: Int,
    *
    * @param state
    */
-  def step(state: SimState) {}
+  def step(state: SimState) {
+    // Evaporation
+    for (i <- 0 until simulation.height; j <- simulation.width) {
+      resPhero.set(i, j, evapore(resPhero.get(i, j), simulation.maxResPhero))
+      warPhero.set(i,j, evapore(warPhero.get(i, j), simulation.maxWarPhero))
+    }
+  }
+
+  /**
+   * Simulates the evaporation
+   *
+   * @param p Pheromone intensity
+   * @param max Maximum pheromone intensity
+   * @return New pheromone intensity
+   */
+  def evapore(p: Double, max: Double): Double = if (p < simulation.pheroThreshould)
+                                                 0
+                                                else
+                                                 p - p * (max - p) / max
 }

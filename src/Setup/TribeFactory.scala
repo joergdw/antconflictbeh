@@ -27,6 +27,7 @@ object TribeFactory {
     tribe.queen = queen
     simulation.ants.setObjectLocation(queen, location)
     simulation.schedule.scheduleRepeating(queen)
+    simulation.schedule.scheduleRepeating(tribe, 10) // all 10 turns
 
     tribe
   }

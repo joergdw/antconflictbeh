@@ -18,6 +18,7 @@ final class Simulation(var s: Long) extends SimState(s) {
   val maxResPhero: Double = maxResAmount * (1 + gamma) /** Maximum number of resource pheromones on a field */
   val maxHomePhero: Int = Int.MaxValue
   val maxWarPhero: Double = 0.0d // TODO: Anpassen, sobald sie ins Spiel kommen
+  val pheroThreshould: Double = 0.0001d
   val tribes: Array[Tribe] = new Array(nTribes)
 
   val maxPopulation: Int = Int.MaxValue /** Maximum tribe population */
