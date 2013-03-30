@@ -16,17 +16,15 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
   val backpack: Int = 1 /** amount of resources which can be transported by an individual */
   val attack: Int = 1 /** damage an ant does to another */
   val mobility: Float = 0.5f /** probability to avoid to be hit */
-  val antsSensingRange: Int = 2 /** radius of the area the ant can sense other individuals */
-  val notBored: Int = 100 /** value of boredom if an ant is not bored at all */
-  val aggressivityRange: Int = 9 /**  */
+  val notBored: Int = 100 /** value of boredom, 100 if an ant is not bored at all */
 
   var transporting: Int = 0 /** amount of resources transported by this ant */  // TODO: Sicherstellen, dass hier niemand was dreht
   protected var hitpoints: Int = 10 /** how much an individual can suffer before dieing */
   protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
-  protected var aggressivity: Int = 0
 
 
-  ///////////////////// Behaviour controlling ////////////////////////////////////////
+
+  ///////////////////// Behaviour description ////////////////////////////////////////
 
   override def step(state: SimState)
 
@@ -56,7 +54,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
       careForFood()
   }
 
-  /** Actions when ant want to fight – dependent of the ant-type */
+  /** Actions when ant want to fight or to flee – dependent of the ant-type */
   def actMilitarily(state: SimState)
 
 
@@ -121,18 +119,30 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
 
   ///////////////////// Helping functions for the section above ////////////////////
 
-  /** Calculates all the neighbour positions within a certain distance.
-    * Current position is not included.
-    *
-    * @param distance Maximum distance of a field towards the current position of the ant
-    * @return
-    */
+  /**
+   * Calculates all the neighbour positions within a certain distance.
+   * Current position is not included.
+   *
+   * @param distance Maximum distance of a field towards the current position of the ant
+   * @return List of positions within the given range.
+   */
   final def nearPos(distance: Int): List[Int2D] = {
+    val (xBag, yBag) = nearPosBags(distance)
+    toInt2DList(xBag, yBag) filterNot currentPosInt2D.equals
+  }
+
+  /**
+   * Calculates in two bags the x-positions an the y-positions of the neighbourhood within a given range
+   *
+   * @param distance Maximum distance of a field towards the current position of the ant
+   * @return Tuple of bags with the x and the corresponding y-positions
+   */
+  final def nearPosBags(distance: Int): (IntBag, IntBag) = {
     val (x, y) = currentPos
     val xBag: IntBag = new IntBag()
     val yBag: IntBag = new IntBag()
     sim.ants.getNeighborsMaxDistance(x, y, distance, false, xBag, yBag)
-    toInt2DList(xBag, yBag) filterNot currentPosInt2D.equals
+    (xBag, yBag)
   }
 
   final def homePheroOn(pos: Int2D): Int = tribe.homePhero.get(pos.getX, pos.getY)
@@ -154,7 +164,15 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
   }
 
   /** What happens if an ant receives a hit */
-  def receiveHit(opponent: AntWorker)
+  def receiveHit(opponent: AntWorker) {
+    hitpoints = hitpoints - opponent.attack
+
+    // Ant should die if no hitpoints left and drop resources
+    if (this.hitpoints == 0) {
+      dropResources()
+      sim.ants.remove(this) // Take ant out of scheduling
+    }
+  }
 
   /** Hit an opponent
     *
