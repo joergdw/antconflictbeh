@@ -56,10 +56,7 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
 
     val alpha = countFriends() / maxAgressiveness
     val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
-    if (r.nextDouble() <= aggressivenessProb)
-      this.emotion = aggressive
-    else
-      this.emotion = defensive
+    emotion = if (r.nextDouble() <= aggressivenessProb) aggressive else defensive
   }
 
   /**
