@@ -3,8 +3,8 @@ Taktisches Kampfverhalten von Ameisen
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
 * Implementierungsliste [2/6]
-** TODO Militärverhalten normaler Ameisen [0/7]
- + [ ] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
+** TODO Militärverhalten normaler Ameisen [1/7]
+ + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
    - Viele Koloniemitglieder in der Nähe :: 76,7% Aggressivität
  + [ ] Wenn Ameisen aggressiv/neutral/defensiv sind, sollen sie es eine Weile

@@ -52,7 +52,8 @@ final class Simulation(var s: Long) extends SimState(s) {
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
 
-  /** Counts population of all tribes
+  /**
+   * Counts population of all tribes
    *
    * @return field i contains the total population of the tribe with the ID i
    */
@@ -68,7 +69,8 @@ final class Simulation(var s: Long) extends SimState(s) {
     result
   }
 
-  /** Counts resources owned by the ant queen of each tribe
+  /**
+   * Counts resources owned by the ant queen of each tribe
    *
    * @return field i contains the amount of resources the queen of tribe i has
    */
@@ -82,8 +84,9 @@ final class Simulation(var s: Long) extends SimState(s) {
   }
 
   /**
+   * Amount of resources owned at the current time by each tribe.
    *
-   * @return field i contains the total amount of resources owned by ants of the tribe i
+   * @return Field i contains the total amount of resources owned by ants of the tribe i
    */
   def totalResStat(): Array[Int] = {
     val objects = ants.getAllObjects
@@ -105,17 +108,17 @@ final class Simulation(var s: Long) extends SimState(s) {
   }
 
 
-  /// Other Helpers
+  ///////////////////////////// Other Helpers ///////////////////////////////////
 
-  def ressourceMap(): Array[Array[Int]] = {
-    val result: Array[Array[Int]] = new Array[Array[Int]](resources.getHeight)
-    for (i <- 0 until result.length) {
-      result(i) = new Array[Int](resources.getWidth)
-
-      for (j <- 0 until result(i).length) {
-        result(i)(j) = resources.get(i, j)
-      }
-    }
+  /**
+   * Returns map containing the current resource distribution
+   *
+   * @return Current resource distribution
+   */
+  def resourceMap() = {
+    val result = Array.ofDim[Int](resources.getHeight, resources.getWidth)
+    for (i <- 0 until result.length; j <- 0 until result(i).length)
+      result(i)(j) = resources.get(i, j)
 
     result
   }

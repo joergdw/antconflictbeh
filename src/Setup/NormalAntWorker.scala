@@ -2,6 +2,7 @@ package Setup
 
 import sim.engine.SimState
 import sim.util.Bag
+import util.Random
 
 final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) {
 
@@ -19,10 +20,17 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
   private var emotion: Int = 0
 
   val sectionSize:Int = emotionalRange / 3  /** Size of each emotional state on the scala */
-  val neutralLowerBound: Int = - (emotionalRange / 2) + sectionSize /** Lower bound of the neutral state */
-  val neutralUpperBound: Int = emotionalRange / 2 - sectionSize /** Upper bound of the neutral state */
+  val defensive: Int = - (emotionalRange / 2)
+  val aggressive: Int = (emotionalRange / 2)
+  val neutralLowerBound: Int = defensive + sectionSize /** Lower bound of the neutral state */
+  val neutralUpperBound: Int = aggressive - sectionSize /** Upper bound of the neutral state */
 
-  val antsSensingRange: Int = 2 /** Radius of the area the ant can sense other individuals */
+  val maxAgressiveness = 100 /** As of this value the ant changes state with probability `maxAggressivenessProb` */
+
+  val maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
+  val minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
+
+  val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
 
 
   ///////////////////// Basic operations /////////////////////////////////////
@@ -40,9 +48,18 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
    *
    * Changes either to aggressive state or to defensive state, in function of the number of ants
    * of the same colony in the nearby environment.
+   *
+   * It is assumed that the chance that an ant gets aggressive grows linearly.
    */
   def adaptState() {
-     // TODO: Implementierung
+    val r = new Random()
+
+    val alpha = countFriends() / maxAgressiveness
+    val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
+    if (r.nextDouble() <= aggressivenessProb)
+      this.emotion = aggressive
+    else
+      this.emotion = defensive
   }
 
   /**
