@@ -36,15 +36,16 @@ final class Tribe(val tribeID: Int,
    */
   var queen: AntQueen = null
 
-  /** Adapts the pheromone maps in function of the time (diffusion, evaporation)
+  /**
+   * Adapts the pheromone maps in function of the time (diffusion, evaporation)
    *
    * @param state
    */
   def step(state: SimState) {
     // Evaporation
-    for (i <- 0 until simulation.height; j <- simulation.width) {
-      resPhero.set(i, j, evapore(resPhero.get(i, j)))
-      warPhero.set(i,j, evapore(warPhero.get(i, j)))
+    for (i <- 0 until simulation.height; j <- 0 until simulation.width) {
+      // resPhero.set(i, j, evapore(resPhero.get(i, j))) // Evaporation stopped, because not necessary
+      // warPhero.set(i,j, evapore(warPhero.get(i, j)))
     }
   }
 

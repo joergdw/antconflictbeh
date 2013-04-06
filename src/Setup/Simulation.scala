@@ -27,7 +27,7 @@ final class Simulation(var s: Long) extends SimState(s) {
   val gamma: Double = 0.9d /** Learning parameter according the one used paper */
   val explorationRate: Double = 0.2d
   val maxResAmount: Int = 5 /** Maximum number of resources on a field */
-  val pheroThreshould: Double = 0.0001d /** Next phero-value: zero */
+  val pheroThreshould: Double = 0.0000000001d /** Next phero-value: zero */
   val tribes: Array[Tribe] = new Array(nTribes)
 
   val maxPopulation: Int = Int.MaxValue /** Maximum tribe population */

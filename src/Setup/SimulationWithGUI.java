@@ -141,9 +141,9 @@ public class SimulationWithGUI extends GUIState {
             resPheros[i].setField(simulation.tribes()[i].resPhero());
             warPheros[i].setField(simulation.tribes()[i].warPhero());
 
-            homePheros[i].setMap(new SimpleColorMap(0, simulation.maxHomePhero(), Color.white, Color.black));
-            resPheros[i].setMap(new SimpleColorMap(0, simulation.maxResPhero(), Color.white, Color.black));
-            warPheros[i].setMap(new SimpleColorMap(0, simulation.maxWarPhero(), Color.white, Color.black));
+            homePheros[i].setMap(new SimpleColorMap(0, Integer.MAX_VALUE, Color.white, Color.black));
+            resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
+            warPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
 
             homePheros[i].setValueName("Home pheromones map of tribe " + i);
             resPheros[i].setValueName("Resource pheromones map of tribe " + i);
