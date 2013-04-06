@@ -14,32 +14,45 @@ package Setup
 
 import sim.field.grid.{IntGrid2D, DoubleGrid2D}
 import sim.engine.{SimState, Steppable}
+import sim.util.Int2D
+import Tribe.nextTribeID
 
 /** Shared information and data between all the members of a tribe
  *
  * @param tribeID Identifier for the tribe the ant belongs to
  * @param simulation Simulation the tribe participates
- * @param homePhero Pheromone-map of the tribe for going home
- * @param resPhero Pheromone-map of the tribe for searching food
- * @param warPhero Pheromone-map of the tribe for war-communication
  */
-final class Tribe(val tribeID: Int,
-                  val simulation: Simulation,
-                  val homePhero: IntGrid2D,
-                  val resPhero: DoubleGrid2D,
-                  val warPhero: DoubleGrid2D) extends Steppable {
+final class Tribe private (val tribeID: Int, val simulation: Simulation) extends Steppable {
 
-  /**
-   * Queen of that tribe
-   *
-   * Design decision: it's a variable to enable the change of a queen in the case that ant-aging is introduced
-   */
-  var queen: AntQueen = null
+  /** Pheromone-map of the tribe for going home */
+  val homePheros: IntGrid2D = new IntGrid2D(simulation.ants.getHeight,
+    simulation.ants.getWidth, Int.MaxValue)
+
+  /** Pheromone-map of the tribe for searching food */
+  val resPheros: DoubleGrid2D = new DoubleGrid2D(simulation.ants.getHeight,
+    simulation.ants.getWidth, 0.0d)
+
+  /** Pheromone-map of the tribe for war-communication */
+  val warPheros: DoubleGrid2D = new DoubleGrid2D(simulation.ants.getHeight,
+    simulation.ants.getWidth, 0.0d)
+
+  var queen: AntQueen = null /** Queen of that tribe */
+
+  def this(simulation: Simulation, location: Int2D) = {
+    this(nextTribeID(), simulation)
+
+    homePheros.set(location.getX, location.getY, 0) // Queen position is 0
+    queen = new AntQueen(this)
+    simulation.ants.setObjectLocation(queen, location)
+    simulation.schedule.scheduleRepeating(queen)
+    simulation.schedule.scheduleRepeating(this, 10) // all 10 turns
+  }
+
 
   /**
    * Adapts the pheromone maps in function of the time (diffusion, evaporation)
    *
-   * @param state
+   * @param state Current SimState
    */
   def step(state: SimState) {
     // Evaporation
@@ -55,8 +68,16 @@ final class Tribe(val tribeID: Int,
    * @param p Pheromone intensity
    * @return New pheromone intensity
    */
-  def evapore(p: Double): Double = if (p < simulation.pheroThreshould)
-                                     0
-                                   else
-                                     p - p * (1 - p)
+  def evapore(p: Double): Double = if (p < simulation.pheroThreshould) 0
+                                   else p - p * (1 - p)
+}
+
+
+object Tribe {
+  private var IDOfLastTribe: Int = -1 /** ID of the last generated tribe */  // -1 so that 0 is the ID of the first tribe
+
+  def nextTribeID(): Int = {
+    IDOfLastTribe += 1
+    IDOfLastTribe
+  }
 }

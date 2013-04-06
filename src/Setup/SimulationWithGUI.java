@@ -137,9 +137,9 @@ public class SimulationWithGUI extends GUIState {
         // Portrayals for the different Pheromone-Grids
         for (int i = 0; i < homePheros.length; ++i) {
 
-            homePheros[i].setField(simulation.tribes()[i].homePhero());
-            resPheros[i].setField(simulation.tribes()[i].resPhero());
-            warPheros[i].setField(simulation.tribes()[i].warPhero());
+            homePheros[i].setField(simulation.tribes()[i].homePheros());
+            resPheros[i].setField(simulation.tribes()[i].resPheros());
+            warPheros[i].setField(simulation.tribes()[i].warPheros());
 
             homePheros[i].setMap(new SimpleColorMap(0, Integer.MAX_VALUE, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));

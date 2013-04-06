@@ -114,7 +114,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     val bestNeighbour = homePheroOn (sortedNeighbours.head)
 
     val adaptedValue = min(currentValue, max(bestNeighbour, bestNeighbour + 1)) // To avoid arithmetic overflow and worse distance
-    tribe.homePhero.set(x, y, adaptedValue)
+    tribe.homePheros.set(x, y, adaptedValue)
   }
 
   /**
@@ -125,7 +125,7 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     val adaptedValue = (resOn(currentPosInt2D) + sim.gamma * resPheroOn(bestNeighbour)) / sim.maxResAmount
 
     val (x, y) = currentPos
-    tribe.resPhero.set(x, y, min(1, adaptedValue))
+    tribe.resPheros.set(x, y, min(1, adaptedValue))
   }
 
 
@@ -157,9 +157,9 @@ abstract class AntWorker (override val tribe: Tribe) extends Ant(tribe) {
     (xBag, yBag)
   }
 
-  final def homePheroOn(pos: Int2D): Int = tribe.homePhero.get(pos.getX, pos.getY)
-  final def resPheroOn(pos: Int2D): Double = tribe.resPhero.get(pos.getX, pos.getY)
-  final def warPheroOn(pos: Int2D): Double = tribe.warPhero.get(pos.getX, pos.getY)
+  final def homePheroOn(pos: Int2D): Int = tribe.homePheros.get(pos.getX, pos.getY)
+  final def resPheroOn(pos: Int2D): Double = tribe.resPheros.get(pos.getX, pos.getY)
+  final def warPheroOn(pos: Int2D): Double = tribe.warPheros.get(pos.getX, pos.getY)
 
   final def resOn(pos: Int2D): Int = sim.resources.get(pos.getX, pos.getY)
 

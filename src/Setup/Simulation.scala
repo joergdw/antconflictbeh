@@ -14,7 +14,6 @@ package Setup
 
 import sim.engine.SimState
 import sim.field.grid.{IntGrid2D, SparseGrid2D}
-import TribeFactory.generateTribe
 import sim.util.{IntBag, Int2D}
 import Helpers.toTupleList
 
@@ -26,7 +25,7 @@ final class Simulation(var s: Long) extends SimState(s) {
   val nTribes: Int = 2 /** Number of tribes */
   val gamma: Double = 0.9d /** Learning parameter according the one used paper */
   val explorationRate: Double = 0.2d
-  val maxResAmount: Int = 5 /** Maximum number of resources on a field */
+  val maxResAmount: Int = 10 /** Maximum number of resources on a field */
   val pheroThreshould: Double = 0.0000000001d /** Next phero-value: zero */
   val tribes: Array[Tribe] = new Array(nTribes)
 
@@ -58,8 +57,8 @@ final class Simulation(var s: Long) extends SimState(s) {
         resources set(x, y, maxResAmount)
     }
     //////////////////// Setup of the ant colonies ////////////////////
-    tribes(0) = generateTribe(this, new Int2D(0, 0))
-    tribes(1) = generateTribe(this, new Int2D(ants.getHeight - 1, ants.getWidth - 1))
+    tribes(0) = new Tribe(this, new Int2D(0, 0))
+    tribes(1) = new Tribe(this, new Int2D(ants.getHeight - 1, ants.getWidth - 1))
   }
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
