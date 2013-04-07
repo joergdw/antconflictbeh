@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [2/6]
+* Implementierungsliste [1/6]
 ** TODO Militärverhalten normaler Ameisen [1/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -44,18 +44,22 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     wie für die Nahrungssuche. Bis dahin wird leider nur bei der Nahrungssuche
     Erkundungsarbeit geleistet.
 
-** DONE Sonstiges [2/2]
+** TODO Sonstiges [2/4]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Pheromonverdunstung
- 3) /Optional:/ Pheromondiffussion
- 4) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
- 5) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem
+ 3) [ ] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen
+    Kartentypen bereithält.
+ 4) [ ] Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung
+    (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int, Int, Int)) hinzufügen.
+ 5) /Optional:/ Pheromondiffussion
+ 6) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
+ 7) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem
     Weg. (Eventuell wird dann eine „Vergrößerung“ der Königin auf mehrere Felder
     benötigt, damit die Ameisen bei großer Populationszahl noch an sie
     herankommen)
- 6) /Optional:/ Queen kann auch sterben und verhält sich in noch mehr
+ 8) /Optional:/ Queen kann auch sterben und verhält sich in noch mehr
     Punkten wie eine normale Ameise.
- 7) /Optional:/ Ameisen können altersbedingt sterben.
+ 9) /Optional:/ Ameisen können altersbedingt sterben.
 
 ** TODO Benutzeroberfläche und Simulationskontrolle [3/5]
  1) [ ] Statistikfenster für jeden Stamm, das folgende Werte und deren Entwicklung anzeigt:

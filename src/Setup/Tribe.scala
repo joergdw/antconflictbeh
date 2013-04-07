@@ -80,4 +80,6 @@ object Tribe {
     IDOfLastTribe += 1
     IDOfLastTribe
   }
+
+  def apply(simulation: Simulation, location: Int2D): Tribe = new Tribe(simulation, location)
 }
