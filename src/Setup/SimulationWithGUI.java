@@ -12,6 +12,8 @@
  */
 package Setup;
 
+import Model.Ant;
+import Model.Simulation;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
@@ -52,7 +54,7 @@ public class SimulationWithGUI extends GUIState {
 
 
 ////////// Constructors and constructor related helpers ////////////////////////////////////// ////////////////
-    public SimulationWithGUI() { super(new Simulation(System.currentTimeMillis())); initialiseDisplays();}
+    public SimulationWithGUI() { super(new Setup_1vs1(System.currentTimeMillis())); initialiseDisplays();}
     public SimulationWithGUI(SimState state) { super(state); initialiseDisplays();}
 
     private void initialiseDisplays() {
@@ -102,11 +104,11 @@ public class SimulationWithGUI extends GUIState {
         final Simulation simulation = (Simulation) state;
 
         // tell the portrayals what to portray and how to portray them
-        ants.setField(simulation.ants());
+        ants.setField(simulation.world().ants());
         ants.setPortrayalForAll(new OvalPortrayal2D() {
             public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
                 Ant ant = (Ant) object;
-                paint = tribeColours[ant.tribe().tribeID()];
+                paint = tribeColours[ant.tribeID()];
                 super.draw(object, graphics, info);
             }
         });
@@ -122,7 +124,7 @@ public class SimulationWithGUI extends GUIState {
 
         // Portrayal for the resource-map
         resources.setMap(new SimpleColorMap(0, simulation.maxResAmount(), Color.white, Color.black));
-        resources.setField(simulation.resources());
+        resources.setField(simulation.world().resources());
         resources.setValueName("Amount resources");
         resources.setPortrayalForAll(new OvalPortrayal2D());
 
@@ -136,10 +138,9 @@ public class SimulationWithGUI extends GUIState {
 
         // Portrayals for the different Pheromone-Grids
         for (int i = 0; i < homePheros.length; ++i) {
-
-            homePheros[i].setField(simulation.tribes()[i].homePheros());
-            resPheros[i].setField(simulation.tribes()[i].resPheros());
-            warPheros[i].setField(simulation.tribes()[i].warPheros());
+            homePheros[i].setField(simulation.world().homePheromones()[i]);
+            resPheros[i].setField(simulation.world().resPheromones()[i]);
+            warPheros[i].setField(simulation.world().warPheromones()[i]);
 
             homePheros[i].setMap(new SimpleColorMap(0, Integer.MAX_VALUE, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
@@ -284,10 +285,10 @@ public class SimulationWithGUI extends GUIState {
         super.quit();
 
         Simulation sim = (Simulation) state;
-        System.out.println(Arrays.toString(sim.populationStat()));
-        System.out.println(Arrays.toString(sim.resourceStat()));
-        System.out.println(Arrays.toString(sim.totalResStat()));
-        System.out.println(Arrays.deepToString(sim.resourceMap()));
+        System.out.println(Arrays.toString(sim.world().populationStat()));
+        System.out.println(Arrays.toString(sim.world().resourceStat()));
+        System.out.println(Arrays.toString(sim.world().totalResStat()));
+        System.out.println(Arrays.deepToString(sim.world().resourceMap()));
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;

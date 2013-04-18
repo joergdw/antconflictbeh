@@ -10,20 +10,18 @@
  *
  * See the License.txt file for more details.
  */
-package Setup
+package Model
 
-import sim.engine.Steppable
-import sim.util.Int2D
-import Helpers.toTuple
+/**
+ * Generator for ants
+ */
+trait AntGenerator {
 
-
-abstract class Ant(val tribe: Tribe) extends Steppable {
-
-  def sim = tribe.simulation
-
-  /** current position of that ant as Int2D */
-  def currentPosInt2D: Int2D = sim.ants.getObjectLocation(this)
-
-  /** current position of that ant as (Int, Int) */
-  def currentPos: (Int, Int) = toTuple(currentPosInt2D)
+  /**
+   * Constructs a new ant
+   *
+   * @param ant Ant of the same tribe in the same simulation (world) like the new one
+   * @return Ant of the same tribe in the same simulation (world) like the given one
+   */
+  def apply(ant: Ant): Ant
 }

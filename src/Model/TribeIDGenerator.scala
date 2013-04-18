@@ -10,21 +10,22 @@
  *
  * See the License.txt file for more details.
  */
-package Setup
 
-import sim.engine.SimState
+package Model
 
-class OffensiveAntWorker(override val tribe: Tribe) extends AntWorker(tribe) {
+/**
+ * Generator for unique tribe ids
+ */
+object TribeIDGenerator {
+  private var IDOfLastTribe: Int = -1 /** ID of the last generated tribe */  // -1 so that 0 is the ID of the first tribe
 
-  override def receiveHit(opponent: AntWorker) {
-    super.receiveHit(opponent)
-    if (this.hitpoints == 0) return // Ant dead: no more actions
-  }
-
-  override def actMilitarily(state: SimState) {}
-
-  def step(state: SimState) {
-    // TODO: Add more behaviour
-    actEconomically(state)
+  /**
+   * Generates a unique tribe id
+   *
+   * @return Unique tribe id
+   */
+  def nextTribeID(): Int = {
+    IDOfLastTribe += 1
+    IDOfLastTribe
   }
 }

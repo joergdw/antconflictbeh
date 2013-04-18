@@ -10,13 +10,27 @@
  *
  * See the License.txt file for more details.
  */
-package Setup
+package Model
 
 import sim.engine.SimState
-import sim.util.Bag
 import util.Random
 
-final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) {
+/**
+ * Antworker with the usual strategies
+ *
+ * @param tribeID Tribe the ant belongs to
+ * @param world World the ant lives on
+ */
+final class NormalAntWorker(override val tribeID: Int,
+                            override val world: World) extends AntWorker(tribeID, world) {
+
+  /**
+   * Constructs ant with the information of the given ant
+   *
+   * @param ant Ant giving the information of construction
+   * @return Ant of the same colony in the same simulation
+   */
+  def this(ant: Ant) = this(ant.tribeID, ant.world)
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
@@ -79,20 +93,9 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
    * @return Number of ants of the same colony
    */
   def countFriends(): Int = {
-    // Get the bag with the objects
-    val (xBag, yBag) = nearPosBags(antsSensingRange)
-    val objects: Bag = new Bag()
-    sim.ants.getObjectsAtLocations(xBag, yBag, objects)
-
-    // Count the ones belonging to the same colony
-    var counter = 0
-    for (i <- 0 until objects.size()) {
-      val ant = objects.get(i).asInstanceOf[Ant]
-      if (ant.tribe.tribeID == this.tribe.tribeID)
-        counter += 1
-    }
-
-    counter
+    val ants: List[Ant] = nearPos(antsSensingRange).map(world.antsOn).flatten
+    def adder(i: Int, a: Ant): Int = i + (if (a.tribeID == this.tribeID) 1 else 0)
+    ants.foldLeft(0: Int)(adder)
   }
 
 
@@ -104,4 +107,18 @@ final class NormalAntWorker(override val tribe: Tribe) extends AntWorker(tribe) 
   }
 
   override def actMilitarily(state: SimState) {}
+}
+
+object NormalAntWorker extends AntGenerator {
+
+  /**
+   * Creates an NormalAntWorker
+   *
+   * @param tribeID Tribe the ant belongs to
+   * @param world World the ant lives on
+   * @return NormalAntWorker
+   */
+  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+
+  def apply(ant: Ant) = new NormalAntWorker(ant)
 }
