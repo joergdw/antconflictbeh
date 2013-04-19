@@ -20,7 +20,7 @@ import sim.engine.Steppable
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
  */
-abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
+private abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
 
   val attack: Int = 1 /** Damage an ant does to another */
   protected var hitpoints: Int = 10 /** How much an individual can suffer before dieing */

@@ -37,11 +37,12 @@ import TribeIDGenerator.nextTribeID
  * @param width  Width of the map
  * @param tribeTypes Constructors of the different types of the tribe
  */
-final class World(val sim: Simulation,
-                  val height: Int, val width: Int,
-                  private val startPositions: Array[(Int, Int)],
-                  val resources: IntGrid2D,
-                  private val tribeTypes: Array[AntGenerator]) extends Steppable {
+final class World(
+  val sim: Simulation,
+  val height: Int, val width: Int,
+  private val startPositions: Array[(Int, Int)],
+  val resources: IntGrid2D,
+  private val tribeTypes: Array[AntGenerator]) extends Steppable {
 
   if (startPositions.length != tribeTypes.length)
     throw new IllegalArgumentException("Not exactly as many start positions as colony types")

@@ -66,6 +66,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     Karte. (Das macht dann nach gegenwärtigem Stand drei Reiter pro Fenster.) /Zu aufwändig!/
 
 ** TODO Quelltext-Arbeiten [2/6]
+ + [ ] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [ ] Militärteil zum Laufen bringen
  + [ ] Analysefunktionen zum Laufen bringen

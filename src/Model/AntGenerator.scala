@@ -15,7 +15,7 @@ package Model
 /**
  * Generator for ants
  */
-trait AntGenerator {
+private trait AntGenerator {
 
   /**
    * Constructs a new ant

@@ -12,8 +12,6 @@
  */
 package Model
 
-import java.lang.reflect.Constructor
-
 import sim.engine.SimState
 
 /**
@@ -23,9 +21,10 @@ import sim.engine.SimState
  * @param world World the ant lives on
  * @param antGen Constructor of the ant type the queen should use for new ants
  */
-final class AntQueen(override val tribeID: Int,
-                     override val world: World,
-                     private val antGen: AntGenerator) extends Ant(tribeID, world) {
+private final class AntQueen(
+  override val tribeID: Int,
+  override val world: World,
+  private val antGen: AntGenerator) extends Ant(tribeID, world) {
 
   private var deposit: Int = world.sim.startRessources /** Resources the queen owns */
 

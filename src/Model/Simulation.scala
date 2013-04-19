@@ -12,10 +12,7 @@
  */
 package Model
 
-import java.lang.reflect.Constructor // TODO: Überprüfen, ob das der richtige Konstruktor ist
-
 import sim.engine.SimState
-import sim.field.grid.IntGrid2D
 
 /**
  * Contains some preferences for the simulation

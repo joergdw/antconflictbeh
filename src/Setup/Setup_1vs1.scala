@@ -18,7 +18,7 @@ import Model.{World, Simulation, NormalAntWorker, OffensiveAntWorker}
 import Common.Common.intArray2IntGrid
 
 
-final class Setup_1vs1(var sd: Long) extends Simulation(sd) {  // TODO: Klären, warum nicht "override var s: Long" geht
+final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
 
   val height = 60
   val width = 60

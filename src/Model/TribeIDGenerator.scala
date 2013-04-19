@@ -16,7 +16,7 @@ package Model
 /**
  * Generator for unique tribe ids
  */
-object TribeIDGenerator {
+private object TribeIDGenerator {
   private var IDOfLastTribe: Int = -1 /** ID of the last generated tribe */  // -1 so that 0 is the ID of the first tribe
 
   /**

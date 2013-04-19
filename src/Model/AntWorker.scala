@@ -21,8 +21,9 @@ import StrictMath.{min, max}
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-abstract class AntWorker (override val tribeID: Int,
-                          override val world: World) extends Ant(tribeID, world) {
+private abstract class AntWorker(
+  override val tribeID: Int,
+  override val world: World) extends Ant(tribeID, world) {
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
