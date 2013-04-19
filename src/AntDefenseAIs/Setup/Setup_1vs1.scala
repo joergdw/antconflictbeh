@@ -26,7 +26,17 @@ final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
-  // TODO: Karte aufbauen
+
+  /* Construction of the resource distribution.
+   * A map-pattern consisting of some to the two queens symmetric resource-spots
+   *
+   * One line of resources goes from the one corner to the other.
+   */
+  for (i <- 0 until height; j <- 0 until width if i == j) {
+    val maxResAmount: Int = 100 // Maximum number of resources on a field
+
+    resDistrib(i)(j) = maxResAmount
+  }
 
   val resourceMap: IntGrid2D = intArray2IntGrid(resDistrib)
 

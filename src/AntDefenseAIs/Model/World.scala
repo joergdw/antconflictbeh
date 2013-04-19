@@ -12,6 +12,8 @@
  */
 package AntDefenseAIs.Model
 
+import StrictMath.max
+
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.util.IntBag
 import sim.engine.{SimState, Steppable}
@@ -36,7 +38,7 @@ import TribeIDGenerator.nextTribeID
  * @param width  Width of the map
  * @param tribeTypes Constructors of the different types of the tribe
  */
-final class World(
+private[AntDefenseAIs] final class World(
   val sim: Simulation,
   val height: Int, val width: Int,
   private val startPositions: Array[(Int, Int)],
@@ -45,8 +47,18 @@ final class World(
 
   val gamma: Double = 0.9d /** Learning parameter according the one used paper */
   val explorationRate: Double = 0.2d
-  val maxResAmount: Int = 10 /** Maximum number of resources on a field */
   val pheroThreshould: Double = 0.0000000001d /** Next phero-value: zero */
+
+/** Maximum number of resources on a field */
+  val maxResAmount: Int = {
+    var result = 0
+
+    for (i <- 0 until resources.getHeight; j <- 0 until resources.getWidth) {
+      result = max(result, resources.get(i, j))
+    }
+
+    result
+  }
 
   val maxPopulation: Int = Int.MaxValue /** Maximum tribe population */
   val startRessources: Int = 20 /** amount of res a tribe starts with */
@@ -361,7 +373,7 @@ final class World(
   }
 
 
-  ///////////////////////////// Other AntDefenseAIs.Common ///////////////////////////////////
+  ///////////////////////////// Other Common ///////////////////////////////////
 
   /**
    * Returns map containing the current resource distribution
