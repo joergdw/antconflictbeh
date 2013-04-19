@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,10 +10,10 @@
  *
  * See the License.txt file for more details.
  */
-package Setup;
+package AntDefenseAIs.Setup;
 
-import Model.Ant;
-import Model.Simulation;
+import AntDefenseAIs.Model.Ant;
+import AntDefenseAIs.Model.Simulation;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
@@ -58,7 +58,7 @@ public class SimulationWithGUI extends GUIState {
     public SimulationWithGUI(SimState state) { super(state); initialiseDisplays();}
 
     private void initialiseDisplays() {
-        int t = ((Simulation) state).nTribes();
+        int t = ((Simulation) state).numberOfTribes();
         homePheroDisplays = new Display2D[t];
         resPheroDisplays = new Display2D[t];
         warPheroDisplays = new Display2D[t];

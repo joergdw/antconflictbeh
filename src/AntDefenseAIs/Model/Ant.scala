@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,21 +10,21 @@
  *
  * See the License.txt file for more details.
  */
-package Model
+package AntDefenseAIs.Model
 
 import sim.engine.Steppable
 
 /**
- * Common properties and capacities of ants
+ * AntDefenseAIs.Common properties and capacities of ants
  *
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
  */
-private abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
+private[AntDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
 
-  val attack: Int = 1 /** Damage an ant does to another */
+  protected val attack: Int = 1 /** Damage an ant does to another */
   protected var hitpoints: Int = 10 /** How much an individual can suffer before dieing */
-  val mobility: Float = 0.5f /** Probability to avoid to be hit */  // TODO: Not used until now
+  protected val mobility: Float = 0.5f /** Probability to avoid to be hit */
 
   /**
    * Current position of that ant as (Int, Int)
@@ -53,7 +53,7 @@ private abstract class Ant(val tribeID: Int, val world: World) extends Steppable
    *
    * @return Queen of the ant
    */
-  protected def myQueen: AntQueen = world.queenOf(this)
+  private[Model] def myQueen: AntQueen = world.queenOf(this)
 
   /**
    * Home pheromone intensity of the tribe of the ant at the given position

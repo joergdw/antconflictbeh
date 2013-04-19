@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package Model
+package AntDefenseAIs.Model
 
 import sim.engine.SimState
 import StrictMath.{min, max}
@@ -21,11 +21,11 @@ import StrictMath.{min, max}
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private abstract class AntWorker(
+protected[AntDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
   override val world: World) extends Ant(tribeID, world) {
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
+  ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
 
   val backpack: Int = 1 /** amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** value of boredom, 100 if an ant is not bored at all */
@@ -85,15 +85,15 @@ private abstract class AntWorker(
   /** Care for food.
     *
     * The next field is ost probable the neighbour-field with the best resource-pheromones.
-    * With a certain probability (in function of the sim.explorationRate) it is any of the
+    * With a certain probability (in function of the world.explorationRate) it is any of the
     * neighbour fields.
     */
   final def careForFood() {
     val list: List[(Int, Int)] = (nearPos(1) sortBy (resPheroOn)).reverse
-    val nextPos: (Int, Int) = if (world.sim.random.nextDouble() <= (1.0d - world.sim.explorationRate))
+    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - world.explorationRate))
                                 list.head
                               else
-                                list.apply(world.sim.random.nextInt(list.size))
+                                list.apply(world.random.nextInt(list.size))
 
     moveTo(nextPos)
     adaptHomePhero()
@@ -120,7 +120,7 @@ private abstract class AntWorker(
    */
   final def adaptResPhero() {
     val bestNeighbour: (Int, Int) = (nearPos(1) sortBy (resPheroOn) reverse).head
-    val adaptedValue = (world.resOn(currentPos) + world.sim.gamma * resPheroOn(bestNeighbour) / world.sim.maxResAmount)
+    val adaptedValue = (world.resOn(currentPos) + world.gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
 
     setResPheroOn(currentPos, min(1, adaptedValue))
   }
@@ -164,7 +164,8 @@ private abstract class AntWorker(
    * Adaptions after receiving a hit
    */
   def receiveHit(opponent: AntWorker) {
-    hitpoints = hitpoints - opponent.attack
+    if (world.random.nextDouble() < mobility) // If ant can
+      hitpoints = hitpoints - opponent.attack
   }
 
   /**

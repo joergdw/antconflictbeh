@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package Model
+package AntDefenseAIs.Model
 
 import sim.engine.SimState
 import util.Random
@@ -21,7 +21,7 @@ import util.Random
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private final class NormalAntWorker(
+private[AntDefenseAIs] final class NormalAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 
@@ -33,7 +33,7 @@ private final class NormalAntWorker(
    */
   def this(ant: Ant) = this(ant.tribeID, ant.world)
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
+  ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
 
   /**
    * Descripes the range of the emotions. Value must be odd and dividable by 3.
@@ -110,7 +110,7 @@ private final class NormalAntWorker(
   override def actMilitarily(state: SimState) {}
 }
 
-object NormalAntWorker extends AntGenerator {
+private[AntDefenseAIs] object NormalAntWorker extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker

@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,10 +10,10 @@
  *
  * See the License.txt file for more details.
  */
-package Common
+package AntDefenseAIs.Common
 
 import sim.util.{Bag, IntBag, Int2D}
-import Model.Ant
+import AntDefenseAIs.Model.Ant
 import sim.field.grid.IntGrid2D
 
 /** Helping functions and constants */

@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package Model
+package AntDefenseAIs.Model
 
 import sim.engine.SimState
 
@@ -20,7 +20,7 @@ import sim.engine.SimState
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private final class OffensiveAntWorker(
+private[AntDefenseAIs] final class OffensiveAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 
@@ -45,7 +45,7 @@ private final class OffensiveAntWorker(
   }
 }
 
-object OffensiveAntWorker extends AntGenerator {
+private[AntDefenseAIs] object OffensiveAntWorker extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker

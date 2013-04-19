@@ -1,8 +1,8 @@
 /*
- * Copyright © 2012 - 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License 3 as published by
+ * it under the terms of the GNU General Public License 3 as published by
  * the Free Software Foundation;
  *
  * This program is distributed in the hope that it will be useful,
@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package Model
+package AntDefenseAIs.Model
 
 import sim.engine.SimState
 
@@ -26,10 +26,10 @@ private final class AntQueen(
   override val world: World,
   private val antGen: AntGenerator) extends Ant(tribeID, world) {
 
-  private var deposit: Int = world.sim.startRessources /** Resources the queen owns */
+  private var deposit: Int = world.startRessources /** Resources the queen owns */
 
-  def productionTime: Int = world.sim.productionTime
-  def productionCost: Int = world.sim.productionCost
+  def productionTime: Int = world.productionTime
+  def productionCost: Int = world.productionCost
 
   /**
    * Returns the amount of resources in the queens deposit
@@ -73,7 +73,7 @@ private final class AntQueen(
     }
 
     else if (productionState >= productionTime - 1   // production completed?
-             && curPop < world.sim.maxPopulation) {
+             && curPop < world.maxPopulation) {
       productionState = 0
 
       val ant: Ant = antGen(this)
@@ -85,7 +85,7 @@ private final class AntQueen(
   }
 }
 
-object AntQueen {
+private object AntQueen {
 
   /**
    * Creates an NormalAntWorker
