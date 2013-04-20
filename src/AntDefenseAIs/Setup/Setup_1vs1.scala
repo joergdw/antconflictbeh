@@ -22,7 +22,7 @@ final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
 
   val height = 60
   val width = 60
-  private val tribes: Array[AntGenerator] = Array(NormalAntWorker, OffensiveAntWorker)
+  private val tribes: Array[AntGenerator] = Array(NormalAntWorker, NormalAntWorker) // TODO: Adapt tribe
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)

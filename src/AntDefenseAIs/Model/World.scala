@@ -91,6 +91,7 @@ private[AntDefenseAIs] final class World(
     homePheromones(i).set(startPositions(i)._1, startPositions(i)._2, 0) // Adapt start position of the queen
 
     queens(i) = new AntQueen(nextTribeID(), this, tribeTypes(i)) // Create queen
+    assert(ants.setObjectLocation(queens(i), startPositions(i)._1, startPositions(i)._2)) // Place queen on world
   }
 
   /**
@@ -103,24 +104,6 @@ private[AntDefenseAIs] final class World(
       sim.schedule.scheduleRepeating(queen)
   }
 
-//  /**
-//   * Sets a resource distribution.
-//   *
-//   * This can only be executed one time.
-//   *
-//   * @param r Resourcedistribution
-//   */
-//  private[Simulation] def setResourceMap(r: IntGrid2D) {
-//    if (!distributionSetable)
-//      throw new IllegalStateException("Resource distribution can only be set one time.")
-//    else if (r.getWidth != width || r.getHeight != height)
-//      throw new IllegalArgumentException("Size does not accord with world size")
-//    else {
-//      resources = r
-//      distributionSetable = false
-//    }
-//  }
-
 
   /////////////////////////// Nature behaviour ///////////////////////////////////////
 
@@ -129,9 +112,10 @@ private[AntDefenseAIs] final class World(
     // Remove dead ants from the map
     for (ant <- allAnts) {
       ant match {
-        case worker: AntWorker => if (worker.isDead) {
+        case worker: AntWorker if (worker.isDead) => {
           worker.dropResources(); ants.remove(worker) // Take ant out of scheduling
         }
+        case _ => // In other cases, do nothing
       }
     }
 
@@ -171,10 +155,13 @@ private[AntDefenseAIs] final class World(
     // Iterate through all objects on that field.
     val bag = ants.getObjectsAtLocation(position)
 
-    val result: IndexedSeq[Ant] = for (i: Int <- 0 until bag.size()) yield
-      bag.get(i).asInstanceOf[Ant]
-
-    result.toList
+    if (bag == null)
+      List()
+    else {
+      val result: IndexedSeq[Ant] = for (i: Int <- 0 until bag.size()) yield
+        bag.get(i).asInstanceOf[Ant]
+      result.toList
+    }
   }
 
   /**
@@ -314,7 +301,7 @@ private[AntDefenseAIs] final class World(
    * @param ant Ant to place on the map
    */
  private[Model] def placeNewAnt(ant: Ant) {
-   placeNewAnt(ant, queenOf(ant).currentPos)
+   placeNewAnt(ant, currentPos(queenOf(ant)))
  }
 
 

@@ -97,7 +97,7 @@ public class SimulationWithGUI extends GUIState {
         setupAntPortrayal();
         setupResourcePortrayal();
         setupPheromonePortrayals();
-//        setupChartPortrayal(); // TODO: Debug method befor including it (see other todo-comment)
+//        setupChartPortrayal(); // TODO: Debug method before including it (see other todo-comment)
     }
 
     private void setupAntPortrayal() {
@@ -214,7 +214,7 @@ public class SimulationWithGUI extends GUIState {
         super.init(c);
 
         // antDisplay
-        antDisplay = new Display2D(500,500,this);
+        antDisplay = new Display2D(400,400,this);
         antDisplay.setClipping(false);
         antDisplayFrame = antDisplay.createFrame();
         antDisplayFrame.setTitle("Ants Display");
@@ -224,7 +224,7 @@ public class SimulationWithGUI extends GUIState {
         antDisplay.attach(ants, "Ant World"); // so the frame appears in the "Display" list
 
         // resDisplay
-        resDisplay = new Display2D(500, 500, this);
+        resDisplay = new Display2D(400, 400, this);
         resDisplay.setClipping(false);
         resDisplayFrame = resDisplay.createFrame();
         resDisplayFrame.setTitle("Resources");
@@ -235,9 +235,9 @@ public class SimulationWithGUI extends GUIState {
 
         // Phero-displays
         for (int i = 0; i < homePheroDisplays.length; ++i) {
-            homePheroDisplays[i] = new Display2D(500, 500, this);
-            resPheroDisplays[i] = new Display2D(500, 500, this);
-            warPheroDisplays[i] = new Display2D(500, 500, this);
+            homePheroDisplays[i] = new Display2D(200, 200, this);
+            resPheroDisplays[i] = new Display2D(200, 200, this);
+            warPheroDisplays[i] = new Display2D(200, 200, this);
 
             homePheroDisplays[i].setClipping(false);
             resPheroDisplays[i].setClipping(false);
