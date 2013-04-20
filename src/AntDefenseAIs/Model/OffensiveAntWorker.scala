@@ -20,7 +20,7 @@ import sim.engine.SimState
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[AntDefenseAIs] final class OffensiveAntWorker(
+private[AntDefenseAIs] class OffensiveAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 

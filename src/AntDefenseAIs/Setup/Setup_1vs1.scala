@@ -16,12 +16,13 @@ import sim.field.grid.IntGrid2D
 
 import AntDefenseAIs.Model._
 import AntDefenseAIs.Common.Common.intArray2IntGrid
+import AntDefenseAIs.Setup.MapCreationHelpers._
 
 
 final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
 
-  val height = 60
-  val width = 60
+  val height = 57
+  val width = 57
   private val tribes: Array[AntGenerator] = Array(NormalAntWorker, NormalAntWorker) // TODO: Adapt tribe
   override val numberOfTribes = tribes.length
 
@@ -32,15 +33,18 @@ final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
    *
    * One line of resources goes from the one corner to the other.
    */
-  for (i <- 0 until height; j <- 0 until width if i == j) {
-    val maxResAmount: Int = 100 // Maximum number of resources on a field
+  {
+    for (i <- 0 until height; j <- 0 until width if (i == j) && (i % 8 == 0)) {
+      brushSoft(resDistrib, 5, 5, 10, (i, j))
+    }
 
-    resDistrib(i)(j) = maxResAmount
+    brushSoft(resDistrib, 5, 5, 10, (43, 13), (13, 43))
   }
+
 
   val resourceMap: IntGrid2D = intArray2IntGrid(resDistrib)
 
   val world: World = new World(sim = this, height = height, width = width,
-    startPositions = Array((0, 0), (59, 59)), resourceMap,
+    startPositions = Array((0, 0), (height - 1, width - 1)), resourceMap,
     tribeTypes = tribes)
 }

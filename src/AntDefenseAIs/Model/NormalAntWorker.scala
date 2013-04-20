@@ -21,7 +21,7 @@ import util.Random
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[AntDefenseAIs] final class NormalAntWorker(
+private[AntDefenseAIs] class NormalAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 

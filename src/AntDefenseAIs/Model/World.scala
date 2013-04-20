@@ -113,7 +113,9 @@ private[AntDefenseAIs] final class World(
     for (ant <- allAnts) {
       ant match {
         case worker: AntWorker if (worker.isDead) => {
-          worker.dropResources(); ants.remove(worker) // Take ant out of scheduling
+          worker.dropResources()
+          ants.remove(worker) // Take ant out of scheduling
+          lostAntsByTribe(worker.tribeID) += 1 // Adapt statistic
         }
         case _ => // In other cases, do nothing
       }
@@ -307,6 +309,8 @@ private[AntDefenseAIs] final class World(
 
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
+
+  val lostAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size)
 
   /**
    * Counts population of all tribes

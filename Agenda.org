@@ -51,19 +51,23 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  9) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
     Int, Int)) hinzufügen.
 
-** TODO Benutzeroberfläche und Simulationskontrolle [3/5]
- 1) [ ] Statistikfenster für jeden Stamm, das folgende Werte und deren Entwicklung anzeigt:
+** TODO Benutzeroberfläche und Simulationskontrolle [5/7]
+ 1) [X] Pinselwerkzeug zum Kartendesign entwickeln
+ 2) [X] Statistikwerkzeug: Verlorene, eigene Ameisen
+ 3) [ ] Fenstergrößen passen sich der Weltgröße an
+ 4) [ ] Statistikfenster für jeden Stamm, das folgende Werte und deren Entwicklung anzeigt:
     - Die (derzeitige) Bevölkerungsstärke
     - Den Ressourcenbestand anzeigt
     - Ressourcen, die unterwegs sind
- 2) [X] Es muss für jeden Stamm möglich sein, alle Pheromonkarten anzuzeigen.
- 3) [X] Ameisenstämme sollen in unterschiedlichen Farben dargestellt werden.
- 4) [X] Es kann auch eine Ressourcen-Karte angezeigt werden, anhand der man sehen kann, wie viele Ressourcen auf einem
+ 5) [X] Es muss für jeden Stamm möglich sein, alle Pheromonkarten anzuzeigen.
+ 6) [X] Ameisenstämme sollen in unterschiedlichen Farben dargestellt werden.
+ 7) [X] Es kann auch eine Ressourcen-Karte angezeigt werden, anhand der man sehen kann, wie viele Ressourcen auf einem
     Feld sind.
- 5) /Optional:/ Der Farbton im Ameisenfenster zeigt an, wie viele Individuen welches Stammes dort sind. (Bis zu einem
+ 8) /Optional:/ Der Farbton im Ameisenfenster zeigt an, wie viele Individuen welches Stammes dort sind. (Bis zu einem
     Maximalwert)
- 6) /Optional:/ Jeder Stamm hält seine Pheromonkarte in einem Fenster, mit veschiedenen Reitern. Je Reiter eine
+ 9) /Optional:/ Jeder Stamm hält seine Pheromonkarte in einem Fenster, mit veschiedenen Reitern. Je Reiter eine
     Karte. (Das macht dann nach gegenwärtigem Stand drei Reiter pro Fenster.) /Zu aufwändig!/
+ 10) /Wird nicht gemacht, wegen nötiger Umstrukturierung:/ Statistikwerkzeug: Besiegte, gegnerische Ameisen
 
 ** TODO Quelltext-Arbeiten [3/7]
  + [X] Sichtbarkeit einschränken
@@ -73,6 +77,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [ ] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [ ] Veröffentlichung bei einem Quelltext-Hoster
+ + /Optional:/ Arrays in „World.scala“ dort wo es sinnvoll ist durch Hashmaps (Schlüssel: TribeID) ersetzen.
  + /Optional:/ Dokumentationen dazu schreiben
  + /Optional:/ Architekturänderung: Nur ein Ameisenarbeitertyp. Das Verhalten wird über einen Scala ~trait~ injiziert.
 

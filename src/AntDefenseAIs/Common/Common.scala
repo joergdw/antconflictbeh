@@ -12,9 +12,12 @@
  */
 package AntDefenseAIs.Common
 
+import StrictMath.{abs, max}
+
 import sim.util.{Bag, IntBag, Int2D}
-import AntDefenseAIs.Model.Ant
 import sim.field.grid.IntGrid2D
+
+import AntDefenseAIs.Model.Ant
 
 /** Helping functions and constants */
 package object Common {
@@ -93,5 +96,33 @@ package object Common {
     }
 
     result
+  }
+
+  /**
+   * Field distance of two positions
+   *
+   * Can be compared with the number of moves a king in a chess game has to do to reach from one position the other
+   *
+   * @param pos_a First position
+   * @param pos_b Second position
+   * @return Distance between first and second position
+   */
+  def distance(pos_a: (Int, Int), pos_b: (Int, Int)): Int =
+    max(abs(pos_a._1 - pos_b._1), abs(pos_a._2 - pos_b._2))
+
+
+  /**
+   * List of all positions in a given 2-dim-Array within a certain radius towards a position
+   *
+   * @param a Array
+   * @param pos Position whichs neighbourhood will be determined
+   * @param maxDistance Radius of the neighbourhood
+   * @return All positions within the `maxDistance`-radius of `pos`
+   */
+  def neighbourhoodOf(a: Array[Array[Int]], pos: (Int, Int), maxDistance: Int): List[(Int, Int)] = {
+    val allPositions: List[(Int, Int)] = (for (i <- 0 until a.length; j <- 0 until a(i).length) yield (i, j)).toList
+    def predicate(otherPos: (Int, Int)): Boolean = distance(pos, otherPos) <= maxDistance
+
+    allPositions.filter(predicate).toList
   }
 }

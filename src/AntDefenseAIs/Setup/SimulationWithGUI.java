@@ -30,6 +30,9 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class SimulationWithGUI extends GUIState {
+    private int antDisplaySize = 400;
+    private int pheroDisplaySize = 600;
+
     SparseGridPortrayal2D ants = new SparseGridPortrayal2D();
     FastValueGridPortrayal2D resources = new FastValueGridPortrayal2D();
     public Display2D antDisplay, resDisplay;
@@ -214,7 +217,7 @@ public class SimulationWithGUI extends GUIState {
         super.init(c);
 
         // antDisplay
-        antDisplay = new Display2D(400,400,this);
+        antDisplay = new Display2D(antDisplaySize,antDisplaySize,this);
         antDisplay.setClipping(false);
         antDisplayFrame = antDisplay.createFrame();
         antDisplayFrame.setTitle("Ants Display");
@@ -224,7 +227,7 @@ public class SimulationWithGUI extends GUIState {
         antDisplay.attach(ants, "Ant World"); // so the frame appears in the "Display" list
 
         // resDisplay
-        resDisplay = new Display2D(400, 400, this);
+        resDisplay = new Display2D(antDisplaySize, antDisplaySize, this);
         resDisplay.setClipping(false);
         resDisplayFrame = resDisplay.createFrame();
         resDisplayFrame.setTitle("Resources");
@@ -235,9 +238,9 @@ public class SimulationWithGUI extends GUIState {
 
         // Phero-displays
         for (int i = 0; i < homePheroDisplays.length; ++i) {
-            homePheroDisplays[i] = new Display2D(200, 200, this);
-            resPheroDisplays[i] = new Display2D(200, 200, this);
-            warPheroDisplays[i] = new Display2D(200, 200, this);
+            homePheroDisplays[i] = new Display2D(pheroDisplaySize, pheroDisplaySize, this);
+            resPheroDisplays[i] = new Display2D(pheroDisplaySize, pheroDisplaySize, this);
+            warPheroDisplays[i] = new Display2D(pheroDisplaySize, pheroDisplaySize, this);
 
             homePheroDisplays[i].setClipping(false);
             resPheroDisplays[i].setClipping(false);
