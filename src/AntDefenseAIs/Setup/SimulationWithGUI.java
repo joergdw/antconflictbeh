@@ -31,7 +31,7 @@ import java.util.Arrays;
 
 public class SimulationWithGUI extends GUIState {
     private int antDisplaySize = 400;
-    private int pheroDisplaySize = 600;
+    private int pheroDisplaySize = 200;
 
     SparseGridPortrayal2D ants = new SparseGridPortrayal2D();
     FastValueGridPortrayal2D resources = new FastValueGridPortrayal2D();

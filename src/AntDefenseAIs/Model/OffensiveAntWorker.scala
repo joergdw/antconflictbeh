@@ -37,7 +37,7 @@ private[AntDefenseAIs] class OffensiveAntWorker(
     if (this.hitpoints == 0) return // Ant dead: no more actions
   }
 
-  override def actMilitarily(state: SimState) {}
+  override def actMilitarily() {}
 
   def step(state: SimState) {
     // TODO: Add more behaviour

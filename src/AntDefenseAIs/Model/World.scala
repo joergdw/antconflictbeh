@@ -249,9 +249,18 @@ private[AntDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant. Default is `1`
    * @return List of positions within the given range.
    */
-  def nearPos(ant: Ant, distance: Int = 1): List[(Int, Int)] = {
-    val (xBag, yBag) = nearPosBags(ant, distance)
-    toTupleList(xBag, yBag) filterNot equals
+  def nearPos(ant: Ant, distance: Int = 1): List[(Int, Int)] =
+    neighbourhood(ant, distance).filter(pos => pos != currentPos(ant))
+
+  /**
+   * Calculates all the neighbour positions within a certain distance.
+   *
+   * @param distance Maximum distance of a field towards the current position of the ant. Default is `1`
+   * @return List of positions within the given range.
+   */
+  def neighbourhood(ant: Ant, distance: Int = 1): List[(Int, Int)] = {
+    val (xBag, yBag) = neighbourhoodBags(ant, distance)
+    toTupleList(xBag, yBag)
   }
 
   /**
@@ -260,7 +269,7 @@ private[AntDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant
    * @return Tuple of bags with the x and the corresponding y-positions
    */
-  private def nearPosBags(ant: Ant, distance: Int): (IntBag, IntBag) = {
+  private def neighbourhoodBags(ant: Ant, distance: Int): (IntBag, IntBag) = {
     val (x, y) = currentPos(ant)
     val xBag: IntBag = new IntBag()
     val yBag: IntBag = new IntBag()

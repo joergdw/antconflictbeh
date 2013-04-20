@@ -65,7 +65,7 @@ protected[AntDefenseAIs] abstract class AntWorker(
   }
 
   /** Actions when ant want to fight or to flee – dependent of the ant-type */
-  def actMilitarily(state: SimState)
+  def actMilitarily()
 
 
   /** Follow home way.

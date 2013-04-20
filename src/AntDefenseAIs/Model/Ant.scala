@@ -34,12 +34,20 @@ private[AntDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   def currentPos: (Int, Int) = world.currentPos(this)
 
   /**
+   * Returns the positions of all the fields within a given distance. Current position of the ant is excluded.
+   *
+   * @param distance Maximum distance of a field which coordinates are included in the result
+   * @return Positions within a given distance to the ant; Current position of the ant is excluded
+   */
+  protected def nearPos(distance: Int) = world.nearPos(this, distance)
+
+  /**
    * Returns the positions of all the fields within a given distance.
    *
    * @param distance Maximum distance of a field which coordinates are included in the result
    * @return Positions within a given distance to the ant
    */
-  protected def nearPos(distance: Int) = world.nearPos(this, distance)
+  protected def neighbourhood(distance: Int) = world.neighbourhood(this, distance)
 
   /**
    * Moves ant to another position. New position must be a neighbour position.
