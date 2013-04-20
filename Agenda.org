@@ -28,26 +28,27 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  1) [X] Verhalten aus: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/A%20Pheromone-Based%20Utility%20Model%20for%20Collaborative%20Foraging%20-%202003.pdf][A Pheromone-Based Utility Model for Collaborative Foraging]]“
  2) [X] Jede Ameisenkolonie über ihre eigenen Pheromone verfügt und die der anderen nicht wahrnimmt.
  3) [X] Ameisen sollen nach einer Weile mit erfolgsloser Nahrungssuche zu ihrem Bau zurückkehren.
- 4) /Optional:/ Wenn man bei der Ressourcensuche gerade eine Richtung eingeschlagen hat, dann verfolgt man diese
+ 4) [ ] Ameisen wenden auch für den Nachhauseweg dasselbe System an, wie für die Nahrungssuche. Dies sollte in
+    Verbindung mit der Eigenschaft implementiert werden, dass die Ameisen mit der Zeit sterben. (Damit welche, die den
+    Nachhauseweg nicht mehr finden, nicht ewig glücklos auf der Karte herumeiern.)
+ 5) /Optional:/ Wenn man bei der Ressourcensuche gerade eine Richtung eingeschlagen hat, dann verfolgt man diese
     präferenziell weiter.
- 5) /Optional:/ Ameisen neigen dazu auch gerne schnell ganze Nahrungsquellen, statt bloß deren Randfelder in Besitz zu
+ 6) /Optional:/ Ameisen neigen dazu auch gerne schnell ganze Nahrungsquellen, statt bloß deren Randfelder in Besitz zu
     nehmen. Das ist strategisch geschickter, um andere Stämme fernzuhalten.
 
    *Bemerkung:* Dieses Verhalten wird tatsächlich gegenwärtig schon bis zu einem gewissen Grad erreicht. Eine Ameise,
     die sich bereits auf einem Nahrungsfeld befindet, schaut sich erst die Nachbarfelder an, bevor sie weiter das
     derzeitige Feld abbaut.
- 6) /Optional:/ Ameisen wenden auch für den Nachhauseweg dasselbe System an, wie für die Nahrungssuche. Bis dahin wird
-    leider nur bei der Nahrungssuche Erkundungsarbeit geleistet.
 
-** DONE Sonstiges [3/3]
+** DONE Sonstiges [2/4]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
- 2) [X] Pheromonverdunstung
- 3) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
- 4) /Optional:/ Pheromondiffussion
- 5) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
- 6) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
+ 2) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
+ 3) [ ] Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
+ 4) [ ] Pheromondiffussion (Wichtig für die Kommunikation der offensiven Ameisen über Kriegspheromone)
+ 5) /Optional:/ Pheromonverdunstung
+ 6) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
+ 7) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
     Königin auf mehrere Felder benötigt, damit die Ameisen bei großer Populationszahl noch an sie herankommen)
- 7) /Optional:/ Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
  8) /Optional:/ Ameisen können altersbedingt sterben.
  9) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
     Int, Int)) hinzufügen.
@@ -74,6 +75,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [ ] Militärteil zum Laufen bringen
+ + [ ] Verhaltenssteuernde Parameter in die Begleitobjekte zu den Ameisen auslagern.
  + [ ] Parameter-Tuning (Ameisen-Produktionsgeschwindigkeit, Ressourcenmenge, und die Verhaltensparameter der Ameisen)
  + [ ] Analysefunktionen zum Laufen bringen
  + [ ] Eventuelle Migration in andere Pakete unterhalt von sim.apps. … (siehe, wo die anderen Simulationen sind).  Dafür
@@ -102,6 +104,8 @@ Ansonsten einfach wieder mit einer KI arbeiten.
 
 Als Darstellungs-Material können die „Chickens“ aus zero-k genommen werden.
 
+** Erweiterungsideen
+Genetischer Parametrisierungs-Modus
 
 
 * Pseudo-Quelltexte [3/4]
