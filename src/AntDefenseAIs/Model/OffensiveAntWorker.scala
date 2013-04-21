@@ -12,8 +12,18 @@
  */
 package AntDefenseAIs.Model
 
-object OffensiveAntWorker {
+object OffensiveAntWorker extends AntGenerator {
 
+  /**
+   * Creates an NormalAntWorker
+   *
+   * @param tribeID Tribe the ant belongs to
+   * @param world World the ant lives on
+   * @return NormalAntWorker
+   */
+  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+
+  def apply(ant: Ant) = new OffensiveAntWorker(ant)
 }
 
 
@@ -22,7 +32,7 @@ import sim.engine.SimState
 import OffensiveAntWorker._
 
 /**
- * Antworker with a more offensive behaviour
+ * AntWorker with a more offensive behaviour
  *
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
@@ -50,18 +60,4 @@ private[AntDefenseAIs] class OffensiveAntWorker(
     // TODO: Add more behaviour
     actEconomically(state)
   }
-}
-
-private[AntDefenseAIs] object OffensiveAntWorkerGenerator extends AntGenerator {
-
-  /**
-   * Creates an NormalAntWorker
-   *
-   * @param tribeID Tribe the ant belongs to
-   * @param world World the ant lives on
-   * @return NormalAntWorker
-   */
-  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
-
-  def apply(ant: Ant) = new OffensiveAntWorker(ant)
 }

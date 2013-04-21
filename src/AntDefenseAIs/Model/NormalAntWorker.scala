@@ -12,8 +12,21 @@
  */
 package AntDefenseAIs.Model
 
-object NormalAntWorker {
+object NormalAntWorker extends AntGenerator {
 
+  /**
+   * Creates an NormalAntWorker
+   *
+   * @param tribeID Tribe the ant belongs to
+   * @param world World the ant lives on
+   * @return NormalAntWorker
+   */
+  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+
+  def apply(ant: Ant) = new NormalAntWorker(ant)
+
+
+  ////////////////////// Common members of all NormalAntWorkers //////////////////////
   /**
    * Descripes the range of the emotions. Value must be odd and dividable by 3.
    *
@@ -174,21 +187,4 @@ private[AntDefenseAIs] class NormalAntWorker(
   override def actMilitarily() {
     // TODO
   }
-}
-
-/**
- * Generatorobjetct for Antworkers
- */
-private[AntDefenseAIs] object NormalAntWorkerGenerator extends AntGenerator {
-
-  /**
-   * Creates an NormalAntWorker
-   *
-   * @param tribeID Tribe the ant belongs to
-   * @param world World the ant lives on
-   * @return NormalAntWorker
-   */
-  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
-
-  def apply(ant: Ant) = new NormalAntWorker(ant)
 }
