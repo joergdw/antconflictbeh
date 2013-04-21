@@ -13,6 +13,8 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
+  val maximumAge: Int = 5000 /** Maximum age of a worker (in steps) */ // TODO: set to 1000 (imortant for debugging)
+
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
@@ -57,9 +59,9 @@ private[antDefenseAIs] abstract class AntWorker(
   final def actEconomically(state: SimState) {
 
     val backpack_full: Boolean = transporting >= backpack
-    val is_bored: Boolean = boredom == 0
+    val isBored: Boolean = boredom == 0
 
-    if (backpack_full || is_bored) {
+    if (backpack_full || isBored) {
       if (currentPos == myQueen.currentPos) { // queen is under the ant
         dropResources()
         boredom = notBored
@@ -82,7 +84,7 @@ private[antDefenseAIs] abstract class AntWorker(
     * Neighbour fields without foreign-colony ants take precedence (to avoid enemy-contact).
     */
   final def followHomeWay() {
-    val list: List[(Int, Int)] = nearPos(1) sortBy (homePheroOn)
+    val list: List[(Int, Int)] = nearPos(1).sortBy(homePheroOn).reverse
     val noEnemyList = list filterNot enemySensedOn
     val nextPos = if (noEnemyList.isEmpty) list.head else noEnemyList.head
 
@@ -92,12 +94,12 @@ private[antDefenseAIs] abstract class AntWorker(
 
   /** Care for food.
     *
-    * The next field is ost probable the neighbour-field with the best resource-pheromones.
+    * The next field is most probable the neighbour-field with the best resource-pheromones.
     * With a certain probability (in function of the world.explorationRate) it is any of the
     * neighbour fields.
     */
   final def careForFood() {
-    val list: List[(Int, Int)] = (nearPos(1) sortBy (resPheroOn)).reverse
+    val list: List[(Int, Int)] = nearPos(1).sortBy(resPheroOn).reverse
     val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - explorationRate))
                                 list.head
                               else
@@ -113,21 +115,21 @@ private[antDefenseAIs] abstract class AntWorker(
    * Adapts the home-pheromones of the current field.
    */
   final def adaptHomePhero() {
-    val pos = currentPos
-    val currentValue: Int = homePheroOn(pos)
+    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(homePheroOn).reverse.head
+    val adaptedValue = if (currentPos == myQueen.currentPos)
+                          1.0d
+                       else
+                          gamma * homePheroOn(bestNeighbour)
 
-    val sortedNeighbours: List[(Int, Int)] =  nearPos(1) sortBy (homePheroOn)
-    val bestNeighbour: Int = homePheroOn(sortedNeighbours.head)
-
-    // To avoid arithmetic overflow and worse distance
-    setHomePheroOn(pos, min(currentValue, max(bestNeighbour, bestNeighbour + 1)))
+    // To avoid pheromone value > 1 and worse value than before
+    setHomePheroOn(currentPos, min(1, max(homePheroOn(currentPos), adaptedValue)))
   }
 
   /**
    * Adapts the ressource-pheromones of the current field.
    */
   final def adaptResPhero() {
-    val bestNeighbour: (Int, Int) = (nearPos(1) sortBy (resPheroOn) reverse).head
+    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(resPheroOn).reverse.head
     val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
 
     setResPheroOn(currentPos, min(1, adaptedValue))
@@ -194,11 +196,4 @@ private[antDefenseAIs] abstract class AntWorker(
    * @return Amount of resources transported by this ant
    */
   final def inBackpack: Int = transporting
-
-  /**
-   * Returns true if the ant is dead
-   *
-   * @return True iff ant is dead
-   */
-  final def isDead: Boolean = hitpoints == 0
 }

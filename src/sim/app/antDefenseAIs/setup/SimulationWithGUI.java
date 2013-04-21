@@ -144,7 +144,7 @@ public class SimulationWithGUI extends GUIState {
             resPheros[i].setField(simulation.world().resPheromones()[i]);
             warPheros[i].setField(simulation.world().warPheromones()[i]);
 
-            homePheros[i].setMap(new SimpleColorMap(0, Integer.MAX_VALUE, Color.white, Color.black));
+            homePheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
             warPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
 
@@ -291,6 +291,7 @@ public class SimulationWithGUI extends GUIState {
         // System.out.println(Arrays.toString(sim.world().resourceStat()));
         System.out.println("Resource overview: " + Arrays.toString(sim.world().totalResStat()));
         // System.out.println(Arrays.deepToString(sim.world().resourceMap()));
+        System.out.println("Losses overview: " + Arrays.toString(sim.world().lostAntsByTribe()));
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;

@@ -114,13 +114,14 @@ package object Common {
   /**
    * List of all positions in a given 2-dim-Array within a certain radius towards a position
    *
-   * @param a Array
+   * @param height Height of the 2-dim array
+   * @param width Width of the 2-dim array
    * @param pos Position whichs neighbourhood will be determined
    * @param maxDistance Radius of the neighbourhood
    * @return All positions within the `maxDistance`-radius of `pos`
    */
-  def neighbourhoodOf(a: Array[Array[Int]], pos: (Int, Int), maxDistance: Int): List[(Int, Int)] = {
-    val allPositions: List[(Int, Int)] = (for (i <- 0 until a.length; j <- 0 until a(i).length) yield (i, j)).toList
+  def neighbourhoodOf(height: Int, width: Int, pos: (Int, Int), maxDistance: Int): List[(Int, Int)] = {
+    val allPositions: List[(Int, Int)] = (for (i <- 0 until height; j <- 0 until width) yield (i, j)).toList
     def predicate(otherPos: (Int, Int)): Boolean = distance(pos, otherPos) <= maxDistance
 
     allPositions.filter(predicate).toList

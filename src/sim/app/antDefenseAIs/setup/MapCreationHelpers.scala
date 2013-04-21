@@ -66,7 +66,7 @@ private object MapCreationHelpers {
         (1 - alpha) * min_strength + alpha * max_strength
       }
 
-      val neighbourhood = neighbourhoodOf(a, pos, width)
+      val neighbourhood = neighbourhoodOf(a.size, a(0).size, pos, width)
 
       for (field <- neighbourhood) {
         a(field._1)(field._2) = max(a(field._1)(field._2), interpolate(field))

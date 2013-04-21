@@ -31,6 +31,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected var hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
   protected var mobility: Float = 0.5f /** Probability to avoid to be hit */
   protected var attack: Int = 1 /** Damage an ant does to another */
+  private[model] var age: Int = 0 /** Current age of the ant */
 
   /**
    * Current position of that ant as (Int, Int)
@@ -99,7 +100,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    * @param pos Position where to set the pheromone intensity
    * @param amount New intensity
    */
-  protected def setHomePheroOn(pos: (Int, Int), amount: Int) {
+  protected def setHomePheroOn(pos: (Int, Int), amount: Double) {
     world.setHomePheroOn(this, pos, amount)
   }
 
@@ -122,6 +123,13 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected def setWarPheroOn(pos: (Int, Int), amount: Double) {
     world.setWarPheroOn(this, pos, amount)
   }
+
+  /**
+   * Returns true if the ant is dead
+   *
+   * @return True iff ant is dead
+   */
+  final def isDead: Boolean = hitpoints == 0
 
   /**
    * True if the field on position pos returns at least one enemy

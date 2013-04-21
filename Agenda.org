@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [0/6]
+* Implementierungsliste [1/6]
 ** TODO Militärverhalten normaler Ameisen [5/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -24,11 +24,12 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [ ] Aggressive Ameisen greifen koloniefremde Ameisen auf dem eigenen Feld an.
  + [ ] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
  + [ ] Neutrale Ameisen ignorieren koloniefremde Ameisen.
-** TODO Wirtschaftsverhalten [3/4]
+
+** DONE Wirtschaftsverhalten [4/4]
  1) [X] Verhalten aus: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/A%20Pheromone-Based%20Utility%20Model%20for%20Collaborative%20Foraging%20-%202003.pdf][A Pheromone-Based Utility Model for Collaborative Foraging]]“
  2) [X] Jede Ameisenkolonie über ihre eigenen Pheromone verfügt und die der anderen nicht wahrnimmt.
  3) [X] Ameisen sollen nach einer Weile mit erfolgsloser Nahrungssuche zu ihrem Bau zurückkehren.
- 4) [ ] Ameisen wenden auch für den Nachhauseweg dasselbe System an, wie für die Nahrungssuche. Dies sollte in
+ 4) [X] Ameisen wenden auch für den Nachhauseweg dasselbe System an, wie für die Nahrungssuche. Dies sollte in
     Verbindung mit der Eigenschaft implementiert werden, dass die Ameisen mit der Zeit sterben. (Damit welche, die den
     Nachhauseweg nicht mehr finden, nicht ewig glücklos auf der Karte herumeiern.)
  5) /Optional:/ Wenn man bei der Ressourcensuche gerade eine Richtung eingeschlagen hat, dann verfolgt man diese

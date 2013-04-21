@@ -17,8 +17,8 @@ import sim.engine.SimState
 private[antDefenseAIs] object AntQueen {
   val startRessources = 10 /** Amount of resources a tribe starts with. Should be >= `productionCost` */
   val productionTime: Int = 10 /** time to produce an ant*/
-  val productionCost: Int = 5 /** costs to produce an ant */
-
+  val productionCost: Int = 10 /** costs to produce an ant */
+  val maximumAge: Int = Integer.MAX_VALUE /** Maximum age of a queen (in steps) */
   /**
    * Creates an NormalAntWorker
    *
@@ -69,6 +69,15 @@ private final class AntQueen(
     assert(amount >= 0)
 
     _deposit += amount
+  }
+
+  /**
+   * Queen places all owned resources her current position
+   */
+  def dropDeposit() {
+    val res = world.resOn(currentPos) + deposit
+    world.setResOn(currentPos, res)
+    _deposit = 0
   }
 
   /**

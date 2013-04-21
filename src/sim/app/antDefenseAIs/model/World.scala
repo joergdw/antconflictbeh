@@ -15,12 +15,13 @@ package sim.app.antDefenseAIs.model
 import StrictMath.max
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
-import sim.util.IntBag
 import sim.engine.{SimState, Steppable}
+import sim.util.IntBag
 
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 import sim.app.antDefenseAIs.setup.Simulation
+
 
 /**
  * World
@@ -66,13 +67,13 @@ private[antDefenseAIs] final class World(
   if (startPositions.length != tribeTypes.length)
     throw new IllegalArgumentException("Not exactly as many start positions as colony types")
 
-  // ASSERT: all start positions in range of `height` and `weight`
+  // ASSERT: all start positions in range of `height` and `width`
 
   val ants: SparseGrid2D = new SparseGrid2D(height, width) /** Agents: multiples can be on one field */
 
   // For each tribe there will be a store for all the pheromone-types.
   // Only public for mason graphical capabilities. Other classes should use the access methods of this class
-  val homePheromones = new Array[IntGrid2D](tribeTypes.length)
+  val homePheromones = new Array[DoubleGrid2D](tribeTypes.length)
   val resPheromones = new Array[DoubleGrid2D](tribeTypes.length)
   val warPheromones = new Array[DoubleGrid2D](tribeTypes.length)
 
@@ -80,14 +81,13 @@ private[antDefenseAIs] final class World(
 
   for (i <- 0 until tribeTypes.length) { // foreach tribe
     // Create pheromone maps
-    homePheromones(i) = new IntGrid2D(height, width, Integer.MAX_VALUE)
+    homePheromones(i) = new DoubleGrid2D(height, width, 0.0d)
     resPheromones(i) = new DoubleGrid2D(height, width, 0.0d)
     warPheromones(i) = new DoubleGrid2D(height, width, 0.0d)
 
-    homePheromones(i).set(startPositions(i)._1, startPositions(i)._2, 0) // Adapt start position of the queen
-
     queens(i) = new AntQueen(nextTribeID(), this, tribeTypes(i)) // Create queen
     assert(ants.setObjectLocation(queens(i), startPositions(i)._1, startPositions(i)._2)) // Place queen on world
+    homePheromones(i).set(startPositions(i)._1, startPositions(i)._2, 1.0d) // Adapt home-pheromone on queens place
   }
 
   /**
@@ -104,17 +104,29 @@ private[antDefenseAIs] final class World(
   /////////////////////////// Nature behaviour ///////////////////////////////////////
 
   def step(state: SimState) {
+    def dieAnt(ant: Ant) { // Actions when an ant dies
+      ant match {
+        case worker: AntWorker if (worker.isDead) => worker.dropResources()
+        case queen: AntQueen => queen.dropDeposit()
+        case other => new Exception("Anttype not known: " + other.getClass.getName)
+      }
+      // TODO: Stop scheduling of that ant
+      ants.remove(ant) // Take ant out of scheduling
+      lostAntsByTribe(ant.tribeID) += 1 // Adapt statistic
+    }
 
-    // Remove dead ants from the map
+    // Remove dead ants and too old ants from the world
     for (ant <- allAnts) {
       ant match {
-        case worker: AntWorker if (worker.isDead) => {
-          worker.dropResources()
-          ants.remove(worker) // Take ant out of scheduling
-          lostAntsByTribe(worker.tribeID) += 1 // Adapt statistic
-        }
-        case _ => // In other cases, do nothing
+        case worker: AntWorker if worker.isDead || worker.age >= AntWorker.maximumAge => dieAnt(worker)
+        case queen: AntQueen if queen.isDead || queen.age >= AntQueen.maximumAge => dieAnt(queen)
+        case other => // do nothing
       }
+    }
+
+    // Age all remaining ants
+    for (ant <- allAnts) {
+      ant.age += 1
     }
 
     // Evaporation can be implemented here
@@ -182,7 +194,7 @@ private[antDefenseAIs] final class World(
    * @param pos Position where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the given ant at the given position
    */
-  private[model] def homePheroOn(ant: Ant, pos: (Int, Int)): Int = homePheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOn(ant: Ant, pos: (Int, Int)): Double = homePheromones(ant.tribeID).get(pos._1, pos._2)
 
   /**
    * Resource pheromone intensity of the tribe of the given ant at the given position
@@ -209,7 +221,7 @@ private[antDefenseAIs] final class World(
    * @param pos Position where to set the pheromone intensity
    * @param amount New intensity
    */
-  private[model] def setHomePheroOn(ant: Ant, pos: (Int, Int), amount: Int) {
+  private[model] def setHomePheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
     homePheromones(ant.tribeID).set(pos._1, pos._2, amount)
   }
 
@@ -273,6 +285,7 @@ private[antDefenseAIs] final class World(
     (xBag, yBag)
   }
 
+
   /**
    * Returns the current position of the asking ant
    *
@@ -300,7 +313,7 @@ private[antDefenseAIs] final class World(
    if (populationStat(ant.tribeID) >= maxPopulation)
      new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
-   ants.setObjectLocation(ant, toInd2D(pos))
+   assert(ants.setObjectLocation(ant, toInd2D(pos)))
    sim.schedule scheduleRepeating(ant)
  }
 
