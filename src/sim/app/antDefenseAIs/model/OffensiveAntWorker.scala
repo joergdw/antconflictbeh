@@ -29,8 +29,6 @@ private[antDefenseAIs] object OffensiveAntWorker extends AntGenerator {
 
 import sim.engine.SimState
 
-import OffensiveAntWorker._
-
 /**
  * AntWorker with a more offensive behaviour
  *

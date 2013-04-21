@@ -37,17 +37,17 @@ import sim.app.antDefenseAIs.setup.Simulation
  * @param resources Distribution of the resources on the map
  * @param height Height of the map
  * @param width  Width of the map
+ * @param maxPopulation Maximum tribe population
  * @param tribeTypes Constructors of the different types of the tribe
  */
 private[antDefenseAIs] final class World(
   val sim: Simulation,
   val height: Int, val width: Int,
+  val maxPopulation: Int = Int.MaxValue,
   private val startPositions: Array[(Int, Int)],
   val resources: IntGrid2D,
   private val tribeTypes: Array[AntGenerator]) extends Steppable {
 
-  val gamma: Double = 0.9d /** Learning parameter according the one used paper */
-  val explorationRate: Double = 0.2d
   val pheroThreshould: Double = 0.0000000001d /** Next phero-value: zero */
 
 /** Maximum number of resources on a field */
@@ -60,11 +60,6 @@ private[antDefenseAIs] final class World(
 
     result
   }
-
-  val maxPopulation: Int = Int.MaxValue /** Maximum tribe population */
-  val startRessources: Int = 20 /** amount of res a tribe starts with */
-  val productionTime: Int = 10 /** time to produce an ant*/
-  val productionCost: Int = 1 /** costs to produce an ant */
 
   val random = sim.random /** Random numbergenerator */
 
@@ -301,7 +296,9 @@ private[antDefenseAIs] final class World(
    * @param pos Position to place the given ant on
    */
  private def placeNewAnt(ant: Ant, pos: (Int, Int)) {
-   // ASSERT: Ant is new and not already placed on the world map.
+   if (ants.getObjectLocation(ant) != null) new IllegalStateException("Ant already placed on world")
+   if (populationStat(ant.tribeID) >= maxPopulation)
+     new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
    ants.setObjectLocation(ant, toInd2D(pos))
    sim.schedule scheduleRepeating(ant)
@@ -347,7 +344,7 @@ private[antDefenseAIs] final class World(
   def resourceStat: Array[Int] = {
     val result = new Array[Int](queens.length)
     for (i <- 0 until result.length) {
-      result(i) = queens(i).hasDeposit
+      result(i) = queens(i).deposit
     }
 
     result
@@ -365,7 +362,7 @@ private[antDefenseAIs] final class World(
     for (ant <- ants) {
       ant match {
         case worker: AntWorker => result(worker.tribeID) += worker.inBackpack
-        case queen: AntQueen => result(queen.tribeID) += queen.hasDeposit
+        case queen: AntQueen => result(queen.tribeID) += queen.deposit
         case otherAnt => throw new Exception("Counting rules for class " + otherAnt.getClass.getName + " not known")
       }
     }

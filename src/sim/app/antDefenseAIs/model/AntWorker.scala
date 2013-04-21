@@ -15,6 +15,9 @@ package sim.app.antDefenseAIs.model
 private[antDefenseAIs] object AntWorker {
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
+
+  var gamma: Double = 0.98d /** Learning parameter according the one used paper */
+  var explorationRate: Double = 0.4d
 }
 
 
@@ -95,7 +98,7 @@ private[antDefenseAIs] abstract class AntWorker(
     */
   final def careForFood() {
     val list: List[(Int, Int)] = (nearPos(1) sortBy (resPheroOn)).reverse
-    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - world.explorationRate))
+    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - explorationRate))
                                 list.head
                               else
                                 list.apply(world.random.nextInt(list.size))
@@ -125,7 +128,7 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   final def adaptResPhero() {
     val bestNeighbour: (Int, Int) = (nearPos(1) sortBy (resPheroOn) reverse).head
-    val adaptedValue = (world.resOn(currentPos) + world.gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
+    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
 
     setResPheroOn(currentPos, min(1, adaptedValue))
   }
@@ -170,7 +173,7 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   def receiveHit(opponent: AntWorker) {
     if (world.random.nextDouble() < mobility) // If ant can
-      hitpoints = hitpoints - opponent.attack
+      hitpoints = hitpoints - attack
   }
 
   /**

@@ -14,6 +14,24 @@ package sim.app.antDefenseAIs.model
 
 import sim.engine.SimState
 
+private[antDefenseAIs] object AntQueen {
+  val startRessources = 5 /** Amount of res a tribe starts with */
+  val productionTime: Int = 10 /** time to produce an ant*/
+  val productionCost: Int = 1 /** costs to produce an ant */
+
+  /**
+   * Creates an NormalAntWorker
+   *
+   * @param tribeID Tribe the ant belongs to
+   * @param world World the ant lives on
+   * @return NormalAntWorker
+   */
+  def apply(tribeID: Int, world: World, antGen: AntGenerator) = new AntQueen(tribeID, world, antGen)
+}
+
+
+import AntQueen._
+
 /**
  * Queen of a colony
  *
@@ -26,17 +44,14 @@ private final class AntQueen(
   override val world: World,
   private val antGen: AntGenerator) extends Ant(tribeID, world) {
 
-  private var deposit: Int = world.startRessources /** Resources the queen owns */
-
-  def productionTime: Int = world.productionTime
-  def productionCost: Int = world.productionCost
+  private var _deposit: Int = startRessources /** Resources the queen owns */
 
   /**
    * Returns the amount of resources in the queens deposit
    *
    * @return Amount of resources in the queens deposit
    */
-  def hasDeposit: Int = deposit
+  def deposit: Int = _deposit
 
   /*
   0 means: no ant being produced
@@ -53,7 +68,7 @@ private final class AntQueen(
   def receiveRes(amount: Int) {
     assert(amount >= 0)
 
-    deposit += amount
+    _deposit += amount
   }
 
   /**
@@ -64,35 +79,26 @@ private final class AntQueen(
   override def step(state: SimState) {
     assert(0 <= productionState && productionState <= productionTime)
 
-    val tmp = deposit - productionCost
-    val curPop = world.populationStat(tribeID) // current population of that tribe
+    val tmp = _deposit - productionCost
 
     if (tmp >= 0 && productionState == 0) { // enough resources and no other construction in progress?
-      deposit = tmp
+      _deposit = tmp
       productionState += 1
     }
 
-    else if (productionState >= productionTime - 1   // production completed?
-             && curPop < world.maxPopulation) {
-      productionState = 0
-
+    else if (productionState >= productionTime - 1) { // production completed?
       val ant: Ant = antGen(this)
-      world.placeNewAnt(ant)
+
+      try {
+        world.placeNewAnt(ant)
+        productionState = 0
+      } catch {
+        case e: IllegalStateException => print(e.getMessage + " by Tribe: " + tribeID)
+        case e: Exception => print("Unforeseen Exception: " + e.getMessage)
+      }
     }
 
     else if (productionState > 0 && productionState < productionTime - 1) // production started and not ready?
       productionState += 1  // advance in construction
   }
-}
-
-private object AntQueen {
-
-  /**
-   * Creates an NormalAntWorker
-   *
-   * @param tribeID Tribe the ant belongs to
-   * @param world World the ant lives on
-   * @return NormalAntWorker
-   */
-  def apply(tribeID: Int, world: World, antGen: AntGenerator) = new AntQueen(tribeID, world, antGen)
 }

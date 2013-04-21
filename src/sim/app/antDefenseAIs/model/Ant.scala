@@ -12,19 +12,25 @@
  */
 package sim.app.antDefenseAIs.model
 
+private[antDefenseAIs] object Ant {
+  val maximumHitpoints = 10 /** How many hitpoints an undamaged individual has */
+}
+
+
 import sim.engine.Steppable
+import Ant.maximumHitpoints
 
 /**
- * sim.app.antDefenseAIs.common properties and capacities of ants
+ * Common properties and capacities of ants
  *
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
  */
 private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
 
-  protected val attack: Int = 1 /** Damage an ant does to another */
-  protected var hitpoints: Int = 10 /** How much an individual can suffer before dieing */
-  protected val mobility: Float = 0.5f /** Probability to avoid to be hit */
+  protected var hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
+  protected var mobility: Float = 0.5f /** Probability to avoid to be hit */
+  protected var attack: Int = 1 /** Damage an ant does to another */
 
   /**
    * Current position of that ant as (Int, Int)

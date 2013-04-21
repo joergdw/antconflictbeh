@@ -12,6 +12,7 @@
  */
 package sim.app.antDefenseAIs.model
 
+
 private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
 
   /**
