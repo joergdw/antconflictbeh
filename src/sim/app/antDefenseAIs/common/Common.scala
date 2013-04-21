@@ -10,14 +10,14 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Common
+package sim.app.antDefenseAIs.common
 
 import StrictMath.{abs, max}
 
 import sim.util.{Bag, IntBag, Int2D}
 import sim.field.grid.IntGrid2D
 
-import AntDefenseAIs.Model.Ant
+import sim.app.antDefenseAIs.model.Ant
 
 /** Helping functions and constants */
 package object Common {

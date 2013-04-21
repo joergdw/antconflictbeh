@@ -11,11 +11,11 @@
  * See the License.txt file for more details.
  */
 
-package AntDefenseAIs.Setup
+package sim.app.antDefenseAIs.setup
 
 import StrictMath.max
 
-import AntDefenseAIs.Common.Common.{neighbourhoodOf, distance}
+import sim.app.antDefenseAIs.common.Common.{neighbourhoodOf, distance}
 
 /**
  * Offers help methods for map creations

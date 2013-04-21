@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
 import StrictMath.max
 
@@ -18,8 +18,9 @@ import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.util.IntBag
 import sim.engine.{SimState, Steppable}
 
-import AntDefenseAIs.Common.Common._
-import TribeIDGenerator.nextTribeID
+import sim.app.antDefenseAIs.common.Common._
+import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
+import sim.app.antDefenseAIs.setup.Simulation
 
 /**
  * World
@@ -38,7 +39,7 @@ import TribeIDGenerator.nextTribeID
  * @param width  Width of the map
  * @param tribeTypes Constructors of the different types of the tribe
  */
-private[AntDefenseAIs] final class World(
+private[antDefenseAIs] final class World(
   val sim: Simulation,
   val height: Int, val width: Int,
   private val startPositions: Array[(Int, Int)],
@@ -172,7 +173,7 @@ private[AntDefenseAIs] final class World(
    * @param ant Ant to move
    * @param newPos Position to move the ant to
    */
-  private[Model] def moveTo(ant: Ant, newPos: (Int, Int)) {
+  private[model] def moveTo(ant: Ant, newPos: (Int, Int)) {
     if (nearPos(ant) contains newPos)
       ants.setObjectLocation(ant, toInd2D(newPos))
     else
@@ -186,7 +187,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the given ant at the given position
    */
-  private[Model] def homePheroOn(ant: Ant, pos: (Int, Int)): Int = homePheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOn(ant: Ant, pos: (Int, Int)): Int = homePheromones(ant.tribeID).get(pos._1, pos._2)
 
   /**
    * Resource pheromone intensity of the tribe of the given ant at the given position
@@ -195,7 +196,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the given ant at the given position
    */
-  private[Model] def resPheroOn(ant: Ant, pos: (Int, Int)): Double = resPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def resPheroOn(ant: Ant, pos: (Int, Int)): Double = resPheromones(ant.tribeID).get(pos._1, pos._2)
 
   /**
    * War pheromone map of the tribe of the given ant
@@ -204,7 +205,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to investigate the pheromone intensity
    * @return War pheromone map of the tribe of the given ant
    */
-  private[Model] def warPheroOn(ant: Ant, pos: (Int, Int)): Double = warPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def warPheroOn(ant: Ant, pos: (Int, Int)): Double = warPheromones(ant.tribeID).get(pos._1, pos._2)
 
   /**
    * Set home pheromone intensity of the tribe of the given ant at the given position
@@ -213,7 +214,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to set the pheromone intensity
    * @param amount New intensity
    */
-  private[Model] def setHomePheroOn(ant: Ant, pos: (Int, Int), amount: Int) {
+  private[model] def setHomePheroOn(ant: Ant, pos: (Int, Int), amount: Int) {
     homePheromones(ant.tribeID).set(pos._1, pos._2, amount)
   }
 
@@ -224,7 +225,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to set the pheromone intensity
    * @param amount New intensity
    */
-  private[Model] def setResPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
+  private[model] def setResPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
     resPheromones(ant.tribeID).set(pos._1, pos._2, amount)
   }
 
@@ -235,7 +236,7 @@ private[AntDefenseAIs] final class World(
    * @param pos Position where to set the pheromone intensity
    * @param amount New intensity
    */
-  private[Model] def setWarPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
+  private[model] def setWarPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
     warPheromones(ant.tribeID).set(pos._1, pos._2, amount)
   }
 
@@ -291,7 +292,7 @@ private[AntDefenseAIs] final class World(
    * @param ant Ant asking for the queen
    * @return Queen of the ant colony the ant belongs to
    */
- private[Model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
+ private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
 
   /**
    * Places a given, new ant on the given position
@@ -311,7 +312,7 @@ private[AntDefenseAIs] final class World(
    *
    * @param ant Ant to place on the map
    */
- private[Model] def placeNewAnt(ant: Ant) {
+ private[model] def placeNewAnt(ant: Ant) {
    placeNewAnt(ant, currentPos(queenOf(ant)))
  }
 
@@ -373,7 +374,7 @@ private[AntDefenseAIs] final class World(
   }
 
 
-  ///////////////////////////// Other Common ///////////////////////////////////
+  ///////////////////////////// Other common ///////////////////////////////////
 
   /**
    * Returns map containing the current resource distribution

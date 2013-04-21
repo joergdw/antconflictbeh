@@ -10,12 +10,12 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
 /**
  * Generator for ants
  */
-private[AntDefenseAIs] trait AntGenerator {
+private[antDefenseAIs] trait AntGenerator {
 
   /**
    * Constructs a new ant

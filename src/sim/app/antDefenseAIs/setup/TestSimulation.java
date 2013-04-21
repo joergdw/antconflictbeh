@@ -10,22 +10,20 @@
  *
  * See the License.txt file for more details.
  */
+package sim.app.antDefenseAIs.setup;
 
-package AntDefenseAIs.Model
+import sim.engine.SimState;
 
-/**
- * Generator for unique tribe ids
- */
-private object TribeIDGenerator {
-  private var IDOfLastTribe: Int = -1 /** ID of the last generated tribe */  // -1 so that 0 is the ID of the first tribe
+public class TestSimulation extends SimState {
 
-  /**
-   * Generates a unique tribe id
-   *
-   * @return Unique tribe id
-   */
-  def nextTribeID(): Int = {
-    IDOfLastTribe += 1
-    IDOfLastTribe
-  }
+    public TestSimulation(long seed) {
+        super(seed);
+    }
+
+    public static void main(String[] args) {
+        {
+            doLoop(TestSimulation.class, args);
+            System.exit(0);
+        }
+    }
 }

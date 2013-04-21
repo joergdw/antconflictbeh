@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Setup
+package sim.app.antDefenseAIs.setup
 
 //import sim.engine.SimState
 import sim.display.Console

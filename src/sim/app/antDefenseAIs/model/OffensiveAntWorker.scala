@@ -10,9 +10,9 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
-object OffensiveAntWorker extends AntGenerator {
+private[antDefenseAIs] object OffensiveAntWorker extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
@@ -37,7 +37,7 @@ import OffensiveAntWorker._
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[AntDefenseAIs] class OffensiveAntWorker(
+private[antDefenseAIs] class OffensiveAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 

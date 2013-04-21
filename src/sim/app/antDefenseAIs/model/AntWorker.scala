@@ -10,9 +10,9 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
-object AntWorker {
+private[antDefenseAIs] object AntWorker {
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 }
@@ -29,11 +29,11 @@ import AntWorker._
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-protected[AntDefenseAIs] abstract class AntWorker(
+private[antDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
   override val world: World) extends Ant(tribeID, world) {
 
-  ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
+  ///////////////////// sim.app.antDefenseAIs.common variables and constants /////////////////////////////////////
 
   protected var transporting: Int = 0 /** Amount of resources transported by this ant */
   protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */

@@ -10,13 +10,13 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Setup
+package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
 
-import AntDefenseAIs.Model._
-import AntDefenseAIs.Common.Common.intArray2IntGrid
-import AntDefenseAIs.Setup.MapCreationHelpers._
+import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
+import sim.app.antDefenseAIs.setup.MapCreationHelpers._
+import sim.app.antDefenseAIs.model.{World, OffensiveAntWorker, NormalAntWorker, AntGenerator}
 
 
 final class Setup_1vs1(var sd: Long) extends Simulation(sd) {

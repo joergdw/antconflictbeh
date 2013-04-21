@@ -10,10 +10,13 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Setup;
+package sim.app.antDefenseAIs.setup;
 
-import AntDefenseAIs.Model.Ant;
-import AntDefenseAIs.Model.Simulation;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Arrays;
+
+import sim.app.antDefenseAIs.model.Ant;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
@@ -24,10 +27,6 @@ import sim.portrayal.grid.FastValueGridPortrayal2D;
 import sim.portrayal.grid.SparseGridPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.gui.SimpleColorMap;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
 
 public class SimulationWithGUI extends GUIState {
     private int antDisplaySize = 400;

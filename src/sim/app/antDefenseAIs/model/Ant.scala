@@ -10,17 +10,17 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
 import sim.engine.Steppable
 
 /**
- * AntDefenseAIs.Common properties and capacities of ants
+ * sim.app.antDefenseAIs.common properties and capacities of ants
  *
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
  */
-private[AntDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
+private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
 
   protected val attack: Int = 1 /** Damage an ant does to another */
   protected var hitpoints: Int = 10 /** How much an individual can suffer before dieing */
@@ -61,7 +61,7 @@ private[AntDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    *
    * @return Queen of the ant
    */
-  private[Model] def myQueen: AntQueen = world.queenOf(this)
+  private[model] def myQueen: AntQueen = world.queenOf(this)
 
   /**
    * Home pheromone intensity of the tribe of the ant at the given position

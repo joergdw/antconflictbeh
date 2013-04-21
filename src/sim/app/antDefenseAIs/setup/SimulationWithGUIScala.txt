@@ -1,0 +1,258 @@
+/*
+   Backupfile. In the case that a transformation of the class SimulationWithGUI from
+   Java to Scala is needed.
+ */
+
+/*
+ * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License 3 as published by
+ * the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY.
+ *
+ * See the License.txt file for more details.
+ */
+package sim.app.antDefenseAIs.setup
+
+import javax.swing._
+import java.awt._
+import java.util.Arrays
+
+import sim.display.Controller
+import sim.display.Display2D
+import sim.display.GUIState
+import sim.engine.SimState
+import sim.engine.Steppable
+import sim.portrayal.DrawInfo2D
+import sim.portrayal.grid.FastValueGridPortrayal2D
+import sim.portrayal.grid.SparseGridPortrayal2D
+import sim.portrayal.simple.OvalPortrayal2D
+import sim.util.gui.SimpleColorMap
+
+object SimulationWithGUIScala {
+  def getName: String = "Ant wars"
+}
+
+class SimulationWithGUIScala private(state: SimState) extends GUIState(state) {
+  initialiseDisplays
+
+  def this() {
+    this(new Setup_1vs1(System.currentTimeMillis): SimState)
+    initialiseDisplays
+  }
+
+  private def initialiseDisplays {
+    val t: Int = (state.asInstanceOf[Simulation]).numberOfTribes
+    homePheroDisplays = new Array[Display2D](t)
+    resPheroDisplays = new Array[Display2D](t)
+    warPheroDisplays = new Array[Display2D](t)
+    homePheroDisplaysFrame = new Array[JFrame](t)
+    resPheroDisplaysFrame = new Array[JFrame](t)
+    warPheroDisplaysFrame = new Array[JFrame](t)
+    homePheros = new Array[FastValueGridPortrayal2D](t)
+    resPheros = new Array[FastValueGridPortrayal2D](t)
+    warPheros = new Array[FastValueGridPortrayal2D](t)
+    {
+      var i: Int = 0
+      while (i < homePheros.length) {
+        {
+          homePheros(i) = new FastValueGridPortrayal2D
+          resPheros(i) = new FastValueGridPortrayal2D
+          warPheros(i) = new FastValueGridPortrayal2D
+        }
+        ({i += 1; i})
+      }
+    }
+  }
+
+  override def start {
+    super.start
+    setupPortrayals
+  }
+
+  override def load(state: SimState) {
+    super.load(state)
+    setupPortrayals
+  }
+
+  private def setupPortrayals {
+    setupAntPortrayal
+    setupResourcePortrayal
+    setupPheromonePortrayals
+  }
+
+  private def setupAntPortrayal {
+    val simulation: Simulation = state.asInstanceOf[Simulation]
+    ants.setField(simulation.world.ants)
+    ants.setPortrayalForAll(new OvalPortrayal2D {
+      override def draw(`object`: AnyRef, graphics: Graphics2D, info: DrawInfo2D) {
+        val ant: Nothing = `object`.asInstanceOf[Nothing]
+        paint = tribeColours(ant.tribeID)
+        super.draw(`object`, graphics, info)
+      }
+    })
+    antDisplay.reset
+    antDisplay.setBackdrop(Color.white)
+    antDisplay.repaint
+  }
+
+  private def setupResourcePortrayal {
+    val simulation: Simulation = state.asInstanceOf[Simulation]
+    resources.setMap(new SimpleColorMap(0, simulation.maxResAmount, Color.white, Color.black))
+    resources.setField(simulation.world.resources)
+    resources.setValueName("Amount resources")
+    resources.setPortrayalForAll(new OvalPortrayal2D)
+    resDisplay.reset
+    resDisplay.setBackdrop(Color.white)
+    resDisplay.repaint
+  }
+
+  private def setupPheromonePortrayals {
+    val simulation: Simulation = state.asInstanceOf[Simulation]
+    {
+      var i: Int = 0
+      while (i < homePheros.length) {
+        {
+          homePheros(i).setField(simulation.world.homePheromones(i))
+          resPheros(i).setField(simulation.world.resPheromones(i))
+          warPheros(i).setField(simulation.world.warPheromones(i))
+          homePheros(i).setMap(new SimpleColorMap(0, Integer.MAX_VALUE, Color.white, Color.black))
+          resPheros(i).setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black))
+          warPheros(i).setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black))
+          homePheros(i).setValueName("Home pheromones map of tribe " + i)
+          resPheros(i).setValueName("Resource pheromones map of tribe " + i)
+          warPheros(i).setValueName("War pheromones map of tribe " + i)
+          homePheros(i).setPortrayalForAll(new OvalPortrayal2D)
+          resPheros(i).setPortrayalForAll(new OvalPortrayal2D)
+          warPheros(i).setPortrayalForAll(new OvalPortrayal2D)
+        }
+        ({i += 1; i})
+      }
+    }
+    {
+      var i: Int = 0
+      while (i < homePheroDisplays.length) {
+        {
+          homePheroDisplays(i).reset
+          resPheroDisplays(i).reset
+          warPheroDisplays(i).reset
+          homePheroDisplays(i).setBackdrop(Color.white)
+          resPheroDisplays(i).setBackdrop(Color.white)
+          warPheroDisplays(i).setBackdrop(Color.white)
+          homePheroDisplays(i).repaint
+          resPheroDisplays(i).repaint
+          warPheroDisplays(i).repaint
+        }
+        ({i += 1; i})
+      }
+    }
+  }
+
+  private def setupChartPortrayal {
+    chart.removeAllSeries
+    series = new XYSeries("Put a unique name for this series here so JFreeChart can hash with it", false)
+    chart.addSeries(series, null)
+    scheduleRepeatingImmediatelyAfter(new Steppable {
+      def step(state: SimState) {
+        val x: Double = state.schedule.time
+        val y: Double = Math.sin(state.schedule.getSteps) * 10
+        if (x >= state.schedule.EPOCH && x < state.schedule.AFTER_SIMULATION) {
+          series.add(x, y, true)
+          chart.updateChartLater(state.schedule.getSteps)
+        }
+      }
+    })
+  }
+
+  override def init(c: Controller) {
+    super.init(c)
+    antDisplay = new Display2D(antDisplaySize, antDisplaySize, this)
+    antDisplay.setClipping(false)
+    antDisplayFrame = antDisplay.createFrame
+    antDisplayFrame.setTitle("Ants Display")
+    c.registerFrame(antDisplayFrame)
+    antDisplayFrame.setVisible(true)
+    antDisplay.attach(ants, "Ant World")
+    resDisplay = new Display2D(antDisplaySize, antDisplaySize, this)
+    resDisplay.setClipping(false)
+    resDisplayFrame = resDisplay.createFrame
+    resDisplayFrame.setTitle("Resources")
+    c.registerFrame(resDisplayFrame)
+    resDisplayFrame.setVisible(true)
+    resDisplay.attach(resources, "Resources")
+    {
+      var i: Int = 0
+      while (i < homePheroDisplays.length) {
+        {
+          homePheroDisplays(i) = new Display2D(pheroDisplaySize, pheroDisplaySize, this)
+          resPheroDisplays(i) = new Display2D(pheroDisplaySize, pheroDisplaySize, this)
+          warPheroDisplays(i) = new Display2D(pheroDisplaySize, pheroDisplaySize, this)
+          homePheroDisplays(i).setClipping(false)
+          resPheroDisplays(i).setClipping(false)
+          warPheroDisplays(i).setClipping(false)
+          homePheroDisplaysFrame(i) = homePheroDisplays(i).createFrame
+          resPheroDisplaysFrame(i) = resPheroDisplays(i).createFrame
+          warPheroDisplaysFrame(i) = warPheroDisplays(i).createFrame
+          homePheroDisplaysFrame(i).setTitle("Home pheromones of tribe " + i)
+          resPheroDisplaysFrame(i).setTitle("Resource pheromones of tribe " + i)
+          warPheroDisplaysFrame(i).setTitle("War pheromones of tribe " + i)
+          c.registerFrame(homePheroDisplaysFrame(i))
+          c.registerFrame(resPheroDisplaysFrame(i))
+          c.registerFrame(warPheroDisplaysFrame(i))
+          homePheroDisplays(i).attach(homePheros(i), "Home pheromones of tribe " + i)
+          resPheroDisplays(i).attach(resPheros(i), "Resource pheromones of tribe " + i)
+          warPheroDisplays(i).attach(warPheros(i), "War pheromones of tribe " + i)
+        }
+        ({i += 1; i})
+      }
+    }
+    chart = new TimeSeriesChartGenerator
+    chart.setTitle("Population statistics")
+    chart.setRangeAxisLabel("Put the name of your charted series here")
+    chart.setDomainAxisLabel("Time")
+    chartFrame = chart.createFrame
+    chartFrame.setVisible(true)
+    chartFrame.pack
+    c.registerFrame(chartFrame)
+  }
+
+  override def quit {
+    super.quit
+    val sim: Simulation = state.asInstanceOf[Simulation]
+    System.out.println(Arrays.toString(sim.world.populationStat))
+    System.out.println(Arrays.toString(sim.world.resourceStat))
+    System.out.println(Arrays.toString(sim.world.totalResStat))
+    System.out.println(Arrays.deepToString(sim.world.resourceMap))
+    if (antDisplayFrame != null) antDisplayFrame.dispose
+    antDisplayFrame = null
+    antDisplay = null
+    if (resDisplayFrame != null) resDisplayFrame.dispose
+    resDisplayFrame = null
+    resDisplay = null
+  }
+
+  private var antDisplaySize: Int = 400
+  private var pheroDisplaySize: Int = 200
+  private[setup] var ants: SparseGridPortrayal2D = new SparseGridPortrayal2D
+  private[setup] var resources: FastValueGridPortrayal2D = new FastValueGridPortrayal2D
+  var antDisplay: Display2D = null
+  var resDisplay: Display2D = null
+  var antDisplayFrame: JFrame = null
+  var resDisplayFrame: JFrame = null
+  private[setup] var homePheros: Array[FastValueGridPortrayal2D] = null
+  private[setup] var resPheros: Array[FastValueGridPortrayal2D] = null
+  private[setup] var warPheros: Array[FastValueGridPortrayal2D] = null
+  var homePheroDisplays: Array[Display2D] = null
+  var resPheroDisplays: Array[Display2D] = null
+  var warPheroDisplays: Array[Display2D] = null
+  var homePheroDisplaysFrame: Array[JFrame] = null
+  var resPheroDisplaysFrame: Array[JFrame] = null
+  var warPheroDisplaysFrame: Array[JFrame] = null
+  private[setup] var series: XYSeries = null
+  private[setup] var chart: TimeSeriesChartGenerator = null
+  private[setup] var chartFrame: JFrame = null
+  private var tribeColours: Array[Color] = Array(Color.black, Color.blue, Color.red, Color.yellow, Color.cyan, Color.green, Color.orange, Color.lightGray)
+}

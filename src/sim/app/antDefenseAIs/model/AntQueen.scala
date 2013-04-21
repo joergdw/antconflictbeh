@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
 import sim.engine.SimState
 

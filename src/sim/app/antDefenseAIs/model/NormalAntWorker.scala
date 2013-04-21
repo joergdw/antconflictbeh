@@ -10,9 +10,9 @@
  *
  * See the License.txt file for more details.
  */
-package AntDefenseAIs.Model
+package sim.app.antDefenseAIs.model
 
-object NormalAntWorker extends AntGenerator {
+private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
@@ -26,7 +26,7 @@ object NormalAntWorker extends AntGenerator {
   def apply(ant: Ant) = new NormalAntWorker(ant)
 
 
-  ////////////////////// Common members of all NormalAntWorkers //////////////////////
+  ////////////////////// common members of all NormalAntWorkers //////////////////////
   /**
    * Descripes the range of the emotions. Value must be odd and dividable by 3.
    *
@@ -82,7 +82,7 @@ import NormalAntWorker._
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[AntDefenseAIs] class NormalAntWorker(
+private[antDefenseAIs] class NormalAntWorker(
   override val tribeID: Int,
   override val world: World) extends AntWorker(tribeID, world) {
 
@@ -95,7 +95,7 @@ private[AntDefenseAIs] class NormalAntWorker(
   def this(ant: Ant) = this(ant.tribeID, ant.world)
 
 
-  ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
+  ///////////////////// sim.app.antDefenseAIs.common variables and constants /////////////////////////////////////
 
   private var emotion: Int = 0 /* For description see the description of `emotionalRange` above. */
 
