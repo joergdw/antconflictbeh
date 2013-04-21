@@ -15,9 +15,9 @@ package sim.app.antDefenseAIs.model
 import sim.engine.SimState
 
 private[antDefenseAIs] object AntQueen {
-  val startRessources = 5 /** Amount of res a tribe starts with */
+  val startRessources = 10 /** Amount of resources a tribe starts with. Should be >= `productionCost` */
   val productionTime: Int = 10 /** time to produce an ant*/
-  val productionCost: Int = 1 /** costs to produce an ant */
+  val productionCost: Int = 5 /** costs to produce an ant */
 
   /**
    * Creates an NormalAntWorker
@@ -26,7 +26,7 @@ private[antDefenseAIs] object AntQueen {
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  def apply(tribeID: Int, world: World, antGen: AntGenerator) = new AntQueen(tribeID, world, antGen)
+  private def apply(tribeID: Int, world: World, antGen: AntGenerator) = new AntQueen(tribeID, world, antGen)
 }
 
 

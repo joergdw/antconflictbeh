@@ -363,7 +363,7 @@ private[antDefenseAIs] final class World(
       ant match {
         case worker: AntWorker => result(worker.tribeID) += worker.inBackpack
         case queen: AntQueen => result(queen.tribeID) += queen.deposit
-        case otherAnt => throw new Exception("Counting rules for class " + otherAnt.getClass.getName + " not known")
+        case otherAnt => new Exception("Counting rules for class " + otherAnt.getClass.getName + " not known")
       }
     }
 

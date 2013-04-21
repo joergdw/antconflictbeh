@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [2/6]
+* Implementierungsliste [0/6]
 ** TODO Militärverhalten normaler Ameisen [5/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -24,7 +24,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [ ] Aggressive Ameisen greifen koloniefremde Ameisen auf dem eigenen Feld an.
  + [ ] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
  + [ ] Neutrale Ameisen ignorieren koloniefremde Ameisen.
-** DONE Wirtschaftsverhalten [3/3]
+** TODO Wirtschaftsverhalten [3/4]
  1) [X] Verhalten aus: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/A%20Pheromone-Based%20Utility%20Model%20for%20Collaborative%20Foraging%20-%202003.pdf][A Pheromone-Based Utility Model for Collaborative Foraging]]“
  2) [X] Jede Ameisenkolonie über ihre eigenen Pheromone verfügt und die der anderen nicht wahrnimmt.
  3) [X] Ameisen sollen nach einer Weile mit erfolgsloser Nahrungssuche zu ihrem Bau zurückkehren.
@@ -40,7 +40,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     die sich bereits auf einem Nahrungsfeld befindet, schaut sich erst die Nachbarfelder an, bevor sie weiter das
     derzeitige Feld abbaut.
 
-** DONE Sonstiges [2/4]
+** TODO Sonstiges [2/4]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
  3) [ ] Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
@@ -72,17 +72,18 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
      Karte. (Das macht dann nach gegenwärtigem Stand drei Reiter pro Fenster.) /Zu aufwändig!/
  11) /Wird nicht gemacht, wegen nötiger Umstrukturierung:/ Statistikwerkzeug: Besiegte, gegnerische Ameisen
 
-** TODO Quelltext-Arbeiten [3/9]
+** TODO Quelltext-Arbeiten [5/10]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [ ] Militärteil zum Laufen bringen
- + [ ] Verhaltenssteuernde Parameter in die Begleitobjekte zu den Ameisen auslagern.
+ + [X] Verhaltenssteuernde Parameter in die Begleitobjekte zu den Ameisen auslagern.
  + [ ] Parameter-Tuning (Ameisen-Produktionsgeschwindigkeit, Ressourcenmenge, und die Verhaltensparameter der Ameisen)
  + [ ] Analysefunktionen zum Laufen bringen
- + [ ] Eventuelle Migration in andere Pakete unterhalt von sim.apps. … (siehe, wo die anderen Simulationen sind).  Dafür
+ + [X] Eventuelle Migration in andere Pakete unterhalt von sim.apps. … (siehe, wo die anderen Simulationen sind).  Dafür
    lohnt es sich dann auch eventuell die Anwendung in zwei Anwendungen zu spalten, damit sie mit einem Klick in der
    Anwendungsauswahl auswählbar sind. Das kann so gemacht werden, dass sie dennoch fast auf den kompletten Quelltext
    gemeinsam zugreifen.
+ + [ ] Zwei Simulationen daraus machen, die aus dem Menü heraus abrufbar sind. (Wie ~sim.app.antforaging~)
  + [ ] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [ ] Veröffentlichung bei einem Quelltext-Hoster

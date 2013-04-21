@@ -287,10 +287,10 @@ public class SimulationWithGUI extends GUIState {
         super.quit();
 
         Simulation sim = (Simulation) state;
-        System.out.println(Arrays.toString(sim.world().populationStat()));
-        System.out.println(Arrays.toString(sim.world().resourceStat()));
-        System.out.println(Arrays.toString(sim.world().totalResStat()));
-        System.out.println(Arrays.deepToString(sim.world().resourceMap()));
+        System.out.println("Population overview: " + Arrays.toString(sim.world().populationStat()));
+        // System.out.println(Arrays.toString(sim.world().resourceStat()));
+        System.out.println("Resource overview: " + Arrays.toString(sim.world().totalResStat()));
+        // System.out.println(Arrays.deepToString(sim.world().resourceMap()));
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;
