@@ -12,8 +12,56 @@
  */
 package AntDefenseAIs.Model
 
+object NormalAntWorker {
+
+  /**
+   * Descripes the range of the emotions. Value must be odd and dividable by 3.
+   *
+   * Value determines the possible values of the variable `emotion`.
+   * It's range is in [-(`emotionalRange` div 2), (`emotionalRange` div 2)]
+   * `emotion` in the lower third of the scala indicates that the ant is the defensive state,
+   * the middle third in the neutral state and the upper third in the aggressive state.
+   */
+  private var _emotionalRange: Int = 15
+
+  def emotionalRange() = _emotionalRange
+
+  /**
+   * Sets the emotional range.
+   *
+   * This is done with respect to the restrictions of that the emotional range must be positive, odd and dividable by 3.
+   *
+   * Example: for `er == 0` it will be set to 3, for `er == 2` it will be set to 15 etc.
+   *
+   * @param er Index of the desired emotionalRange in a List of all numbers which are odd and dividable by 3.
+   */
+  def emotionalRange_=(er: Int) {
+    if (er < 0) new IllegalArgumentException("er must be non negative.")
+
+    _emotionalRange = 3 * (2 * er + 1)
+  }
+
+  def sectionSize: Int = emotionalRange / 3  /** Size of each emotional state on the scala */
+  def  defensive: Int = - (emotionalRange / 2)
+  def aggressive: Int = (emotionalRange / 2)
+  def neutralLowerBound: Int = defensive + sectionSize /** Lower bound of the neutral state */
+  def neutralUpperBound: Int = aggressive - sectionSize /** Upper bound of the neutral state */
+
+  /**
+   * As of this value of other ants of the same colony, the ant changes state with probability
+   * `maxAggressivenessProb`.
+   */
+  var maxAgressiveness = 40
+
+  var maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
+  var minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
+
+  val antsSensingRange: Int = 4 /** Radius of the area the ant can sense other individuals */
+}
+
+
 import sim.engine.SimState
-import util.Random
+import NormalAntWorker._
 
 /**
  * Antworker with the usual strategies
@@ -33,39 +81,14 @@ private[AntDefenseAIs] class NormalAntWorker(
    */
   def this(ant: Ant) = this(ant.tribeID, ant.world)
 
+
   ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
 
-  /**
-   * Descripes the range of the emotions. Value must be odd and dividable by 3.
-   *
-   * Value determines the possible values of the variable `emotion`.
-   * It's range is in [-(`emotionalRange` div 2), (`emotionalRange` div 2)]
-   * `emotion` in the lower third of the scala indicates that the ant is the defensive state,
-   * the middle third in the neutral state and the upper third in the aggressive state.
-   */
-  val emotionalRange: Int = 15
-  private var emotion: Int = 0
-
-  val sectionSize:Int = emotionalRange / 3  /** Size of each emotional state on the scala */
-  val defensive: Int = - (emotionalRange / 2)
-  val aggressive: Int = (emotionalRange / 2)
-  val neutralLowerBound: Int = defensive + sectionSize /** Lower bound of the neutral state */
-  val neutralUpperBound: Int = aggressive - sectionSize /** Upper bound of the neutral state */
+  private var emotion: Int = 0 /* For description see the description of `emotionalRange` above. */
 
   def isAggressive = emotion > neutralUpperBound
   def isDefensive = emotion < neutralLowerBound
   def isNeutral = !(isAggressive || isDefensive)
-
-  /**
-   * As of this value of other ants of the same colony, the ant changes state with probability
-   * `maxAggressivenessProb`.
-   */
-  val maxAgressiveness = 40
-
-  val maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
-  val minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
-
-  val antsSensingRange: Int = 4 /** Radius of the area the ant can sense other individuals */
 
 
   ///////////////////// Basic operations /////////////////////////////////////
@@ -153,7 +176,10 @@ private[AntDefenseAIs] class NormalAntWorker(
   }
 }
 
-private[AntDefenseAIs] object NormalAntWorker extends AntGenerator {
+/**
+ * Generatorobjetct for Antworkers
+ */
+private[AntDefenseAIs] object NormalAntWorkerGenerator extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker

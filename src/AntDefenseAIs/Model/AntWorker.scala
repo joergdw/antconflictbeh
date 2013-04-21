@@ -12,8 +12,16 @@
  */
 package AntDefenseAIs.Model
 
-import sim.engine.SimState
+object AntWorker {
+  val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
+  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
+}
+
+
 import StrictMath.{min, max}
+import sim.engine.SimState
+
+import AntWorker._
 
 /**
  * What have all ant workers have in common
@@ -26,9 +34,6 @@ protected[AntDefenseAIs] abstract class AntWorker(
   override val world: World) extends Ant(tribeID, world) {
 
   ///////////////////// AntDefenseAIs.Common variables and constants /////////////////////////////////////
-
-  val backpack: Int = 1 /** amount of resources which can be transported by an individual */
-  val notBored: Int = 100 /** value of boredom, 100 if an ant is not bored at all */
 
   protected var transporting: Int = 0 /** Amount of resources transported by this ant */
   protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */

@@ -12,7 +12,14 @@
  */
 package AntDefenseAIs.Model
 
+object OffensiveAntWorker {
+
+}
+
+
 import sim.engine.SimState
+
+import OffensiveAntWorker._
 
 /**
  * Antworker with a more offensive behaviour
@@ -45,7 +52,7 @@ private[AntDefenseAIs] class OffensiveAntWorker(
   }
 }
 
-private[AntDefenseAIs] object OffensiveAntWorker extends AntGenerator {
+private[AntDefenseAIs] object OffensiveAntWorkerGenerator extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
