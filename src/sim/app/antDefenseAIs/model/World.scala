@@ -95,9 +95,6 @@ private[antDefenseAIs] final class World(
    */
   def start() {
     sim.schedule.scheduleRepeating(this)
-
-    for (queen <- queens)
-      sim.schedule.scheduleRepeating(queen)
   }
 
 
@@ -106,27 +103,22 @@ private[antDefenseAIs] final class World(
   def step(state: SimState) {
     def dieAnt(ant: Ant) { // Actions when an ant dies
       ant match {
-        case worker: AntWorker if (worker.isDead) => worker.dropResources()
+        case worker: AntWorker => worker.dropResources()
         case queen: AntQueen => queen.dropDeposit()
         case other => new Exception("Anttype not known: " + other.getClass.getName)
       }
-      // TODO: Stop scheduling of that ant
+
       ants.remove(ant) // Take ant out of scheduling
       lostAntsByTribe(ant.tribeID) += 1 // Adapt statistic
     }
 
-    // Remove dead ants and too old ants from the world
+    // Remove dead ants and too old ants from the world and age and schedule again all other ants
     for (ant <- allAnts) {
       ant match {
         case worker: AntWorker if worker.isDead || worker.age >= AntWorker.maximumAge => dieAnt(worker)
         case queen: AntQueen if queen.isDead || queen.age >= AntQueen.maximumAge => dieAnt(queen)
-        case other => // do nothing
+        case other: Ant => sim.schedule.scheduleOnce(other); other.age += 1
       }
-    }
-
-    // Age all remaining ants
-    for (ant <- allAnts) {
-      ant.age += 1
     }
 
     // Evaporation can be implemented here
@@ -314,7 +306,7 @@ private[antDefenseAIs] final class World(
      new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
    assert(ants.setObjectLocation(ant, toInd2D(pos)))
-   sim.schedule scheduleRepeating(ant)
+   sim.schedule scheduleOnce(ant)
  }
 
   /**
