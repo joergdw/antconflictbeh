@@ -19,14 +19,15 @@ private[antDefenseAIs] object AntWorker {
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
-  var explorationRate: Double = 0.4d
+  var explorationRate: Double = 0.2d
 }
 
 
-import StrictMath.{min, max}
+import StrictMath.{min, max, abs}
 import sim.engine.SimState
 
 import AntWorker._
+import sim.app.antDefenseAIs.common.Common.epsilon
 
 /**
  * What have all ant workers have in common
@@ -56,7 +57,7 @@ private[antDefenseAIs] abstract class AntWorker(
     *
     * In any other case the ant cares for food.
     */
-  final def actEconomically(state: SimState) {
+  final protected def actEconomically(state: SimState) {
 
     val backpack_full: Boolean = transporting >= backpack
     val isBored: Boolean = boredom == 0
@@ -75,40 +76,65 @@ private[antDefenseAIs] abstract class AntWorker(
   }
 
   /** Actions when ant want to fight or to flee – dependent of the ant-type */
-  def actMilitarily()
+  protected def actMilitarily()
 
 
-  /** Follow home way.
-    *
-    * The next field is the neighbour-field with the best home-pheromones.
-    * Neighbour fields without foreign-colony ants take precedence (to avoid enemy-contact).
-    */
-  final def followHomeWay() {
-    val list: List[(Int, Int)] = nearPos(1).sortBy(homePheroOn).reverse
-    val noEnemyList = list filterNot enemySensedOn
-    val nextPos = if (noEnemyList.isEmpty) list.head else noEnemyList.head
-
+  /**
+   * Follow home way.
+   *
+   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   */
+  final protected def followHomeWay() {
+    val nextPos = choosePositionByPheromone(homePheroOn)
     moveTo(nextPos)
+    adaptHomePhero()
     adaptResPhero()
   }
 
-  /** Care for food.
-    *
-    * The next field is most probable the neighbour-field with the best resource-pheromones.
-    * With a certain probability (in function of the world.explorationRate) it is any of the
-    * neighbour fields.
-    */
-  final def careForFood() {
-    val list: List[(Int, Int)] = nearPos(1).sortBy(resPheroOn).reverse
-    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - explorationRate))
-                                list.head
-                              else
-                                list.apply(world.random.nextInt(list.size))
-
+  /**
+   * Care for food.
+   *
+   * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields
+   */
+  final protected def careForFood() {
+    val nextPos = choosePositionByPheromone(resPheroOn)
     moveTo(nextPos)
     adaptHomePhero()
     adaptResPhero()
     mineRes()
+  }
+
+  /**
+   * Chooses a neighbourfield to go to.
+   *
+   * Works in the following way: With a probability of (1 - `explorationRate`) one of the positions with
+   * the highest pheromone concentration is chosen. One of the "highest" means: the differ only from the
+   * highest concentration by an value of `epsilon`. In the other case there will be chosen a random position
+   * from the rest of the fields.
+   *
+   * @param pheroOn Pheromone to observe for determining next position.
+   * @return
+   */
+  final def choosePositionByPheromone(pheroOn: ((Int, Int)) => Double): (Int, Int) = {
+    val neighboursOrdered: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
+    def predicate(pos: (Int, Int)) = abs(pheroOn(pos) - pheroOn(neighboursOrdered.head)) < epsilon
+
+    val bestNeighbours = neighboursOrdered.filter(predicate)
+    val otherNeighbours = neighboursOrdered.filterNot(predicate)
+
+    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
+      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
+        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
+      } else {
+        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
+      }
+    } else if (bestNeighbours.size > 0) {
+      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
+    } else {
+      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
+    }
   }
 
   /**

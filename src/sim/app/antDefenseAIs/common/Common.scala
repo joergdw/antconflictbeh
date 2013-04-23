@@ -27,6 +27,8 @@ package object Common {
    */
   def toTuple(i: Int2D): (Int, Int) = (i.getX, i.getY)
 
+  val epsilon: Double = 0.1e-10 /** Small value to compare two doubles */
+
   /** Converts (Int, Int) to Int2D */
   def toInd2D(t: (Int, Int)): Int2D = new Int2D(t._1, t._2)
 
