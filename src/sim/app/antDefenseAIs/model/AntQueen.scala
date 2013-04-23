@@ -44,6 +44,8 @@ private final class AntQueen(
   override val world: World,
   private val antGen: AntGenerator) extends Ant(tribeID, world) {
 
+  override def maximumAge(): Int = AntQueen.maximumAge
+
   private var _deposit: Int = startRessources /** Resources the queen owns */
 
   /**

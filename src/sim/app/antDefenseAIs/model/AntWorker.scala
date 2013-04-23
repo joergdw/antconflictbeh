@@ -13,7 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
-  val maximumAge: Int = 1000 /** Maximum age of a worker (in steps) */
+  val maximumAge: Int = 2500 /** Maximum age of a worker (in steps) */
 
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
@@ -38,11 +38,11 @@ private[antDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
   override val world: World) extends Ant(tribeID, world) {
 
-  ///////////////////// sim.app.antDefenseAIs.common variables and constants /////////////////////////////////////
+  ///////////////////// Common variables and constants /////////////////////////////////////
 
   protected var transporting: Int = 0 /** Amount of resources transported by this ant */
   protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
-
+  override final def maximumAge(): Int = AntWorker.maximumAge
 
   ///////////////////// Behaviour description ////////////////////////////////////////
 

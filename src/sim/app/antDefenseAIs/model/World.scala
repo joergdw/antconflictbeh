@@ -15,12 +15,13 @@ package sim.app.antDefenseAIs.model
 import StrictMath.max
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
-import sim.engine.{SimState, Steppable}
+import sim.engine.{Stoppable, SimState, Steppable}
 import sim.util.IntBag
 
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 import sim.app.antDefenseAIs.setup.Simulation
+import scala.collection.mutable.HashMap
 
 
 /**
@@ -94,30 +95,40 @@ private[antDefenseAIs] final class World(
    * Starts the simulation of the world
    */
   def start() {
+    // World must do first step in every turn, otherwise it can occur that …
     sim.schedule.scheduleRepeating(this)
+
+    for (queen <- queens) { // Schedule all queens
+      val stoper = sim.schedule.scheduleRepeating(queen)
+      stopOrders += ((queen, stoper))
+    }
   }
 
 
   /////////////////////////// Nature behaviour ///////////////////////////////////////
+
+  // Stoppable object for each ant to take it out of scheduling
+  private val stopOrders: HashMap[Ant, Stoppable] = HashMap()
 
   def step(state: SimState) {
     def dieAnt(ant: Ant) { // Actions when an ant dies
       ant match {
         case worker: AntWorker => worker.dropResources()
         case queen: AntQueen => queen.dropDeposit()
-        case other => new Exception("Anttype not known: " + other.getClass.getName)
       }
 
-      ants.remove(ant) // Take ant out of scheduling
+      stopOrders.get(ant).get.stop() // Take ant out of scheduling
+      stopOrders.-=(ant)
+      ants.remove(ant)               // Remove ant from map
       lostAntsByTribe(ant.tribeID) += 1 // Adapt statistic
     }
 
     // Remove dead ants and too old ants from the world and age and schedule again all other ants
     for (ant <- allAnts) {
       ant match {
-        case worker: AntWorker if worker.isDead || worker.age >= AntWorker.maximumAge => dieAnt(worker)
-        case queen: AntQueen if queen.isDead || queen.age >= AntQueen.maximumAge => dieAnt(queen)
-        case other: Ant => sim.schedule.scheduleOnce(other); other.age += 1
+        case worker: AntWorker if worker.isDead || worker.age >= worker.maximumAge => dieAnt(worker)
+        case queen: AntQueen if queen.isDead || queen.age >= queen.maximumAge => dieAnt(queen)
+        case other: Ant => other.age += 1
       }
     }
 
@@ -286,13 +297,13 @@ private[antDefenseAIs] final class World(
    */
   def currentPos(ant: Ant): (Int, Int) = toTuple(ants.getObjectLocation(ant))
 
-  /**
-   * Returns a reference to the queen of the given ant
-   *
-   * @param ant Ant asking for the queen
-   * @return Queen of the ant colony the ant belongs to
-   */
- private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
+    /**
+     * Returns a reference to the queen of the given ant
+     *
+     * @param ant Ant asking for the queen
+     * @return Queen of the ant colony the ant belongs to
+     */
+    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
 
   /**
    * Places a given, new ant on the given position
@@ -306,7 +317,8 @@ private[antDefenseAIs] final class World(
      new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
    assert(ants.setObjectLocation(ant, toInd2D(pos)))
-   sim.schedule scheduleOnce(ant)
+   val stoper = sim.schedule.scheduleRepeating(ant)
+   stopOrders += ((ant, stoper))
  }
 
   /**

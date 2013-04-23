@@ -32,6 +32,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected var mobility: Float = 0.5f /** Probability to avoid to be hit */
   protected var attack: Int = 1 /** Damage an ant does to another */
   private[model] var age: Int = 0 /** Current age of the ant */
+  def maximumAge(): Int /** Maximum age of an ant */
 
   /**
    * Current position of that ant as (Int, Int)
