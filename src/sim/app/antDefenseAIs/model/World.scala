@@ -13,6 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 import StrictMath.max
+import scala.collection.mutable.HashMap
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.engine.{Stoppable, SimState, Steppable}
@@ -20,8 +21,9 @@ import sim.util.IntBag
 
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
+import Direction._
 import sim.app.antDefenseAIs.setup.Simulation
-import scala.collection.mutable.HashMap
+
 
 
 /**
@@ -178,16 +180,14 @@ private[antDefenseAIs] final class World(
   }
 
   /**
-   * Moves the given ant to the given position. Position must be a neighbour position of the ant.
+   * Moves the given ant into the given direction.
    *
    * @param ant Ant to move
-   * @param newPos Position to move the ant to
+   * @param direction Direction to move the ant to
    */
-  private[model] def moveTo(ant: Ant, newPos: (Int, Int)) {
-    if (nearPos(ant) contains newPos)
-      ants.setObjectLocation(ant, toInd2D(newPos))
-    else
-      throw new IllegalArgumentException("Destiny is not a neighbour field")
+  private[model] def move(ant: Ant, direction: Direction.Value) {
+    val targetPosition = goDirection(toTuple(ants.getObjectLocation(ant)), direction)
+    ants.setObjectLocation(ant, toInd2D(targetPosition))
   }
 
   /**

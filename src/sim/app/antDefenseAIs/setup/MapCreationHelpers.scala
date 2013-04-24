@@ -15,7 +15,7 @@ package sim.app.antDefenseAIs.setup
 
 import StrictMath.max
 
-import sim.app.antDefenseAIs.common.Common.{neighbourhoodOf, distance}
+import sim.app.antDefenseAIs.common.Common.{neighbourhoodOf, maxDistance}
 
 /**
  * Offers help methods for map creations
@@ -62,7 +62,7 @@ private object MapCreationHelpers {
 
     for (pos <- poss) {
       def interpolate(p: (Int, Int)): Int = {
-        val alpha = (width - distance(p, pos)) / width
+        val alpha = (width - maxDistance(p, pos)) / width
         (1 - alpha) * min_strength + alpha * max_strength
       }
 

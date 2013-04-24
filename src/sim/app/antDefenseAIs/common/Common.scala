@@ -101,15 +101,26 @@ package object Common {
   }
 
   /**
-   * Field distance of two positions
-   *
-   * Can be compared with the number of moves a king in a chess game has to do to reach from one position the other
+   * Field Maximum Distance of two positions
    *
    * @param pos_a First position
    * @param pos_b Second position
    * @return Distance between first and second position
    */
-  def distance(pos_a: (Int, Int), pos_b: (Int, Int)): Int =
+  def maxDistance(pos_a: (Int, Int), pos_b: (Int, Int)): Int =
+    max(abs(pos_a._1 - pos_b._1), abs(pos_a._2 - pos_b._2))
+
+
+  /**
+   * Field Mannheim Distance of two positions
+   *
+   * Manhattan Distance, Taxi Distance are other names for that.
+   *
+   * @param pos_a First position
+   * @param pos_b Second position
+   * @return Distance between first and second position
+   */
+  def mannheimDistance(pos_a: (Int, Int), pos_b: (Int, Int)): Int =
     max(abs(pos_a._1 - pos_b._1), abs(pos_a._2 - pos_b._2))
 
 
@@ -119,12 +130,12 @@ package object Common {
    * @param height Height of the 2-dim array
    * @param width Width of the 2-dim array
    * @param pos Position whichs neighbourhood will be determined
-   * @param maxDistance Radius of the neighbourhood
+   * @param radius Radius of the neighbourhood
    * @return All positions within the `maxDistance`-radius of `pos`
    */
-  def neighbourhoodOf(height: Int, width: Int, pos: (Int, Int), maxDistance: Int): List[(Int, Int)] = {
+  def neighbourhoodOf(height: Int, width: Int, pos: (Int, Int), radius: Int): List[(Int, Int)] = {
     val allPositions: List[(Int, Int)] = (for (i <- 0 until height; j <- 0 until width) yield (i, j)).toList
-    def predicate(otherPos: (Int, Int)): Boolean = distance(pos, otherPos) <= maxDistance
+    def predicate(otherPos: (Int, Int)): Boolean = maxDistance(pos, otherPos) <= radius
 
     allPositions.filter(predicate).toList
   }
