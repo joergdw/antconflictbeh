@@ -18,7 +18,10 @@ private[antDefenseAIs] object AntWorker {
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
-  var alpha: Double = 1.0d /** Importance of pheromone over old direction. Should be between 0 and 1 */  // TODO: anpassen
+  // The sum of the following two parameters should be exactly 1
+  var alpha: Double = 0.8d /** Influence of pheromon for determin next position. Should be between 0 and 1 */  // TODO: anpassen
+  var beta: Double = 0.1d /** Influence of old direction for determin next position. Should be between 0 and 1 */
+
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
 
@@ -123,7 +126,10 @@ private[antDefenseAIs] abstract class AntWorker(
       val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
 
       val targetPos = world.Direction.inDirection(currentPos, dir)
-      pheroOn(targetPos) / bestPheroInNeighbourhood
+      if (bestPheroInNeighbourhood == 0)
+        0
+      else
+        pheroOn(targetPos) / bestPheroInNeighbourhood
     }
 
     // Calculates a normalized value of a direction influenced by the last direction
@@ -131,9 +137,10 @@ private[antDefenseAIs] abstract class AntWorker(
       world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
 
     def weightFunction(dir: world.Direction.Value): Double =
-      alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
+      alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir) + (1 - alpha - beta) * world.random.nextDouble()
 
-    val list = validDirections.sortBy(weightFunction)
+    val list = validDirections.sortBy(weightFunction).reverse
+    val wList: List[Double] = list.map(weightFunction) // TODO: Debug
     list.head
   }
 
