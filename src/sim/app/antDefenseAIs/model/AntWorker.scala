@@ -19,8 +19,10 @@ private[antDefenseAIs] object AntWorker {
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
   // The sum of the following two parameters should be exactly 1
-  var alpha: Double = 0.8d /** Influence of pheromon for determin next position. Should be between 0 and 1 */  // TODO: anpassen
-  var beta: Double = 0.1d /** Influence of old direction for determin next position. Should be between 0 and 1 */
+  var alpha: Double = 0.7d /** Influence of pheromon for determin next position. Should be between 0 and 1 */
+  var beta: Double = 0.3d /** Influence of old direction for determin next position. Should be between 0 and 1 */
+
+  var explorationRate: Double = 0.4
 
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
@@ -120,28 +122,55 @@ private[antDefenseAIs] abstract class AntWorker(
    * @return
    */
   final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
+    val list: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
+    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - explorationRate))
+                                list.head
+                              else
+                                list.apply(world.random.nextInt(list.size))
 
-    // Calculates a normalized value of a direction influenced by the pheromone
-    def dirValueByPhero(dir: world.Direction.Value): Double = {
-      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
+    world.Direction.directionIs(currentPos, nextPos)
 
-      val targetPos = world.Direction.inDirection(currentPos, dir)
-      if (bestPheroInNeighbourhood == 0)
-        0
-      else
-        pheroOn(targetPos) / bestPheroInNeighbourhood
-    }
-
-    // Calculates a normalized value of a direction influenced by the last direction
-    def dirValueByDir(dir: world.Direction.Value): Double =
-      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
-
-    def weightFunction(dir: world.Direction.Value): Double =
-      alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir) + (1 - alpha - beta) * world.random.nextDouble()
-
-    val list = validDirections.sortBy(weightFunction).reverse
-    val wList: List[Double] = list.map(weightFunction) // TODO: Debug
-    list.head
+//    // Calculates a normalized value of a direction influenced by the pheromone
+//    def dirValueByPhero(dir: world.Direction.Value): Double = {
+//      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
+//
+//      val targetPos = world.Direction.inDirection(currentPos, dir)
+//      if (bestPheroInNeighbourhood == 0)
+//        0
+//      else
+//        pheroOn(targetPos) / bestPheroInNeighbourhood
+//    }
+//
+//    // Calculates a normalized value of a direction influenced by the last direction
+//    def dirValueByDir(dir: world.Direction.Value): Double =
+//      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
+//
+//    def weightFunction(dir: world.Direction.Value): Double =
+//      alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir)
+//
+//    val list = validDirections.sortBy(weightFunction).reverse
+//    val wList: List[Double] = list.map(weightFunction) // TODO: Debug
+//    list.head
+//
+//
+//
+//    val neighboursOrdered: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
+//    def predicate(pos: (Int, Int)) = abs(pheroOn(pos) - pheroOn(neighboursOrdered.head)) < epsilon
+//
+//    val bestNeighbours = neighboursOrdered.filter(predicate)
+//    val otherNeighbours = neighboursOrdered.filterNot(predicate)
+//
+//    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
+//      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
+//        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
+//      } else {
+//        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
+//      }
+//    } else if (bestNeighbours.size > 0) {
+//      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
+//    } else {
+//      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
+//    }
   }
 
   /**
