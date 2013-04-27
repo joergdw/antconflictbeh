@@ -94,6 +94,8 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [ ] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [ ] Veröffentlichung bei einem Quelltext-Hoster
+ + /Optional:/ Richtungskonzept durchziehen (überall, wo möglich) – Ameisen wissen jetzt grundsätzlich nicht mehr, wo
+   sie sind. Und auch die Sache mit Ressourcen fallen lassen etc. wird von der Welt übernommen.
  + /Optional:/ Arrays in „World.scala“ dort wo es sinnvoll ist durch Hashmaps (Schlüssel: TribeID) ersetzen.
  + /Optional:/ Dokumentationen dazu schreiben
  + /Optional:/ Architekturänderung: Nur ein Ameisenarbeitertyp. Das Verhalten wird über einen Scala ~trait~ injiziert.

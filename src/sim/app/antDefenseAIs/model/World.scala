@@ -86,6 +86,7 @@ private[antDefenseAIs] final class World(
     val South = Value(5, "south") /** Direction south */
     val SouthWest = Value(6, "south west") /** Direction south-west */
     val West = Value(7, "west") /** Direction west */
+    val NoDirection = Value(8, "no direction") /** Current place – no direction */
 
     /**
      * Distance of directions
@@ -100,8 +101,12 @@ private[antDefenseAIs] final class World(
       /* Directions are ordered with their values like in a circle of the ring Z_8 of eight elements.
        * Therefore their distance towards each other is their distance in Z_8.
        */
-      val a = dir1.id; val b = dir2.id
-      min(abs(a - b), abs(a - abs(values.size - b)))
+      if (dir1 == NoDirection || dir2 == NoDirection) // The current position has always distance 0
+        0
+      else {
+        val a = dir1.id; val b = dir2.id
+        min(abs(a - b), abs(a - abs(values.size - b)))
+      }
     }
 
     val MaxDirDistance: Int = directionDistance(North, South) /** Maximum distance of two directions */
@@ -119,6 +124,7 @@ private[antDefenseAIs] final class World(
       (North, (0, -1)),
       (NorthEast, (1, -1)),
       (West, (-1, 0)),
+      (NoDirection, (0, 0)),
       (East, (1, 0)),
       (SouthWest, (-1, 1)),
       (South, (0, 1)),
