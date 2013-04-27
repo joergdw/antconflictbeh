@@ -19,7 +19,6 @@ private[antDefenseAIs] object Ant {
 
 import sim.engine.Steppable
 import Ant.maximumHitpoints
-import Direction._
 
 /**
  * Common properties and capacities of ants
@@ -33,7 +32,13 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected final var mobility: Float = 0.5f /** Probability to avoid to be hit */
   protected final var attack: Int = 1 /** Damage an ant does to another */
   private[model] final var age: Int = 0 /** Current age of the ant */
-  protected final var lastDirection: Direction.Value = Place /** Last went direction */
+
+  /** Last went direction */
+  protected final var lastDirection: world.Direction.Value = {  // Initialise with random value
+    val valueList = world.Direction.values.toList
+    valueList.apply(world.random.nextInt(world.Direction.values.size))
+  }
+
   def maximumAge(): Int /** Maximum age of an ant */
 
   /**
@@ -60,11 +65,21 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected def neighbourhood(distance: Int) = world.neighbourhood(this, distance)
 
   /**
+   * All directions in which the ant can go right now
+   *
+   * @return All directions in which the ant can go right now
+   */
+  def validDirections = world.validDirections(this)
+
+  /**
    * Moves ant into the given direction
    *
    * @param direction New position of the ant
    */
-  protected def moveTo(direction: Direction.Value) {world.move(this, direction)}
+  protected def moveTo(direction: world.Direction.Value) {
+    world.move(this, direction)
+    lastDirection = direction
+  }
 
   /**
    * Returns a reference to the queen of the ant

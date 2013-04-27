@@ -18,8 +18,8 @@ private[antDefenseAIs] object AntWorker {
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
+  var alpha: Double = 1.0d /** Importance of pheromone over old direction. Should be between 0 and 1 */  // TODO: anpassen
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
-  var explorationRate: Double = 0.2d
 }
 
 
@@ -27,7 +27,6 @@ import StrictMath.{min, max, abs}
 import sim.engine.SimState
 
 import AntWorker._
-import sim.app.antDefenseAIs.common.Common.epsilon
 
 /**
  * What have all ant workers have in common
@@ -86,8 +85,8 @@ private[antDefenseAIs] abstract class AntWorker(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
    */
   final protected def followHomeWay() {
-    val nextPos = choosePositionByPheromone(homePheroOn)
-    moveTo(nextPos)
+    val direction = chooseDirectionByPheromone(homePheroOn)
+    moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
   }
@@ -99,8 +98,8 @@ private[antDefenseAIs] abstract class AntWorker(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields
    */
   final protected def careForFood() {
-    val nextPos = choosePositionByPheromone(resPheroOn)
-    moveTo(nextPos)
+    val direction = chooseDirectionByPheromone(resPheroOn)
+    moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
     mineRes()
@@ -117,24 +116,25 @@ private[antDefenseAIs] abstract class AntWorker(
    * @param pheroOn Pheromone to observe for determining next position.
    * @return
    */
-  final def choosePositionByPheromone(pheroOn: ((Int, Int)) => Double): (Int, Int) = {
-    val neighboursOrdered: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
-    def predicate(pos: (Int, Int)) = abs(pheroOn(pos) - pheroOn(neighboursOrdered.head)) < epsilon
+  final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
 
-    val bestNeighbours = neighboursOrdered.filter(predicate)
-    val otherNeighbours = neighboursOrdered.filterNot(predicate)
+    // Calculates a normalized value of a direction influenced by the pheromone
+    def dirValueByPhero(dir: world.Direction.Value): Double = {
+      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
 
-    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
-      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
-        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
-      } else {
-        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
-      }
-    } else if (bestNeighbours.size > 0) {
-      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
-    } else {
-      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
+      val targetPos = world.Direction.inDirection(currentPos, dir)
+      pheroOn(targetPos) / bestPheroInNeighbourhood
     }
+
+    // Calculates a normalized value of a direction influenced by the last direction
+    def dirValueByDir(dir: world.Direction.Value): Double =
+      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
+
+    def weightFunction(dir: world.Direction.Value): Double =
+      alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
+
+    val list = validDirections.sortBy(weightFunction)
+    list.head
   }
 
   /**
