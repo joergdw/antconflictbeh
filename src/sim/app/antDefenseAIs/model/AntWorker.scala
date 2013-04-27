@@ -122,55 +122,54 @@ private[antDefenseAIs] abstract class AntWorker(
    * @return
    */
   final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
-    val list: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
-    val nextPos: (Int, Int) = if (world.random.nextDouble() <= (1.0d - explorationRate))
-                                list.head
-                              else
-                                list.apply(world.random.nextInt(list.size))
+    import sim.app.antDefenseAIs.common.Common.epsilon
 
-    world.Direction.directionIs(currentPos, nextPos)
+    def valueDirection = valueDirectionWithPhero(pheroOn) _
 
-//    // Calculates a normalized value of a direction influenced by the pheromone
-//    def dirValueByPhero(dir: world.Direction.Value): Double = {
-//      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
-//
-//      val targetPos = world.Direction.inDirection(currentPos, dir)
-//      if (bestPheroInNeighbourhood == 0)
-//        0
-//      else
-//        pheroOn(targetPos) / bestPheroInNeighbourhood
-//    }
-//
-//    // Calculates a normalized value of a direction influenced by the last direction
-//    def dirValueByDir(dir: world.Direction.Value): Double =
-//      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
-//
-//    def weightFunction(dir: world.Direction.Value): Double =
-//      alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir)
-//
-//    val list = validDirections.sortBy(weightFunction).reverse
-//    val wList: List[Double] = list.map(weightFunction) // TODO: Debug
-//    list.head
-//
-//
-//
-//    val neighboursOrdered: List[(Int, Int)] = nearPos(1).sortBy(pheroOn).reverse
-//    def predicate(pos: (Int, Int)) = abs(pheroOn(pos) - pheroOn(neighboursOrdered.head)) < epsilon
-//
-//    val bestNeighbours = neighboursOrdered.filter(predicate)
-//    val otherNeighbours = neighboursOrdered.filterNot(predicate)
-//
-//    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
-//      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
-//        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
-//      } else {
-//        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
-//      }
-//    } else if (bestNeighbours.size > 0) {
-//      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))
-//    } else {
-//      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))
-//    }
+    // Add to every direction its value
+    val directionsValued: List[(world.Direction.Value, Double)] =
+      validDirections.map(x => (x, valueDirection(x)))
+
+    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse
+
+    // Tells when a direction is considered to be equal to the best one
+    def valueIsEqual(valDir: (world.Direction.Value, Double)) =
+      abs(valDir._2 - valDirsSorted.head._2) < epsilon
+
+    val bestNeighbours = valDirsSorted.filter(valueIsEqual)
+    val otherNeighbours = directionsValued.filterNot(valueIsEqual)
+
+    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
+      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
+        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))._1
+      } else {
+        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))._1
+      }
+    } else if (bestNeighbours.size > 0) {
+      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))._1
+    } else {
+      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))._1
+    }
+  }
+
+  // Calculates an all over all value for a direction
+  final def valueDirectionWithPhero(pheroOn: ((Int, Int)) => Double)(dir: world.Direction.Value): Double = {
+    // Calculates a normalized value of a direction influenced by the pheromone
+    def dirValueByPhero(dir: world.Direction.Value): Double = {
+      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
+
+      val targetPos = world.Direction.inDirection(currentPos, dir)
+      if (bestPheroInNeighbourhood == 0)
+        0
+      else
+        pheroOn(targetPos) / bestPheroInNeighbourhood
+    }
+
+    // Calculates a normalized value of a direction influenced by the last direction
+    def dirValueByDir(dir: world.Direction.Value): Double =
+      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
+
+    alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir)
   }
 
   /**
