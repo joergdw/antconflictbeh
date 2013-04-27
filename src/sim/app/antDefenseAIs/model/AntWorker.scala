@@ -19,10 +19,9 @@ private[antDefenseAIs] object AntWorker {
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
   // The sum of the following two parameters should be exactly 1
-  var alpha: Double = 0.7d /** Influence of pheromon for determin next position. Should be between 0 and 1 */
-  var beta: Double = 0.3d /** Influence of old direction for determin next position. Should be between 0 and 1 */
+  var alpha: Double = 0.9d /** Influence of pheromone for determing next position. Should be between 0 and 1 */
 
-  var explorationRate: Double = 0.4
+  var explorationRate: Double = 0.1
 
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
@@ -169,7 +168,7 @@ private[antDefenseAIs] abstract class AntWorker(
     def dirValueByDir(dir: world.Direction.Value): Double =
       world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
 
-    alpha * dirValueByPhero(dir) + beta * dirValueByDir(dir)
+    alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
   }
 
   /**
