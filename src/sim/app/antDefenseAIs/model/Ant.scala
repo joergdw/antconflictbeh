@@ -165,7 +165,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    *
    * @return True iff ant is dead
    */
-  final def isDead: Boolean = hitpoints == 0
+  final def isKilled: Boolean = hitpoints == 0
 
   /**
    * True if the field on position pos returns at least one enemy

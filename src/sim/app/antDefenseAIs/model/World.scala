@@ -204,7 +204,7 @@ private[antDefenseAIs] final class World(
   private val stopOrders: HashMap[Ant, Stoppable] = HashMap()
 
   def step(state: SimState) {
-    def dieAnt(ant: Ant) { // Actions when an ant dies
+    def removeAnt(ant: Ant) { // Actions to do to remove an ant
       ant match {
         case worker: AntWorker => worker.dropResources()
         case queen: AntQueen => queen.dropDeposit()
@@ -213,15 +213,14 @@ private[antDefenseAIs] final class World(
       stopOrders.get(ant).get.stop() // Take ant out of scheduling
       stopOrders.-=(ant)
       ants.remove(ant)               // Remove ant from map
-      lostAntsByTribe(ant.tribeID) += 1 // Adapt statistic
     }
 
     // Remove dead ants and too old ants from the world and age and schedule again all other ants
     for (ant <- allAnts) {
       ant match {
-        case worker: AntWorker if worker.isDead || worker.age >= worker.maximumAge => dieAnt(worker)
-        case queen: AntQueen if queen.isDead || queen.age >= queen.maximumAge => dieAnt(queen)
-        case other: Ant => other.age += 1
+        case _ if ant.isKilled => removeAnt(ant); killedAntsByTribe(ant.tribeID) += 1 // and adapt statistic
+        case _ if ant.age >= ant.maximumAge => removeAnt(ant); diedAntsByTribe(ant.tribeID) += 1
+        case other: Ant => other.age += 1  // age a living ant
       }
     }
 
@@ -436,7 +435,21 @@ private[antDefenseAIs] final class World(
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
 
-  val lostAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size)
+  val killedAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size) /** Killed number of ants by each tribe */
+  val diedAntsByTribe: Array[Int] =  new Array[Int](tribeTypes.size) /** Number of ants died because of age by each tribe */
+
+  /**
+   * Total number of ants lost by each tribe
+   *
+   * @return Total number of ants lost by each tribe
+   */
+  def lostAntsByTribe(): Array[Int] = {
+    val result = new Array[Int](tribeTypes.size)
+    for (i <- 0 until result.size)
+      result(i) = killedAntsByTribe(i) + diedAntsByTribe(i)
+
+    result
+  }
 
   /**
    * Counts population of all tribes

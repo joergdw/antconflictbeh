@@ -111,7 +111,7 @@ private[antDefenseAIs] class NormalAntWorker(
 
   override def receiveHit(opponent: Ant) {
     super.receiveHit(opponent)
-    if (this.isDead) return // Ant dead: no more actions
+    if (this.isKilled) return // Ant dead: no more actions
 
     if (neutralLowerBound <= emotion && emotion <= neutralUpperBound) // If ant neutral…
       adaptState() // … calculate new state
