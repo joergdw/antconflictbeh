@@ -257,17 +257,12 @@ private[antDefenseAIs] final class World(
    * @return Ants on the given location
    */
   def antsOn(position: (Int, Int)): List[Ant] = {
-
-    // Iterate through all objects on that field.
-    val bag = ants.getObjectsAtLocation(position)
+    val bag = ants.getObjectsAtLocation(toInd2D(position))
 
     if (bag == null)
       List()
-    else {
-      val result: IndexedSeq[Ant] = for (i: Int <- 0 until bag.size()) yield
-        bag.get(i).asInstanceOf[Ant]
-      result.toList
-    }
+    else
+      antBag2AntList(bag)
   }
 
   /**

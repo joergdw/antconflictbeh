@@ -47,7 +47,7 @@ private[antDefenseAIs] class OffensiveAntWorker(
    */
   def this(ant: Ant) = this(ant.tribeID, ant.world)
 
-  override def receiveHit(opponent: AntWorker) {
+  override def receiveHit(opponent: Ant) {
     super.receiveHit(opponent)
     if (this.hitpoints == 0) return // Ant dead: no more actions
   }
@@ -56,6 +56,6 @@ private[antDefenseAIs] class OffensiveAntWorker(
 
   def step(state: SimState) {
     // TODO: Add more behaviour
-    actEconomically(state)
+    actEconomically
   }
 }

@@ -142,6 +142,24 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
     world.setWarPheroOn(this, pos, amount)
   }
 
+
+  /**
+   * Adaptions after receiving a hit
+   */
+  protected def receiveHit(opponent: Ant) {
+    if (world.random.nextDouble() < mobility) // If ant can
+      hitpoints = hitpoints - attack
+  }
+
+  /**
+   * Hit an opponent
+   *
+   * @param opponent Opponent receiving a hit
+   */
+  protected def hit(opponent: Ant) {
+    opponent receiveHit(this)
+  }
+
   /**
    * Returns true if the ant is dead
    *

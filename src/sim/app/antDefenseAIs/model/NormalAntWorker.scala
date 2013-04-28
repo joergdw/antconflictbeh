@@ -27,7 +27,7 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
   def apply(ant: Ant) = new NormalAntWorker(ant)
 
 
-  ////////////////////// common members of all NormalAntWorkers //////////////////////
+  ////////////////////// Common members of all NormalAntWorkers //////////////////////
   /**
    * Descripes the range of the emotions. Value must be odd and dividable by 3.
    *
@@ -65,16 +65,18 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
    * As of this value of other ants of the same colony, the ant changes state with probability
    * `maxAggressivenessProb`.
    */
-  var maxAgressiveness = 40
+  var maxAggressiveness = 5
 
   var maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
   var minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
 
-  val antsSensingRange: Int = 4 /** Radius of the area the ant can sense other individuals */
+  val antsSensingRange: Int = 5 /** Radius of the area the ant can sense other individuals */
 }
 
+import StrictMath.min
 
 import sim.engine.SimState
+
 import NormalAntWorker._
 
 /**
@@ -107,7 +109,7 @@ private[antDefenseAIs] class NormalAntWorker(
 
   ///////////////////// Basic operations /////////////////////////////////////
 
-  override def receiveHit(opponent: AntWorker) {
+  override def receiveHit(opponent: Ant) {
     super.receiveHit(opponent)
     if (this.isDead) return // Ant dead: no more actions
 
@@ -124,7 +126,7 @@ private[antDefenseAIs] class NormalAntWorker(
    * It is assumed that the chance that an ant gets aggressive grows linearly.
    */
   def adaptState() {
-    val alpha = countFriends() / maxAgressiveness
+    val alpha = min(1, countFriends() / maxAggressiveness)
     val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
     emotion = if (world.random.nextDouble() <= aggressivenessProb) aggressive else defensive
   }
@@ -136,7 +138,7 @@ private[antDefenseAIs] class NormalAntWorker(
    *
    * @return Number of ants of the same colony in the neighbourhood
    */
-  def countFriends(): Int = countAntsFullfillingPredicate(a => a.tribeID == this.tribeID)
+  def countFriends(): Int = countAntsFullfillingPredicate(antsSensingRange)(a => a.tribeID == this.tribeID)
 
   /**
    * Counts the number of ants of other colonies within the neighbourhood.
@@ -145,18 +147,19 @@ private[antDefenseAIs] class NormalAntWorker(
    *
    * @return Number of ants of other colonies in the neighbourhood
    */
-  def countStrangers(): Int = countAntsFullfillingPredicate((a: Ant) => a.tribeID != this.tribeID)
+  def countStrangers(): Int = countAntsFullfillingPredicate(antsSensingRange)((a: Ant) => a.tribeID != this.tribeID)
 
   /**
    * Counts the number of ants within the neighbourhood fulfilling a predicate.
    *
    * The size of the observed neighbourhood is indicated by `antsSensingRange`.
    *
+   * @param range Range in which will be searched
    * @param p Predicate
    * @return Number of ants in the neighbourhood fulfilling the predicate p
    */
-  def countAntsFullfillingPredicate(p: Ant => Boolean): Int = {
-    val ants: List[Ant] = neighbourhood(antsSensingRange).map(world.antsOn).flatten
+  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
+    val ants: List[Ant] = neighbourhood(range).map(world.antsOn).flatten
     def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
     ants.foldLeft(0: Int)(adder)
   }
@@ -167,25 +170,47 @@ private[antDefenseAIs] class NormalAntWorker(
   override def step(state: SimState) {
 
     /*
-     If the ant is deeply neutral (i.e. emotion == 0) it adapts its state when there are more than
-     `threshold_strangers` ants of other colonies and more than `threshold_friends` ants of the own
-     colony in the neighbourhood. The first condition ensures that the ant does not change every simulation step its
-     behaviour.
-      */
+     * If the ant is deeply neutral (i.e. emotion == 0) it adapts its state when there are more than
+     * `threshold_strangers` ants of other colonies and more than `threshold_friends` ants of the own
+     * colony in the neighbourhood. The first condition ensures that the ant does not change every simulation
+     * step its behaviour.
+     */
     val threshold_strangers = 1
-    val threshold_friends = 10
+    val threshold_friends = min(1, maxAggressiveness) // should be <= than `maxAggressiveness`
+
     if (emotion == 0 && countStrangers() >= threshold_strangers && countFriends() >= threshold_friends)
       adaptState()
 
-    if (isNeutral) actEconomically(state)
+    if (isNeutral) actEconomically()
     else if (isAggressive) actMilitarily()
     else followHomeWay() //; assert(isDefensive)
   }
 
   /**
    * The ant tries to pursuit and to hit ants of strange colonies.
+   *
+   * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
+   * neighbour field instead, one of them will be hit. If there are no enemies around, the ant will act economically.
    */
   override def actMilitarily() {
-    // TODO
+
+    val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
+    if (foreignAntsOnOwnField.size > 0)
+      hit(foreignAntsOnOwnField.head)
+    else {
+      def directionContainsEnemy(dir: world.Direction.Value): Boolean = {
+        val destiny = world.Direction.inDirection(currentPos, dir)
+        val foreignAntsInDirection = world.antsOn(destiny).filter(a => a.tribeID != tribeID)
+        foreignAntsInDirection.size > 0
+      }
+
+      val directionsContainingEnemies = world.validDirections(this).filter(directionContainsEnemy)
+      if(directionsContainingEnemies.size > 0) {
+        moveTo(directionsContainingEnemies.head)
+        val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
+        hit(foreignAntsOnNewField.head)
+      } else
+        actEconomically()
+    }
   }
 }

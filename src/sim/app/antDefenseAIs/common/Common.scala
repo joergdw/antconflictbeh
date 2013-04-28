@@ -27,7 +27,7 @@ package object Common {
    */
   def toTuple(i: Int2D): (Int, Int) = (i.getX, i.getY)
 
-  val epsilon: Double = 0.1e-30 /** Small value to compare two doubles */
+// TODO: Entfernen, falls möglich:  val epsilon: Double = 0.1e-30 /** Small value to compare two doubles */
 
   /** Converts (Int, Int) to Int2D */
   def toInd2D(t: (Int, Int)): Int2D = new Int2D(t._1, t._2)
@@ -63,7 +63,7 @@ package object Common {
    * @param yBag y-coordinates
    * @return List of Int2D
    */
-  def toInt2DList(xBag: IntBag, yBag: IntBag): List[Int2D] = toTupleList(xBag, yBag) map toInd2D
+  def toInt2DList(xBag: IntBag, yBag: IntBag): List[Int2D] = toTupleList(xBag, yBag).map(toInd2D)
 
   /**
    * Converts a bag full of ants to an ant list

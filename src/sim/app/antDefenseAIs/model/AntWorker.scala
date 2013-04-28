@@ -13,14 +13,14 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
-  val maximumAge: Int = 2500 /** Maximum age of a worker (in steps) */
+  val maximumAge: Int = Integer.MAX_VALUE // TODO: Debug 2500 /** Maximum age of a worker (in steps) */
 
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
   var alpha: Double = 0.99d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
 
-  var explorationRate: Double = 0.3
+  var explorationRate = 0.3d /** Probability that another than the best neighbour field will be chosen to move to */
 
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
@@ -59,7 +59,7 @@ private[antDefenseAIs] abstract class AntWorker(
     *
     * In any other case the ant cares for food.
     */
-  final protected def actEconomically(state: SimState) {
+  final protected def actEconomically() {
 
     val backpack_full: Boolean = transporting >= backpack
     val isBored: Boolean = boredom == 0
@@ -131,7 +131,6 @@ private[antDefenseAIs] abstract class AntWorker(
       valDirsSorted.head._1
     else
       valDirsSorted.apply( 1 + world.random.nextInt(valDirsSorted.size - 1))._1
-
   }
 
   // Calculates an all over all value for a direction
@@ -211,23 +210,6 @@ private[antDefenseAIs] abstract class AntWorker(
     }
     else
       boredom -= 1
-  }
-
-  /**
-   * Adaptions after receiving a hit
-   */
-  def receiveHit(opponent: AntWorker) {
-    if (world.random.nextDouble() < mobility) // If ant can
-      hitpoints = hitpoints - attack
-  }
-
-  /**
-   * Hit an opponent
-   *
-   * @param opponent Opponent receiving a hit
-   */
-  def hit(opponent: AntWorker) {
-    opponent receiveHit(this)
   }
 
 
