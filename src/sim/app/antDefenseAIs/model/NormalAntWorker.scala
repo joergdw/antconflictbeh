@@ -191,7 +191,8 @@ private[antDefenseAIs] class NormalAntWorker(
    * The ant tries to pursuit and to hit ants of strange colonies.
    *
    * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
-   * neighbour field instead, one of them will be hit. If there are no enemies around, the ant will act economically.
+   * neighbour field instead, one of them will be hit, preferably in the direction the ant went the last step.
+   * If there are no enemies around, the ant will act economically.
    */
   override protected def actMilitarily() {
 
@@ -207,9 +208,12 @@ private[antDefenseAIs] class NormalAntWorker(
 
       val directionsContainingEnemies = world.validDirections(this).filter(directionContainsEnemy)
       if(directionsContainingEnemies.size > 0) {
-        moveTo(directionsContainingEnemies.head)
+        def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
+
+        moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
         val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
         hit(foreignAntsOnNewField.head)
+
       } else
         actEconomically()
     }
