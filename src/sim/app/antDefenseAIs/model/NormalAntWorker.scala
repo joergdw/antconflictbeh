@@ -56,7 +56,7 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
   }
 
   def sectionSize: Int = emotionalRange / 3  /** Size of each emotional state on the scala */
-  def  defensive: Int = - (emotionalRange / 2)
+  def defensive: Int = - (emotionalRange / 2)
   def aggressive: Int = (emotionalRange / 2)
   def neutralLowerBound: Int = defensive + sectionSize /** Lower bound of the neutral state */
   def neutralUpperBound: Int = aggressive - sectionSize /** Upper bound of the neutral state */
@@ -65,12 +65,12 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
    * As of this value of other ants of the same colony, the ant changes state with probability
    * `maxAggressivenessProb`.
    */
-  var maxAggressiveness = 5
+  var maxAggressiveness = 20
 
   var maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
   var minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
 
-  val antsSensingRange: Int = 5 /** Radius of the area the ant can sense other individuals */
+  val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
 }
 
 import StrictMath.min
@@ -176,7 +176,7 @@ private[antDefenseAIs] class NormalAntWorker(
      * step its behaviour.
      */
     val threshold_strangers = 1
-    val threshold_friends = min(1, maxAggressiveness) // should be <= than `maxAggressiveness`
+    val threshold_friends = min(5, maxAggressiveness) // should be <= than `maxAggressiveness`
 
     if (emotion == 0 && countStrangers() >= threshold_strangers && countFriends() >= threshold_friends)
       adaptState()
@@ -184,6 +184,7 @@ private[antDefenseAIs] class NormalAntWorker(
     if (isNeutral) actEconomically()
     else if (isAggressive) actMilitarily()
     else followHomeWay() //; assert(isDefensive)
+    relax()
   }
 
   /**
@@ -192,7 +193,7 @@ private[antDefenseAIs] class NormalAntWorker(
    * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
    * neighbour field instead, one of them will be hit. If there are no enemies around, the ant will act economically.
    */
-  override def actMilitarily() {
+  override protected def actMilitarily() {
 
     val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
@@ -212,5 +213,16 @@ private[antDefenseAIs] class NormalAntWorker(
       } else
         actEconomically()
     }
+  }
+
+  /**
+   * Puts the ant a bit more into the relaxed emotional state 0
+   */
+  private def relax() {
+     emotion match {
+       case 0 => // do nothing
+       case _ if emotion < 0 => emotion += 1
+       case _ if emotion > 0 => emotion -= 1
+     }
   }
 }

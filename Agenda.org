@@ -79,11 +79,11 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
      Karte. (Das macht dann nach gegenwärtigem Stand drei Reiter pro Fenster.) /Zu aufwändig!/
  11) /Wird nicht gemacht, wegen nötiger Umstrukturierung:/ Statistikwerkzeug: Besiegte, gegnerische Ameisen
 
-** TODO Quelltext-Arbeiten [6/12]
+** TODO Quelltext-Arbeiten [7/12]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [X] Konsistenzprüfung Koordinatentopologie; Siehe [[Mason Topologie]].
- + [ ] Militärteil zum Laufen bringen
+ + [X] Militärteil zum Laufen bringen
  + [X] Verhaltenssteuernde Parameter in die Begleitobjekte zu den Ameisen auslagern.
  + [ ] Parameter-Tuning (Ameisen-Produktionsgeschwindigkeit, Ressourcenmenge, und die Verhaltensparameter der Ameisen)
  + [ ] Analysefunktionen zum Laufen bringen

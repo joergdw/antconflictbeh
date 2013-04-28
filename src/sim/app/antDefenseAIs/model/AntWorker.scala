@@ -13,15 +13,13 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
-  val maximumAge: Int = Integer.MAX_VALUE // TODO: Debug 2500 /** Maximum age of a worker (in steps) */
+  val maximumAge: Int = 5000 /** Maximum age of a worker (in steps) */
 
-  val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
+  val backpack: Int = 5 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
-  var alpha: Double = 0.99d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
-
+  var alpha: Double = 0.98d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
   var explorationRate = 0.3d /** Probability that another than the best neighbour field will be chosen to move to */
-
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
 

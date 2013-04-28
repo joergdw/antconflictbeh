@@ -38,7 +38,7 @@ final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
       brushSoft(resDistrib, 5, 5, 10, (i, j))
     }
 
-    brushSoft(resDistrib, 5, 5, 10, (43, 13), (13, 43))
+    brushSoft(resDistrib, 5, 5, 20, (43, 13), (13, 43))
   }
 
 
