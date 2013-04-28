@@ -18,10 +18,9 @@ private[antDefenseAIs] object AntWorker {
   val backpack: Int = 1 /** Amount of resources which can be transported by an individual */
   val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
 
-  // The sum of the following two parameters should be exactly 1
-  var alpha: Double = 0.9d /** Influence of pheromone for determing next position. Should be between 0 and 1 */
+  var alpha: Double = 0.99d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
 
-  var explorationRate: Double = 0.1
+  var explorationRate: Double = 0.3
 
   var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
@@ -112,17 +111,14 @@ private[antDefenseAIs] abstract class AntWorker(
   /**
    * Chooses a neighbourfield to go to.
    *
-   * Works in the following way: With a probability of (1 - `explorationRate`) one of the positions with
-   * the highest pheromone concentration is chosen. One of the "highest" means: the differ only from the
-   * highest concentration by an value of `epsilon`. In the other case there will be chosen a random position
+   * Works in the following way: With a probability of (1 - `explorationRate`) the position with
+   * the best evaluation is chosen. In the other case there will be chosen a random position
    * from the rest of the fields.
    *
    * @param pheroOn Pheromone to observe for determining next position.
    * @return
    */
   final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
-    import sim.app.antDefenseAIs.common.Common.epsilon
-
     def valueDirection = valueDirectionWithPhero(pheroOn) _
 
     // Add to every direction its value
@@ -131,24 +127,11 @@ private[antDefenseAIs] abstract class AntWorker(
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse
 
-    // Tells when a direction is considered to be equal to the best one
-    def valueIsEqual(valDir: (world.Direction.Value, Double)) =
-      abs(valDir._2 - valDirsSorted.head._2) < epsilon
+    if (world.random.nextDouble() <= (1.0d - explorationRate))
+      valDirsSorted.head._1
+    else
+      valDirsSorted.apply( 1 + world.random.nextInt(valDirsSorted.size - 1))._1
 
-    val bestNeighbours = valDirsSorted.filter(valueIsEqual)
-    val otherNeighbours = directionsValued.filterNot(valueIsEqual)
-
-    if (bestNeighbours.size > 0 && otherNeighbours.size > 0) {
-      if (world.random.nextDouble() <= (1.0d - explorationRate)) {
-        bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))._1
-      } else {
-        otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))._1
-      }
-    } else if (bestNeighbours.size > 0) {
-      bestNeighbours.apply(world.random.nextInt(bestNeighbours.size))._1
-    } else {
-      otherNeighbours.apply(world.random.nextInt(otherNeighbours.size))._1
-    }
   }
 
   // Calculates an all over all value for a direction
