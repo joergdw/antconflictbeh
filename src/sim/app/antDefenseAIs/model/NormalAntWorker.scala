@@ -207,7 +207,7 @@ private[antDefenseAIs] class NormalAntWorker(
       }
 
       val directionsContainingEnemies = world.validDirections(this).filter(directionContainsEnemy)
-      if(directionsContainingEnemies.size > 0) {
+      if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
 
         moveTo(directionsContainingEnemies.sortBy(directionSorter).head)

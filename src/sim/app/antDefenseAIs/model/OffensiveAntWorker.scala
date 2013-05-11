@@ -56,6 +56,6 @@ private[antDefenseAIs] class OffensiveAntWorker(
 
   def step(state: SimState) {
     // TODO: Add more behaviour
-    actEconomically
+    actEconomically()
   }
 }
