@@ -28,38 +28,11 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
 
 
   ////////////////////// Common members of all NormalAntWorkers //////////////////////
-  /**
-   * Descripes the range of the emotions. Value must be odd and dividable by 3.
-   *
-   * Value determines the possible values of the variable `emotion`.
-   * It's range is in [-(`emotionalRange` div 2), (`emotionalRange` div 2)]
-   * `emotion` in the lower third of the scala indicates that the ant is the defensive state,
-   * the middle third in the neutral state and the upper third in the aggressive state.
-   */
-  private var _emotionalRange: Int = 15
-
-  def emotionalRange() = _emotionalRange
 
   /**
-   * Sets the emotional range.
-   *
-   * This is done with respect to the restrictions of that the emotional range must be positive, odd and dividable by 3.
-   *
-   * Example: for `er == 0` it will be set to 3, for `er == 2` it will be set to 15 etc.
-   *
-   * @param er Index of the desired emotionalRange in a List of all numbers which are odd and dividable by 3.
+   * How long an individual stays in an individual state before going to another
    */
-  def emotionalRange_=(er: Int) {
-    if (er < 0) new IllegalArgumentException("er must be non negative.")
-
-    _emotionalRange = 3 * (2 * er + 1)
-  }
-
-  def sectionSize: Int = emotionalRange / 3  /** Size of each emotional state on the scala */
-  def defensive: Int = - (emotionalRange / 2)
-  def aggressive: Int = (emotionalRange / 2)
-  def neutralLowerBound: Int = defensive + sectionSize /** Lower bound of the neutral state */
-  def neutralUpperBound: Int = aggressive - sectionSize /** Upper bound of the neutral state */
+  var emotionalDwellTime: Int = 5
 
   /**
    * As of this value of other ants of the same colony, the ant changes state with probability
@@ -100,11 +73,22 @@ private[antDefenseAIs] class NormalAntWorker(
 
   ///////////////////// sim.app.antDefenseAIs.common variables and constants /////////////////////////////////////
 
-  private var emotion: Int = 0 /* For description see the description of `emotionalRange` above. */
+  /**
+   * Possible emotional states of an ant
+   */
+  private object Emotion extends Enumeration {
+    val aggressive = Value("Aggressive") /** Ant attacks other individuals in neighbourhood */
+    val defensive = Value("Defensive") /** Ant flees into direction of its home  */
 
-  def isAggressive = emotion > neutralUpperBound
-  def isDefensive = emotion < neutralLowerBound
-  def isNeutral = !(isAggressive || isDefensive)
+    /** Ant ignores ants of stranger colonies and changes emotional state if it receives a hit  */
+    val normal = Value("Normal")
+
+    /** Ant changes emotional state as soon as it sees ants of stranger colonies or receives a hit */
+    val undecided = Value("Undecided")
+  }
+
+  private var emotion: Emotion.Value = Emotion.undecided /** Current emotional state */
+  private var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
 
 
   ///////////////////// Basic operations /////////////////////////////////////
@@ -113,7 +97,7 @@ private[antDefenseAIs] class NormalAntWorker(
     super.receiveHit(opponent)
     if (this.isKilled) return // Ant dead: no more actions
 
-    if (neutralLowerBound <= emotion && emotion <= neutralUpperBound) // If ant neutral…
+    if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
       adaptState() // … calculate new state
   }
 
@@ -128,7 +112,8 @@ private[antDefenseAIs] class NormalAntWorker(
   def adaptState() {
     val alpha = min(1, countFriends() / maxAggressiveness)
     val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
-    emotion = if (world.random.nextDouble() <= aggressivenessProb) aggressive else defensive
+    emotion = if (world.random.nextDouble() <= aggressivenessProb) Emotion.aggressive else Emotion.defensive
+    nextEmotionChange = emotionalDwellTime
   }
 
   /**
@@ -178,12 +163,15 @@ private[antDefenseAIs] class NormalAntWorker(
     val threshold_strangers = 1
     val threshold_friends = min(5, maxAggressiveness) // should be <= than `maxAggressiveness`
 
-    if (emotion == 0 && countStrangers() >= threshold_strangers && countFriends() >= threshold_friends)
+    if (emotion == Emotion.undecided && countStrangers() >= threshold_strangers && countFriends() >= threshold_friends)
       adaptState()
 
-    if (isNeutral) actEconomically()
-    else if (isAggressive) actMilitarily()
-    else followHomeWay() //; assert(isDefensive)
+    emotion match {
+      case Emotion.aggressive => actMilitarily()
+      case Emotion.defensive => followHomeWay()
+      case e if e == Emotion.normal || e == Emotion.undecided => actEconomically()
+    }
+
     relax()
   }
 
@@ -219,14 +207,16 @@ private[antDefenseAIs] class NormalAntWorker(
     }
   }
 
-  /**
-   * Puts the ant a bit more into the relaxed emotional state 0
-   */
   private def relax() {
-     emotion match {
-       case 0 => // do nothing
-       case _ if emotion < 0 => emotion += 1
-       case _ if emotion > 0 => emotion -= 1
-     }
+    if (nextEmotionChange <= 0)
+      emotion match {
+        case Emotion.aggressive => emotion = Emotion.normal; nextEmotionChange = emotionalDwellTime
+        case Emotion.defensive => emotion = Emotion.normal; nextEmotionChange = emotionalDwellTime
+        case Emotion.normal => emotion = Emotion.undecided
+        case Emotion.undecided => // do nothing
+      }
+
+    else
+      nextEmotionChange -= 1
   }
 }
