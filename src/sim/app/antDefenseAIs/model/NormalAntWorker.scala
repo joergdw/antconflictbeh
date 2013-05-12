@@ -71,7 +71,7 @@ private[antDefenseAIs] class NormalAntWorker(
   def this(ant: Ant) = this(ant.tribeID, ant.world)
 
 
-  ///////////////////// sim.app.antDefenseAIs.common variables and constants /////////////////////////////////////
+  ///////////////////// Common variables and constants /////////////////////////////////////
 
   /**
    * Possible emotional states of an ant
