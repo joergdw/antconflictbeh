@@ -25,7 +25,7 @@ final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
   val width = 57
   val lasiusNigerStandardGenerator = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(artificialStandardGenerator, artificialStandardGenerator) // TODO: Adapt tribe
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerStandardGenerator, lasiusNigerStandardGenerator) // TODO: Adapt tribe
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
