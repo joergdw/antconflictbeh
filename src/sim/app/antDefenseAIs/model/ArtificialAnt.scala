@@ -44,7 +44,7 @@ private[antDefenseAIs] class ArtificialAntGenerator(
  */
 class ArtificialAntBehaviourConf(
   val emotionalDwellTime: Int = 10,
-  val warPheroThreshold: Double = 0.1e-3,
+  val warPheroThreshold: Double = 0.1e-10,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
   override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
@@ -135,9 +135,9 @@ private[antDefenseAIs] class ArtificialAnt(
    */
   def adaptWarPhero() {
     val bestNeighbour: (Int, Int) = nearPos(1).sortBy(warPheroOn).reverse.head
-    val adaptedValue = gamma * homePheroOn(bestNeighbour)
+    val adaptedValue = gamma * warPheroOn(bestNeighbour)
 
-    setWarPheroOn(currentPos, min(1, adaptedValue))
+    setWarPheroOn(currentPos, min(warPheroOn(currentPos), adaptedValue))
   }
 
 
@@ -277,9 +277,10 @@ private[antDefenseAIs] class ArtificialAnt(
 
   override def receiveHit(opponent: Ant) {
     super.receiveHit(opponent)
-    if (isKilled) return // Ant dead: no more actions
 
     // Adapt emotion
     emotion = if (evalueSituation().get < 1) Emotion.fearsome else Emotion.battlesome
+    if (emotion == Emotion.fearsome) // Start war pheromone route
+      setWarPheroOn(currentPos, 1)
   }
 }
