@@ -21,7 +21,7 @@ private[antDefenseAIs] object OffensiveAntWorker extends AntGenerator {
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+  def apply(tribeID: Int, world: World) = new LasiusNigerBehaviour(tribeID, world)
 
   def apply(ant: Ant) = new OffensiveAntWorker(ant)
 

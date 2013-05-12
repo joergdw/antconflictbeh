@@ -33,12 +33,6 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected final var attack: Int = 1 /** Damage an ant does to another */
   private[model] final var age: Int = 0 /** Current age of the ant */
 
-  /** Last went direction */
-  protected final var lastDirection: world.Direction.Value = {  // Initialise with random value
-    val valueList = world.Direction.values.toList
-    valueList.apply(world.random.nextInt(world.Direction.values.size))
-  }
-
   def maximumAge(): Int /** Maximum age of an ant */
 
   /**
@@ -76,7 +70,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    *
    * @param direction New position of the ant
    */
-  protected def moveTo(direction: world.Direction.Value) {
+  private[model] def moveTo(direction: world.Direction.Value) {
     world.move(this, direction)
     lastDirection = direction
   }
@@ -156,7 +150,7 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    *
    * @param opponent Opponent receiving a hit
    */
-  protected def hit(opponent: Ant) {
+  private[model] def hit(opponent: Ant) {
     opponent receiveHit(this)
   }
 

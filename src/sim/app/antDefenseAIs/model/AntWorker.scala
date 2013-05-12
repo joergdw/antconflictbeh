@@ -14,13 +14,7 @@ package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
   val maximumAge: Int = 5000 /** Maximum age of a worker (in steps) */
-
   val backpack: Int = 5 /** Amount of resources which can be transported by an individual */
-  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
-
-  var alpha: Double = 0.98d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
-  var explorationRate = 0.3d /** Probability that another than the best neighbour field will be chosen to move to */
-  var gamma: Double = 0.98d /** Learning parameter according the one used paper */
 }
 
 
@@ -35,101 +29,39 @@ import AntWorker._
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[antDefenseAIs] abstract class AntWorker(
+private[antDefenseAIs] class AntWorker(
   override val tribeID: Int,
-  override val world: World) extends Ant(tribeID, world) {
+  override val world: World,
+  protected val behaviour: AntBehaviour) extends Ant(tribeID, world) {
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
+  ///////////////////// Common types, variables and constants /////////////////////////////////////
 
   protected var transporting: Int = 0 /** Amount of resources transported by this ant */
-  protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
   override final def maximumAge(): Int = AntWorker.maximumAge
 
   ///////////////////// Behaviour description ////////////////////////////////////////
 
-  override def step(state: SimState)
+  override def step(state: SimState) = behaviour.step(state)
 
-  /** Actions for ants serving the economy of its tribe.
-    *
-    * If the backpack is full, or the ant is bored that is the ant has searched too long resources
-    * without success, the ant follows the way home to its queen and give all resources in the backpack
-    * to her. (After that ant is not bored at all.)
-    *
-    * In any other case the ant cares for food.
-    */
-  final protected def actEconomically() {
 
-    val backpack_full: Boolean = transporting >= backpack
-    val isBored: Boolean = boredom == 0
+  //////////////////// Basic operations of ants //////////////////////////////////////
 
-    if (backpack_full || isBored) {
-      if (currentPos == myQueen.currentPos) { // queen is under the ant
-        dropResources()
-        boredom = notBored
-      }
-      else
-        followHomeWay()
 
+  private[mode] def directionsWithHomePhero()
+
+  private[mode] def directionsWithResPhero()
+
+  private[mode] def directionsWithWarPhero()
+
+  private def directionsWithPhero(pheroOn: ((Int, Int)) => Double): List[(world.Direction.Value, Double)] = {
+    def pheroInDir(dir: world.Direction.Value): (world.Direction.Value, Double) = {
+      val position = world.Direction.inDirection(currentPos, dir)
+      (dir, pheroOn(position))
     }
-    else
-      careForFood()
+
+    world.Direction.values.toList.map(pheroInDir)
   }
 
-  /** Actions when ant want to fight or to flee – dependent of the ant-type */
-  protected def actMilitarily()
-
-
-  /**
-   * Follow home way.
-   *
-   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
-   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
-   */
-  final protected def followHomeWay() {
-    val direction = chooseDirectionByPheromone(homePheroOn)
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-  }
-
-  /**
-   * Care for food.
-   *
-   * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
-   * With a certain probability (in function of the world.explorationRate) it is one of the other fields
-   */
-  final protected def careForFood() {
-    val direction = chooseDirectionByPheromone(resPheroOn)
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-    mineRes()
-  }
-
-  /**
-   * Chooses a neighbourfield to go to.
-   *
-   * Works in the following way: With a probability of (1 - `explorationRate`) the position with
-   * the best evaluation is chosen. In the other case there will be chosen a random position
-   * from the rest of the fields.
-   *
-   * @param pheroOn Pheromone to observe for determining next position.
-   * @return
-   */
-  final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
-    def valueDirection = valueDirectionWithPhero(pheroOn) _
-
-    // Add to every direction its value
-    val directionsValued: List[(world.Direction.Value, Double)] =
-      validDirections.map(x => (x, valueDirection(x)))
-
-    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse
-
-    if (world.random.nextDouble() <= (1.0d - explorationRate))
-      valDirsSorted.head._1
-    else
-      valDirsSorted.apply( 1 + world.random.nextInt(valDirsSorted.size - 1))._1
-  }
 
   // Calculates an all over all value for a direction
   final def valueDirectionWithPhero(pheroOn: ((Int, Int)) => Double)(dir: world.Direction.Value): Double = {
@@ -175,8 +107,33 @@ private[antDefenseAIs] abstract class AntWorker(
     setResPheroOn(currentPos, min(1, adaptedValue))
   }
 
+  override protected def receiveHit(opponent: Ant) {
+    super.receiveHit(opponent)
+    behaviour.reactToHit()
+  }
 
-  //////////////////// Basic operations of ants //////////////////////////////////////
+  /**
+   * Counts the number of ants within the neighbourhood fulfilling a predicate.
+   *
+   * @param range Range in which will be searched
+   * @param p Predicate
+   * @return Number of ants in the neighbourhood fulfilling the predicate p
+   */
+  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
+    val ants: List[Ant] = listAntsFullfillingPredicate(range)(p)
+    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
+    ants.foldLeft(0: Int)(adder)
+  }
+
+  /**
+   * List of all ants within the neighbourhood fulfilling a predicate.
+   *
+   * @param range Range in which will be searched
+   * @param p Predicate
+   * @return Number of ants in the neighbourhood fulfilling the predicate p
+   */
+  def listAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): List[Ant] =
+    neighbourhood(range).map(world.antsOn).flatten
 
   /**
    * Drops the resources on the current place. If the queen is there, she
@@ -209,7 +166,6 @@ private[antDefenseAIs] abstract class AntWorker(
     else
       boredom -= 1
   }
-
 
   //////////////////////// Information revealing functions for other classes ////////////
 

@@ -16,14 +16,14 @@ import sim.field.grid.IntGrid2D
 
 import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
 import sim.app.antDefenseAIs.setup.MapCreationHelpers._
-import sim.app.antDefenseAIs.model.{World, OffensiveAntWorker, NormalAntWorker, AntGenerator}
+import sim.app.antDefenseAIs.model.{World, OffensiveAntWorker, LasiusNigerBehaviour, AntGenerator}
 
 
 final class Setup_1vs1(var sd: Long) extends Simulation(sd) {
 
   val height = 57
   val width = 57
-  private val tribes: Array[AntGenerator] = Array(NormalAntWorker, NormalAntWorker) // TODO: Adapt tribe
+  private val tribes: Array[AntGenerator] = Array(LasiusNigerBehaviour, LasiusNigerBehaviour) // TODO: Adapt tribe
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
