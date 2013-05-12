@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [3/6]
+* Implementierungsliste [4/6]
 ** DONE Militärverhalten normaler Ameisen [7/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -16,14 +16,15 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
    Zustand aus.
  + [X] Defensive Ameisen fliehen vor dem Feind in Richtung ihres Baus.
    
-** TODO Kampfverhalten offensiver Ameisen [0/5]
+** DONE Kampfverhalten offensiver Ameisen [7/7]
  + /Optional:/ Verhalten sich neutral, falls sie in der Unterzahl sind.
- + /Optional:/ Organisieren Hilfe, falls sie in der Unterzahl sind.
- + [ ] Wenn sie gleichwertig oder in der Überzahl sind, dann sind sie ausnahmslos aggressiv.
- + [ ] Wenn sie angegriffen werden, sind sie aggressiv.
- + [ ] Aggressive Ameisen greifen koloniefremde Ameisen auf dem eigenen Feld an.
- + [ ] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
- + [ ] Neutrale Ameisen ignorieren koloniefremde Ameisen.
+ + [X] Organisieren Hilfe, falls sie in der Unterzahl sind.
+ + [X] Wenn sie gleichwertig oder in der Überzahl sind, dann sind sie ausnahmslos aggressiv.
+ + [X] Wenn sie in Überzahl angegriffen werden, sind sie aggressiv.
+ + [X] Wenn sie in Unterzahl angegriffen werden, sind sie defensiv
+ + [X] Aggressive Ameisen greifen koloniefremde Ameisen auf dem eigenen Feld an.
+ + [X] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
+ + [X] Neutrale Ameisen ignorieren koloniefremde Ameisen.
 
 ** DONE Wirtschaftsverhalten [5/5]
  1) [X] Verhalten aus: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/A%20Pheromone-Based%20Utility%20Model%20for%20Collaborative%20Foraging%20-%202003.pdf][A Pheromone-Based Utility Model for Collaborative Foraging]]“
@@ -51,14 +52,14 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
  3) [X] Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
- 4) [ ] Pheromondiffussion (Wichtig für die Kommunikation der offensiven Ameisen über Kriegspheromone)
- 5) /Optional:/ Pheromonverdunstung
- 6) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
- 7) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
+ 4) [ ] Pheromonverdunstung
+ 5) [ ] Pheromondiffussion (Wichtig für die Kommunikation der offensiven Ameisen über Kriegspheromone)
+ 7) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
+ 8) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
     Königin auf mehrere Felder benötigt, damit die Ameisen bei großer Populationszahl noch an sie herankommen)
- 8) /Optional:/ Ameisen können altersbedingt sterben.
- 9) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
-    Int, Int)) hinzufügen.
+ 9) /Optional:/ Ameisen können altersbedingt sterben.
+ 10) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
+     Int, Int)) hinzufügen.
 
 ** DONE Benutzeroberfläche und Simulationskontrolle [5/5]
  1) [X] Pinselwerkzeug zum Kartendesign entwickeln
