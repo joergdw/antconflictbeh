@@ -13,7 +13,30 @@
 package sim.app.antDefenseAIs.model
 
 
-private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
+/**
+ * Behaviour configuration of an Lasius Niger ant ant
+ *
+ * @param emotionalDwellTime How long an individual stays in an individual state before going to another
+ * @param maxAggressiveness As of this value of other ants of the same colony, the ant changes state with probability
+ *                          `maxAggressivenessProb`.
+ * @param maxAggressivenessProb Highest possible probability that an ant gets aggressive
+ * @param minAggressivenessProb Lowest possible probability that an ant gets aggressive
+ * @param alpha Influence of pheromone for determine next position. Should be between 0 and 1
+ * @param explorationRate Probability that another than the best neighbour field will be chosen to move to
+ * @param gamma Learning parameter according the one used paper
+ */
+private[antDefenseAIs] class LasiusBehaviourConf(
+  val emotionalDwellTime: Int = 5,
+  val maxAggressiveness: Int = 20,
+  val maxAggressivenessProb: Double = 0.767d,
+  val minAggressivenessProb: Double = 0.257d,
+  override val alpha: Double = 0.98d,
+  override val explorationRate: Double = 0.3d,
+  override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
+
+
+private[antDefenseAIs] class LasiusNigerGenerator(
+  override val behaviourConf: LasiusBehaviourConf) extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
@@ -22,56 +45,53 @@ private[antDefenseAIs] object NormalAntWorker extends AntGenerator {
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+  def apply(tribeID: Int, world: World) = new LasiusNiger(tribeID, world, behaviourConf)
 
-  def apply(ant: Ant) = new NormalAntWorker(ant)
+  def apply(ant: Ant) = {
+    if (behaviourConf.isInstanceOf[LasiusBehaviourConf])
+      new LasiusNiger(ant, behaviourConf.asInstanceOf[LasiusBehaviourConf])
+
+    else
+      throw new IllegalArgumentException("Configuration not of required type.")
+  }
+}
 
 
-  ////////////////////// Common members of all NormalAntWorkers //////////////////////
-
-  /**
-   * How long an individual stays in an individual state before going to another
-   */
-  var emotionalDwellTime: Int = 5
-
-  /**
-   * As of this value of other ants of the same colony, the ant changes state with probability
-   * `maxAggressivenessProb`.
-   */
-  var maxAggressiveness = 20
-
-  var maxAggressivenessProb = 0.767d /** Highest possible probability that an ant gets aggressive */
-  var minAggressivenessProb = 0.257d /** Lowest possible probability that an ant gets aggressive */
-
+private[antDefenseAIs] object LasiusNiger {
   val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
 }
+
 
 import StrictMath.min
 
 import sim.engine.SimState
 
-import NormalAntWorker._
-
+import LasiusNiger._
 /**
  * Antworker with the usual strategies
  *
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[antDefenseAIs] class NormalAntWorker(
+private[antDefenseAIs] class LasiusNiger(
   override val tribeID: Int,
-  override val world: World) extends AntWorker(tribeID, world) {
+  override val world: World,
+  override val behaviourConf: LasiusBehaviourConf) extends AntWorker(tribeID, world, behaviourConf) {
+  import behaviourConf._
 
   /**
    * Constructs ant with the information of the given ant
    *
-   * @param ant Ant giving the information of construction
+   * @param ant Ant ant giving the information of construction
    * @return Ant of the same colony in the same simulation
    */
-  def this(ant: Ant) = this(ant.tribeID, ant.world)
+  def this(ant: Ant, behaviourConf: LasiusBehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
 
   ///////////////////// Common variables and constants /////////////////////////////////////
+
+  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
+  private var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
 
   /**
    * Possible emotional states of an ant
@@ -91,15 +111,7 @@ private[antDefenseAIs] class NormalAntWorker(
   private var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
 
 
-  ///////////////////// Basic operations /////////////////////////////////////
-
-  override def receiveHit(opponent: Ant) {
-    super.receiveHit(opponent)
-    if (this.isKilled) return // Ant dead: no more actions
-
-    if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
-      adaptState() // … calculate new state
-  }
+  ///////////////////// (Additional) Basic operations /////////////////////////////////////
 
   /**
    * Adapts the emotional state of the ant.
@@ -175,6 +187,32 @@ private[antDefenseAIs] class NormalAntWorker(
     relax()
   }
 
+  /** Actions for ants serving the economy of its tribe.
+    *
+    * If the backpack is full, or the ant is bored that is the ant has searched too long resources
+    * without success, the ant follows the way home to its queen and give all resources in the backpack
+    * to her. (After that ant is not bored at all.)
+    *
+    * In any other case the ant cares for food.
+    */
+  final protected def actEconomically() {
+
+    val backpack_full: Boolean = transporting >= AntWorker.backpackSize
+    val isBored: Boolean = boredom == 0
+
+    if (backpack_full || isBored) {
+      if (currentPos == myQueen.currentPos) { // queen is under the ant
+        dropResources()
+        boredom = notBored
+      }
+      else
+        followHomeWay()
+
+    }
+    else
+      careForFood()
+  }
+
   /**
    * The ant tries to pursuit and to hit ants of strange colonies.
    *
@@ -182,7 +220,7 @@ private[antDefenseAIs] class NormalAntWorker(
    * neighbour field instead, one of them will be hit, preferably in the direction the ant went the last step.
    * If there are no enemies around, the ant will act economically.
    */
-  override protected def actMilitarily() {
+  protected def actMilitarily() {
 
     val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
@@ -218,5 +256,55 @@ private[antDefenseAIs] class NormalAntWorker(
 
     else
       nextEmotionChange -= 1
+  }
+
+
+  override def receiveHit(opponent: Ant) {
+    super.receiveHit(opponent)
+    if (this.isKilled) return // Ant dead: no more actions
+
+    if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
+      adaptState() // … calculate new state
+  }
+
+  /**
+   * Follow home way.
+   *
+   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   */
+  final protected def followHomeWay() {
+    val direction = chooseDirectionByPheromone(homePheroOn)
+    moveTo(direction)
+    adaptHomePhero()
+    adaptResPhero()
+  }
+
+  /**
+   * Care for food.
+   *
+   * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields
+   */
+  final protected def careForFood() {
+    val direction = chooseDirectionByPheromone(resPheroOn)
+    moveTo(direction)
+    adaptHomePhero()
+    adaptResPhero()
+    mineRes()
+  }
+
+  /**
+   * Mines, if possible, resources. Boredom increased if no resources.
+   * No boredom if try successful.
+   */
+  override def mineRes() {
+    val tmp = transporting
+    super.mineRes()
+
+    if (transporting > tmp) // successfull mined
+      boredom = notBored
+    else
+      boredom -= 1
   }
 }

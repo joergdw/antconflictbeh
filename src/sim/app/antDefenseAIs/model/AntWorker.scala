@@ -13,14 +13,8 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
-  val maximumAge: Int = 5000 /** Maximum age of a worker (in steps) */
-
-  val backpack: Int = 5 /** Amount of resources which can be transported by an individual */
-  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
-
-  var alpha: Double = 0.98d /** Influence of pheromone for determine next position. Should be between 0 and 1 */
-  var explorationRate = 0.3d /** Probability that another than the best neighbour field will be chosen to move to */
-  var gamma: Double = 0.98d /** Learning parameter according the one used paper */
+  val maximumAge: Int = 5000 /** Maximum age of a ant (in steps) */
+  val backpackSize: Int = 5 /** Amount of resources which can be transported by an individual */
 }
 
 
@@ -37,74 +31,17 @@ import AntWorker._
  */
 private[antDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
-  override val world: World) extends Ant(tribeID, world) {
+  override val world: World,
+  val behaviourConf: BehaviourConf) extends Ant(tribeID, world) {
+  import behaviourConf._
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
   protected var transporting: Int = 0 /** Amount of resources transported by this ant */
-  protected var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
   override final def maximumAge(): Int = AntWorker.maximumAge
 
+
   ///////////////////// Behaviour description ////////////////////////////////////////
-
-  override def step(state: SimState)
-
-  /** Actions for ants serving the economy of its tribe.
-    *
-    * If the backpack is full, or the ant is bored that is the ant has searched too long resources
-    * without success, the ant follows the way home to its queen and give all resources in the backpack
-    * to her. (After that ant is not bored at all.)
-    *
-    * In any other case the ant cares for food.
-    */
-  final protected def actEconomically() {
-
-    val backpack_full: Boolean = transporting >= backpack
-    val isBored: Boolean = boredom == 0
-
-    if (backpack_full || isBored) {
-      if (currentPos == myQueen.currentPos) { // queen is under the ant
-        dropResources()
-        boredom = notBored
-      }
-      else
-        followHomeWay()
-
-    }
-    else
-      careForFood()
-  }
-
-  /** Actions when ant want to fight or to flee – dependent of the ant-type */
-  protected def actMilitarily()
-
-
-  /**
-   * Follow home way.
-   *
-   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
-   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
-   */
-  final protected def followHomeWay() {
-    val direction = chooseDirectionByPheromone(homePheroOn)
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-  }
-
-  /**
-   * Care for food.
-   *
-   * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
-   * With a certain probability (in function of the world.explorationRate) it is one of the other fields
-   */
-  final protected def careForFood() {
-    val direction = chooseDirectionByPheromone(resPheroOn)
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-    mineRes()
-  }
 
   /**
    * Chooses a neighbourfield to go to.
@@ -151,29 +88,7 @@ private[antDefenseAIs] abstract class AntWorker(
     alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
   }
 
-  /**
-   * Adapts the home-pheromones of the current field.
-   */
-  final def adaptHomePhero() {
-    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(homePheroOn).reverse.head
-    val adaptedValue = if (currentPos == myQueen.currentPos)
-                          1.0d
-                       else
-                          gamma * homePheroOn(bestNeighbour)
 
-    // To avoid pheromone value > 1 and worse value than before
-    setHomePheroOn(currentPos, min(1, max(homePheroOn(currentPos), adaptedValue)))
-  }
-
-  /**
-   * Adapts the ressource-pheromones of the current field.
-   */
-  final def adaptResPhero() {
-    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(resPheroOn).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
-
-    setResPheroOn(currentPos, min(1, adaptedValue))
-  }
 
 
   //////////////////// Basic operations of ants //////////////////////////////////////
@@ -195,19 +110,78 @@ private[antDefenseAIs] abstract class AntWorker(
   }
 
   /**
-   * Mines, if possible, resources. Boredom increased if no resources.
-   * No boredom if try successful.
+   * Mines, if possible, resources.
    */
-  final def mineRes() {
+  def mineRes() {
     val pos = currentPos
-    val spaceLeft: Boolean = backpack > transporting // space left in bag?
+    val spaceLeft: Boolean = backpackSize > transporting // space left in bag?
     if (spaceLeft && world.resOn(pos) > 0) {
       world.setResOn(pos, world.resOn(pos) - 1)
       transporting += 1
-      boredom = notBored
     }
+  }
+
+  /**
+   * Adapts the home-pheromones of the current field.
+   */
+  def adaptHomePhero() {
+    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(homePheroOn).reverse.head
+    val adaptedValue = if (currentPos == myQueen.currentPos)
+      1.0d
     else
-      boredom -= 1
+      gamma * homePheroOn(bestNeighbour)
+
+    // To avoid pheromone value > 1 and worse value than before
+    setHomePheroOn(currentPos, min(1, max(homePheroOn(currentPos), adaptedValue)))
+  }
+
+  /**
+   * Adapts the ressource-pheromones of the current field.
+   */
+  def adaptResPhero() {
+    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(resPheroOn).reverse.head
+    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
+
+    setResPheroOn(currentPos, min(1, adaptedValue))
+  }
+
+  /**
+   * Adds to each direction the amount of pheromones lying there
+   *
+   * @return List of directions zipped with corresponding pheromone value
+   */
+  def directionsWithHomePhero() = directionsWithPhero(homePheroOn)
+
+  /**
+   * Adds to each direction the amount of pheromones lying there
+   *
+   * @return List of directions zipped with corresponding pheromone value
+   */
+  def directionsWithResPhero() = directionsWithPhero(resPheroOn)
+
+  /**
+   * Adds to each direction the amount of pheromones lying there
+   *
+   * @return List of directions zipped with corresponding pheromone value
+   */
+  def directionsWithWarPhero() = directionsWithPhero(warPheroOn)
+
+
+  //////////////////////// Helpers /////////////////////////////////
+
+  /**
+   * Adds to each direction the amount of pheromones lying there
+   *
+   * @param pheroOn Function revealing pheromone on a certain position
+   * @return List of directions zipped with corresponding pheromone value
+   */
+  private def directionsWithPhero(pheroOn: ((Int, Int)) => Double): List[(world.Direction.Value, Double)] = {
+    def pheroInDir(dir: world.Direction.Value): (world.Direction.Value, Double) = {
+      val position = world.Direction.inDirection(currentPos, dir)
+      (dir, pheroOn(position))
+    }
+
+    world.Direction.values.toList.map(pheroInDir)
   }
 
 

@@ -1,2 +1,0 @@
-(Almost) every type in this subpackage has its compagnon object. Members there are declared as var iff
-they have an impact on the behaviour of an ant. The physics of the nature/world remains untouched (as val).

@@ -17,11 +17,15 @@ package sim.app.antDefenseAIs.model
  */
 private[antDefenseAIs] trait AntGenerator {
 
+  val behaviourConf: BehaviourConf /** Configuration used by this generator to generate new ant workers */
+
   /**
    * Constructs a new ant
    *
    * @param ant Ant of the same tribe in the same simulation (world) like the new one
-   * @return Ant of the same tribe in the same simulation (world) like the given one
+   * @param workerConf Configuration used for the ant ant
+   *
+   * @return Ant ant of the same tribe in the same simulation (world) like the given one
    */
-  def apply(ant: Ant): Ant
+  def apply(ant: Ant): AntWorker
 }

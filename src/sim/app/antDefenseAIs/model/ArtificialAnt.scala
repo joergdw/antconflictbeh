@@ -12,8 +12,8 @@
  */
 package sim.app.antDefenseAIs.model
 
-private[antDefenseAIs] object OffensiveAntWorker extends AntGenerator {
-
+private[antDefenseAIs] class ArtificialAntGenerator(
+  override val behaviourConf: ArtificialAntBehaviourConf) extends AntGenerator {
   /**
    * Creates an NormalAntWorker
    *
@@ -21,24 +21,43 @@ private[antDefenseAIs] object OffensiveAntWorker extends AntGenerator {
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  def apply(tribeID: Int, world: World) = new NormalAntWorker(tribeID, world)
+  def apply(tribeID: Int, world: World, beh: ArtificialAntBehaviourConf) = new ArtificialAnt(tribeID, world, beh)
 
-  def apply(ant: Ant) = new OffensiveAntWorker(ant)
+  def apply(ant: Ant): AntWorker = {
+    if (behaviourConf.isInstanceOf[ArtificialAntBehaviourConf])
+      new ArtificialAnt(ant, behaviourConf.asInstanceOf[ArtificialAntBehaviourConf])
 
+    else
+      throw new IllegalArgumentException("Configuration not of required type.")
+  }
+}
+
+/**
+ * Behaviour configuration of an Artificial-Ant ant
+ *
+ * @param emotionalDwellTime How long an individual stays in the battlesome emotional state before
+ *                           changing to a normal state
+ * @param warPheroThreshold Ant recognises war pheromone values from this value on
+ * @param alpha Influence of pheromone for determine next position. Should be between 0 and 1
+ * @param explorationRate Probability that another than the best neighbour field will be chosen to move to
+ * @param gamma Learning parameter according the one used paper
+ */
+class ArtificialAntBehaviourConf(
+  val emotionalDwellTime: Int = 10,
+  val warPheroThreshold: Double = 0.1e-3,
+  override val alpha: Double = 0.98d,
+  override val explorationRate: Double = 0.3d,
+  override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
+
+
+private[antDefenseAIs] object ArtificialAnt {
   val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
-
-  /**
-   * How long an individual stays in a battlesome emotional state before changing to a normal state
-   */
-  var emotionalDwellTime: Int = 10
-
-  val warPheroThreshould: Double = 0.1e-3 /** Ant recognises values from this value on */
 }
 
 
 import sim.engine.SimState
 
-import OffensiveAntWorker._
+import ArtificialAnt._
 import java.lang.StrictMath._
 
 /**
@@ -47,9 +66,11 @@ import java.lang.StrictMath._
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[antDefenseAIs] class OffensiveAntWorker(
+private[antDefenseAIs] class ArtificialAnt(
   override val tribeID: Int,
-  override val world: World) extends AntWorker(tribeID, world) {
+  override val world: World,
+  override val behaviourConf: ArtificialAntBehaviourConf) extends AntWorker(tribeID, world, behaviourConf) {
+  import behaviourConf._
 
   /**
    * Constructs ant with the information of the given ant
@@ -57,9 +78,12 @@ private[antDefenseAIs] class OffensiveAntWorker(
    * @param ant Ant giving the information of construction
    * @return Ant of the same colony in the same simulation
    */
-  def this(ant: Ant) = this(ant.tribeID, ant.world)
+  def this(ant: Ant, behaviourConf: ArtificialAntBehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
   ///////////////////// Common variables and constants /////////////////////////////////////
+
+  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
+  private var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
 
   private object Emotion extends Enumeration {
     val battlesome = Value("Battlesome")
@@ -113,20 +137,10 @@ private[antDefenseAIs] class OffensiveAntWorker(
     ants.foldLeft(0: Int)(adder)
   }
 
-  override def receiveHit(opponent: Ant) {
-    super.receiveHit(opponent)
-    if (isKilled) return // Ant dead: no more actions
-
-    // Adapt emotion
-    emotion = if (evalueSituation() < 1) Emotion.fearsome else Emotion.battlesome
-  }
-
   /**
    * Adapts the war pheromones of the current field.
    */
   def adaptWarPhero() {
-    import AntWorker.gamma
-
     val bestNeighbour: (Int, Int) = nearPos(1).sortBy(warPheroOn).reverse.head
     val adaptedValue = gamma * homePheroOn(bestNeighbour)
 
@@ -143,7 +157,7 @@ private[antDefenseAIs] class OffensiveAntWorker(
         val warPheroDir = chooseDirectionByPheromone(warPheroOn)
         val bestWarPhero = warPheroOn(world.Direction.inDirection(currentPos, warPheroDir))
 
-        if (bestWarPhero >= warPheroThreshould) {
+        if (bestWarPhero >= warPheroThreshold) {
           if (bestWarPhero < warPheroOn(currentPos))
             emotion = Emotion.battlesome
           else
@@ -171,9 +185,9 @@ private[antDefenseAIs] class OffensiveAntWorker(
    *
    * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
    * neighbour field instead, one of them will be hit, preferably in the direction the ant went the last step.
-   * If there are no enemies around, the ant will act economically.
+   * If there are no enemies around, the ant will move into a direction.
    */
-  override def actMilitarily() {
+  def actMilitarily() {
 
     val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
@@ -200,6 +214,59 @@ private[antDefenseAIs] class OffensiveAntWorker(
     }
   }
 
+  /** Actions for ants serving the economy of its tribe.
+    *
+    * If the backpack is full, or the ant is bored that is the ant has searched too long resources
+    * without success, the ant follows the way home to its queen and give all resources in the backpack
+    * to her. (After that ant is not bored at all.)
+    *
+    * In any other case the ant cares for food.
+    */
+  final protected def actEconomically() {
+
+    val backpack_full: Boolean = transporting >= AntWorker.backpackSize
+    val isBored: Boolean = boredom == 0
+
+    if (backpack_full || isBored) {
+      if (currentPos == myQueen.currentPos) { // queen is under the ant
+        dropResources()
+        boredom = notBored
+      }
+      else
+        followHomeWay()
+
+    }
+    else
+      careForFood()
+  }
+
+  /**
+   * Follow home way.
+   *
+   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   */
+  final protected def followHomeWay() {
+    val direction = chooseDirectionByPheromone(homePheroOn)
+    moveTo(direction)
+    adaptHomePhero()
+    adaptResPhero()
+  }
+
+  /**
+   * Care for food.
+   *
+   * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields
+   */
+  final protected def careForFood() {
+    val direction = chooseDirectionByPheromone(resPheroOn)
+    moveTo(direction)
+    adaptHomePhero()
+    adaptResPhero()
+    mineRes()
+  }
+
   def adaptEmotion() {
     if (emotion == Emotion.battlesome && nextEmotionChange <= 0) {
       emotion = Emotion.normal
@@ -207,5 +274,13 @@ private[antDefenseAIs] class OffensiveAntWorker(
     }
     else if (emotion == Emotion.battlesome)
       nextEmotionChange -= 1
+  }
+
+  override def receiveHit(opponent: Ant) {
+    super.receiveHit(opponent)
+    if (isKilled) return // Ant dead: no more actions
+
+    // Adapt emotion
+    emotion = if (evalueSituation() < 1) Emotion.fearsome else Emotion.battlesome
   }
 }
