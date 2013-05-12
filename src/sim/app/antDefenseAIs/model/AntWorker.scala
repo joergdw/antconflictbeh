@@ -166,6 +166,21 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   def directionsWithWarPhero() = directionsWithPhero(warPheroOn)
 
+  /**
+   * Counts the number of ants within the neighbourhood fulfilling a predicate.
+   *
+   * The size of the observed neighbourhood is indicated by `antsSensingRange`.
+   *
+   * @param range Range in which will be searched
+   * @param p Predicate
+   * @return Number of ants in the neighbourhood fulfilling the predicate p
+   */
+  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
+    val ants: List[Ant] = neighbourhood(range).map(world.antsOn).flatten
+    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
+    ants.foldLeft(0: Int)(adder)
+  }
+
 
   //////////////////////// Helpers /////////////////////////////////
 

@@ -94,15 +94,23 @@ private[antDefenseAIs] class ArtificialAnt(
   private var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
 
 
-  //////////////////// Basic operations ////////////////////////////////
+  //////////////////// (Additional) Basic operations ////////////////////////////////
 
 
   /**
    * Evaluates the relationship in the area `antsSensingRange`
    *
-   * @return < 1 iff ants from foreign colonies outnumber the ones from the own, (>= 1 else)
+   * @return `Some` < 1 iff ants from foreign colonies outnumber the ones from the own, (>= 1 else) – if no strangers in
+   *         the neighbourhood `None will be returned`.
    */
-  def evalueSituation(): Double = countFriends() / countStrangers()
+  def evalueSituation(): Option[Double] = {
+    val strangers = countStrangers()
+
+    if (strangers == 0)
+      None
+    else
+      Some(countFriends() / strangers)
+  }
 
   /**
    * Counts the number of ants of the same colony within the neighbourhood.
@@ -121,21 +129,6 @@ private[antDefenseAIs] class ArtificialAnt(
    * @return Number of ants of other colonies in the neighbourhood
    */
   def countStrangers(): Int = countAntsFullfillingPredicate(antsSensingRange)((a: Ant) => a.tribeID != this.tribeID)
-
-  /**
-   * Counts the number of ants within the neighbourhood fulfilling a predicate.
-   *
-   * The size of the observed neighbourhood is indicated by `antsSensingRange`.
-   *
-   * @param range Range in which will be searched
-   * @param p Predicate
-   * @return Number of ants in the neighbourhood fulfilling the predicate p
-   */
-  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
-    val ants: List[Ant] = neighbourhood(range).map(world.antsOn).flatten
-    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
-    ants.foldLeft(0: Int)(adder)
-  }
 
   /**
    * Adapts the war pheromones of the current field.
@@ -268,12 +261,18 @@ private[antDefenseAIs] class ArtificialAnt(
   }
 
   def adaptEmotion() {
-    if (emotion == Emotion.battlesome && nextEmotionChange <= 0) {
-      emotion = Emotion.normal
-      nextEmotionChange = emotionalDwellTime
+    emotion match {
+      case Emotion.battlesome if nextEmotionChange <= 0 => {
+        emotion = Emotion.normal
+        nextEmotionChange = emotionalDwellTime
+      }
+      case Emotion.battlesome => nextEmotionChange -= 1
+      case Emotion.normal => evalueSituation() match {
+        case None => // Do noting because no strangers in the area
+        case Some(n) => if (n >= 1) emotion = Emotion.battlesome
+      }
+      case Emotion.fearsome => // Do nothing
     }
-    else if (emotion == Emotion.battlesome)
-      nextEmotionChange -= 1
   }
 
   override def receiveHit(opponent: Ant) {
@@ -281,6 +280,6 @@ private[antDefenseAIs] class ArtificialAnt(
     if (isKilled) return // Ant dead: no more actions
 
     // Adapt emotion
-    emotion = if (evalueSituation() < 1) Emotion.fearsome else Emotion.battlesome
+    emotion = if (evalueSituation().get < 1) Emotion.fearsome else Emotion.battlesome
   }
 }
