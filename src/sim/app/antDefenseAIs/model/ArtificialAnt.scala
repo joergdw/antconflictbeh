@@ -37,14 +37,12 @@ private[antDefenseAIs] class ArtificialAntGenerator(
  *
  * @param emotionalDwellTime How long an individual stays in the battlesome emotional state before
  *                           changing to a normal state
- * @param warPheroThreshold Ant recognises war pheromone values from this value on
  * @param alpha Influence of pheromone for determine next position. Should be between 0 and 1
  * @param explorationRate Probability that another than the best neighbour field will be chosen to move to
  * @param gamma Learning parameter according the one used paper
  */
 class ArtificialAntBehaviourConf(
   val emotionalDwellTime: Int = 10,
-  val warPheroThreshold: Double = 0.1e-10,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
   override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
@@ -150,9 +148,11 @@ private[antDefenseAIs] class ArtificialAnt(
         val warPheroDir = chooseDirectionByPheromone(warPheroOn)
         val bestWarPhero = warPheroOn(world.Direction.inDirection(currentPos, warPheroDir))
 
-        if (bestWarPhero >= warPheroThreshold) {
-          if (bestWarPhero < warPheroOn(currentPos))
+        if (bestWarPhero > 0) {
+          if (bestWarPhero < warPheroOn(currentPos)) { // End of phero route reached
             emotion = Emotion.battlesome
+            actMilitarily()
+          }
           else
             moveTo(warPheroDir)
         }

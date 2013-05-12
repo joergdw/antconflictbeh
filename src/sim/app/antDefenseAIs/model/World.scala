@@ -224,13 +224,17 @@ private[antDefenseAIs] final class World(
       }
     }
 
+    import StrictMath.min
     // Evaporation
     for (warPheroMap <- warPheromones) {
       for (i <- 0 until height; j <- 0 until width) {
-        val evaporationRate: Double = 0.8
+        val threshold = 0.1e-2 // lowest possible value
 
         val old = warPheroMap.get(i, j)
-        warPheroMap.set(i, j, old * evaporationRate)
+        val evaporationRate: Double = 0.9
+
+        val newer = if (old < threshold) 0 else old * evaporationRate
+        warPheroMap.set(i, j, newer)
       }
     }
 
