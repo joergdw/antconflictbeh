@@ -89,8 +89,6 @@ private[antDefenseAIs] abstract class AntWorker(
   }
 
 
-
-
   //////////////////// Basic operations of ants //////////////////////////////////////
 
   /**

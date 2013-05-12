@@ -201,7 +201,7 @@ private[antDefenseAIs] class ArtificialAnt(
         hit(foreignAntsOnNewField.head)
 
       } else {
-       val dir = chooseDirectionByPheromone(p => 0.0d) // Pheromones don't matter, (but old directions still do)
+       val dir = chooseDirectionByPheromone(position => 0.0d) // Pheromones don't matter, (but old directions still do)
        moveTo(dir)
       }
     }
