@@ -22,6 +22,7 @@ import sim.util.IntBag
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 import sim.app.antDefenseAIs.setup.Simulation
+import scala.collection.mutable
 
 /**
  * World
@@ -201,7 +202,7 @@ private[antDefenseAIs] final class World(
   /////////////////////////// Nature behaviour ///////////////////////////////////////
 
   // Stoppable object for each ant to take it out of scheduling
-  private val stopOrders: HashMap[Ant, Stoppable] = HashMap()
+  private val stopOrders: mutable.HashMap[Ant, Stoppable] = mutable.HashMap()
 
   def step(state: SimState) {
     def removeAnt(ant: Ant) { // Actions to do to remove an ant
@@ -224,7 +225,6 @@ private[antDefenseAIs] final class World(
       }
     }
 
-    import StrictMath.min
     // Evaporation
     for (warPheroMap <- warPheromones) {
       for (i <- 0 until height; j <- 0 until width) {
@@ -301,31 +301,73 @@ private[antDefenseAIs] final class World(
   }
 
   /**
-   * Home pheromone intensity of the tribe of the given ant at the given position
+   * Home pheromone intensity of the tribe of the given ant in the given direction
    *
    * @param ant Ant which wants the result
-   * @param pos Position where to investigate the pheromone intensity
-   * @return Home pheromone intensity of the tribe of the given ant at the given position
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return Home pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def homePheroOn(ant: Ant, pos: (Int, Int)): Double = homePheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Double = {
+    val pos = Direction.inDirection(currentPos(ant), dir)
+    homePheromones(ant.tribeID).get(pos._1, pos._2)
+  }
 
   /**
-   * Resource pheromone intensity of the tribe of the given ant at the given position
+   * Home pheromone intensity of the tribe of the given ant at its current position
    *
    * @param ant Ant which wants the result
-   * @param pos Position where to investigate the pheromone intensity
-   * @return Resource pheromone intensity of the tribe of the given ant at the given position
+   * @return Home pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def resPheroOn(ant: Ant, pos: (Int, Int)): Double = resPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOf(ant: Ant): Double = {
+    val pos = currentPos(ant)
+    homePheromones(ant.tribeID).get(pos._1, pos._2)
+  }
 
   /**
-   * War pheromone map of the tribe of the given ant
+   * Resource pheromone intensity of the tribe of the given ant in the given direction
    *
    * @param ant Ant which wants the result
-   * @param pos Position where to investigate the pheromone intensity
-   * @return War pheromone map of the tribe of the given ant
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return Resource pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def warPheroOn(ant: Ant, pos: (Int, Int)): Double = warPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Double = {
+    val pos = Direction.inDirection(currentPos(ant), dir)
+    resPheromones(ant.tribeID).get(pos._1, pos._2)
+  }
+
+  /**
+   * Resource pheromone intensity of the tribe of the given ant at its current position
+   *
+   * @param ant Ant which wants the result
+   * @return Resource pheromone intensity of the tribe of the given at its current position
+   */
+  private[model] def resPheroOf(ant: Ant): Double = {
+    val pos = currentPos(ant)
+    resPheromones(ant.tribeID).get(pos._1, pos._2)
+  }
+
+  /**
+   * War pheromone intensity of the tribe of the given ant in the given direction
+   *
+   * @param ant Ant which wants the result
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return War pheromone intensity of the tribe of the given ant in the given position
+   */
+  private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Double = {
+    val pos = Direction.inDirection(currentPos(ant), dir)
+    warPheromones(ant.tribeID).get(pos._1, pos._2)
+  }
+
+  /**
+   * War pheromone intensity of the tribe of the given ant at its current position
+   *
+   * @param ant Ant which wants the result
+   * @return War pheromone intensity of the tribe of the given at its current position
+   */
+  private[model] def warPheroOf(ant: Ant): Double = {
+    val pos = currentPos(ant)
+    warPheromones(ant.tribeID).get(pos._1, pos._2)
+  }
 
   /**
    * Set home pheromone intensity of the tribe of the given ant at the given position

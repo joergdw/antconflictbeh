@@ -89,28 +89,49 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   private[model] def myQueen: AntQueen = world.queenOf(this)
 
   /**
-   * Home pheromone intensity of the tribe of the ant at the given position
+   * Home pheromone intensity of the tribe of the ant in the given direction
    *
-   * @param pos Position where to investigate the pheromone intensity
-   * @return Home pheromone intensity of the tribe of the ant at the given position
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return Home pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def homePheroOn(pos: (Int, Int)) = world.homePheroOn(this, pos)
+  protected def homePheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir)
 
   /**
-   * Resource pheromone intensity of the tribe of the ant at the given position
+   * Home pheromone intensity of the tribe of the ant at its current position
    *
-   * @param pos Position where to investigate the pheromone intensity
-   * @return Resource pheromone intensity of the tribe of the ant at the given position
+   * @return Home pheromone intensity of the tribe of the ant at its current position
    */
-  protected def resPheroOn(pos: (Int, Int)) = world.resPheroOn(this, pos)
+  protected def homePheroOf() = world.homePheroOf(this)
 
   /**
-   * War pheromone intensity of the tribe of the ant at the given position
+   * Resource pheromone intensity of the tribe of the ant in the given direction
    *
-   * @param pos Position where to investigate the pheromone intensity
-   * @return War pheromone intensity of the tribe of the ant at the given position
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return Resource pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def warPheroOn(pos: (Int, Int)) = world.warPheroOn(this, pos)
+  protected def resPheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir)
+
+  /**
+   * Resource pheromone intensity of the tribe of the ant at its current position
+   *
+   * @return Resource pheromone intensity of the tribe of the ant at its current position
+   */
+  protected def resPheroOf() = world.homePheroOf(this)
+
+  /**
+   * War pheromone intensity of the tribe of the ant in the given direction
+   *
+   * @param dir Direction where to investigate the pheromone intensity
+   * @return War pheromone intensity of the tribe of the ant in the given direction
+   */
+  protected def warPheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir)
+
+  /**
+   * War pheromone intensity of the tribe of the ant at its current position
+   *
+   * @return Resource pheromone intensity of the tribe of the ant at its current position
+   */
+  protected def warPheroOf() = world.homePheroOf(this)
 
   /**
    * Set home pheromone intensity of the tribe of the ant at the given position

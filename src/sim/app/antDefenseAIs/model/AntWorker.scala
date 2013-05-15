@@ -18,8 +18,7 @@ private[antDefenseAIs] object AntWorker {
 }
 
 
-import StrictMath.{min, max, abs}
-import sim.engine.SimState
+import StrictMath.{min, max}
 
 import AntWorker._
 
@@ -41,26 +40,22 @@ private[antDefenseAIs] abstract class AntWorker(
   override final def maximumAge(): Int = AntWorker.maximumAge
 
 
-  ///////////////////// Behaviour description ////////////////////////////////////////
+  //////////////////// Basic operations of ants //////////////////////////////////////
 
   /**
-   * Chooses a neighbourfield to go to.
+   * Chooses a direction to go to.
    *
-   * Works in the following way: With a probability of (1 - `explorationRate`) the position with
-   * the best evaluation is chosen. In the other case there will be chosen a random position
-   * from the rest of the fields.
+   * Works in the following way: With a probability of (1 - `explorationRate`) the (valid) direction with
+   * the best evaluation is chosen. In the other case there will be chosen a random direction.
    *
-   * @param pheroOn Pheromone to observe for determining next position.
-   * @return
+   * @param evaluate Function to evaluate
+   * @return Direction chosen
    */
-  final def chooseDirectionByPheromone(pheroOn: ((Int, Int)) => Double): world.Direction.Value = {
-    def valueDirection = valueDirectionWithPhero(pheroOn) _
-
-    // Add to every direction its value
+  def chooseDirectionBy(evaluate: world.Direction.Value => Double): world.Direction.Value = {
     val directionsValued: List[(world.Direction.Value, Double)] =
-      validDirections.map(x => (x, valueDirection(x)))
+      validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
 
-    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse
+    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
     if (world.random.nextDouble() <= (1.0d - explorationRate))
       valDirsSorted.head._1
@@ -87,9 +82,6 @@ private[antDefenseAIs] abstract class AntWorker(
 
     alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
   }
-
-
-  //////////////////// Basic operations of ants //////////////////////////////////////
 
   /**
    * Drops the resources on the current place. If the queen is there, she
@@ -123,46 +115,25 @@ private[antDefenseAIs] abstract class AntWorker(
    * Adapts the home-pheromones of the current field.
    */
   def adaptHomePhero() {
-    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(homePheroOn).reverse.head
+    val bestNeighbour: world.Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
     val adaptedValue = if (currentPos == myQueen.currentPos)
       1.0d
     else
-      gamma * homePheroOn(bestNeighbour)
+      gamma * homePheroOf(bestNeighbour)
 
     // To avoid pheromone value > 1 and worse value than before
-    setHomePheroOn(currentPos, min(1, max(homePheroOn(currentPos), adaptedValue)))
+    setHomePheroOn(currentPos, min(1, max(homePheroOf(), adaptedValue)))
   }
 
   /**
    * Adapts the ressource-pheromones of the current field.
    */
   def adaptResPhero() {
-    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(resPheroOn).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOn(bestNeighbour) / world.maxResAmount)
+    val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
+    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
 
     setResPheroOn(currentPos, min(1, adaptedValue))
   }
-
-  /**
-   * Adds to each direction the amount of pheromones lying there
-   *
-   * @return List of directions zipped with corresponding pheromone value
-   */
-  def directionsWithHomePhero() = directionsWithPhero(homePheroOn)
-
-  /**
-   * Adds to each direction the amount of pheromones lying there
-   *
-   * @return List of directions zipped with corresponding pheromone value
-   */
-  def directionsWithResPhero() = directionsWithPhero(resPheroOn)
-
-  /**
-   * Adds to each direction the amount of pheromones lying there
-   *
-   * @return List of directions zipped with corresponding pheromone value
-   */
-  def directionsWithWarPhero() = directionsWithPhero(warPheroOn)
 
   /**
    * Counts the number of ants within the neighbourhood fulfilling a predicate.
@@ -177,24 +148,6 @@ private[antDefenseAIs] abstract class AntWorker(
     val ants: List[Ant] = neighbourhood(range).map(world.antsOn).flatten
     def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
     ants.foldLeft(0: Int)(adder)
-  }
-
-
-  //////////////////////// Helpers /////////////////////////////////
-
-  /**
-   * Adds to each direction the amount of pheromones lying there
-   *
-   * @param pheroOn Function revealing pheromone on a certain position
-   * @return List of directions zipped with corresponding pheromone value
-   */
-  private def directionsWithPhero(pheroOn: ((Int, Int)) => Double): List[(world.Direction.Value, Double)] = {
-    def pheroInDir(dir: world.Direction.Value): (world.Direction.Value, Double) = {
-      val position = world.Direction.inDirection(currentPos, dir)
-      (dir, pheroOn(position))
-    }
-
-    world.Direction.values.toList.map(pheroInDir)
   }
 
 

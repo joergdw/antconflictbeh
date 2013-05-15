@@ -132,10 +132,10 @@ private[antDefenseAIs] class ArtificialAnt(
    * Adapts the war pheromones of the current field.
    */
   def adaptWarPhero() {
-    val bestNeighbour: (Int, Int) = nearPos(1).sortBy(warPheroOn).reverse.head
-    val adaptedValue = gamma * warPheroOn(bestNeighbour)
+    val bestNeighbour: world.Direction.Value = validDirections.sortBy(warPheroOf).reverse.head
+    val adaptedValue = gamma * warPheroOf(bestNeighbour)
 
-    setWarPheroOn(currentPos, min(warPheroOn(currentPos), adaptedValue))
+    setWarPheroOn(currentPos, min(warPheroOf(), adaptedValue))
   }
 
 
@@ -145,11 +145,11 @@ private[antDefenseAIs] class ArtificialAnt(
 
     emotion match {
       case Emotion.normal => {
-        val warPheroDir = chooseDirectionByPheromone(warPheroOn)
-        val bestWarPhero = warPheroOn(world.Direction.inDirection(currentPos, warPheroDir))
+        val warPheroDir = chooseDirectionBy(warPheroOf)
+        val bestWarPhero = warPheroOf(warPheroDir)
 
         if (bestWarPhero > 0) {
-          if (bestWarPhero < warPheroOn(currentPos)) { // End of phero route reached
+          if (bestWarPhero < warPheroOf()) { // End of phero route reached
             emotion = Emotion.battlesome
             actMilitarily()
           }
@@ -201,7 +201,7 @@ private[antDefenseAIs] class ArtificialAnt(
         hit(foreignAntsOnNewField.head)
 
       } else {
-       val dir = chooseDirectionByPheromone(position => 0.0d) // Pheromones don't matter, (but old directions still do)
+       val dir = chooseDirectionBy(direction => 0.0d) // Pheromones don't matter, (but old directions still do)
        moveTo(dir)
       }
     }
@@ -240,7 +240,7 @@ private[antDefenseAIs] class ArtificialAnt(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
    */
   final protected def followHomeWay() {
-    val direction = chooseDirectionByPheromone(homePheroOn)
+    val direction = chooseDirectionBy(homePheroOf)
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
@@ -253,7 +253,7 @@ private[antDefenseAIs] class ArtificialAnt(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields
    */
   final protected def careForFood() {
-    val direction = chooseDirectionByPheromone(resPheroOn)
+    val direction = chooseDirectionBy(resPheroOf)
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()

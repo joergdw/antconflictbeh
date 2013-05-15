@@ -259,7 +259,7 @@ private[antDefenseAIs] class LasiusNiger(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
    */
   final protected def followHomeWay() {
-    val direction = chooseDirectionByPheromone(homePheroOn)
+    val direction = chooseDirectionBy(homePheroOf)
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
@@ -272,7 +272,7 @@ private[antDefenseAIs] class LasiusNiger(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields
    */
   final protected def careForFood() {
-    val direction = chooseDirectionByPheromone(resPheroOn)
+    val direction = chooseDirectionBy(resPheroOf)
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
