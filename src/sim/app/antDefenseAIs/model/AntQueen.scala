@@ -104,7 +104,7 @@ private final class AntQueen(
         world.placeNewAnt(ant)
         productionState = 0
       } catch {
-        case e: IllegalStateException => print(e.getMessage + " by Tribe: " + tribeID)
+        case e: IllegalStateException => println(e.getMessage + " by Tribe: " + tribeID)
         case e: Exception => print("Unforeseen Exception: " + e.getMessage)
       }
     }

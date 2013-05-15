@@ -15,7 +15,7 @@ package sim.app.antDefenseAIs.common
 import StrictMath.{abs, max}
 
 import sim.util.{Bag, IntBag, Int2D}
-import sim.field.grid.IntGrid2D
+import sim.field.grid.{DoubleGrid2D, IntGrid2D}
 
 import sim.app.antDefenseAIs.model.Ant
 
@@ -31,6 +31,22 @@ package object Common {
 
   /** Converts (Int, Int) to Int2D */
   def toInd2D(t: (Int, Int)): Int2D = new Int2D(t._1, t._2)
+
+  /**
+   * Converts a DoubleGrid2D to a 2-dim Double-Array
+   *
+   * @param grid Grid to convert
+   * @return Conversion result
+   */
+  def doubleGrid2Array(grid: DoubleGrid2D): Array[Array[Double]] = {
+    val result: Array[Array[Double]] = Array.ofDim(grid.getHeight, grid.getWidth)
+
+    for(i <- 0 until grid.getHeight; j <- 0 until grid.getWidth) {
+      result(i)(j) = grid.get(i, j)
+    }
+
+    result
+  }
 
   /**
    * Converts a two bags full of Int into a List[(Int, Int)]

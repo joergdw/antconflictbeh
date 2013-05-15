@@ -477,7 +477,7 @@ private[antDefenseAIs] final class World(
  private def placeNewAnt(ant: Ant, pos: (Int, Int)) {
    if (ants.getObjectLocation(ant) != null) new IllegalStateException("Ant already placed on world")
    if (populationStat(ant.tribeID) >= maxPopulation)
-     new IllegalStateException("Maximum population already reached: " + maxPopulation)
+     throw new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
    assert(ants.setObjectLocation(ant, toInd2D(pos)))
    val stoper = sim.schedule.scheduleRepeating(ant)
@@ -565,7 +565,7 @@ private[antDefenseAIs] final class World(
   }
 
 
-  ///////////////////////////// Other common ///////////////////////////////////
+  ///////////////////////////// Others ///////////////////////////////////
 
   /**
    * Returns map containing the current resource distribution
@@ -578,6 +578,33 @@ private[antDefenseAIs] final class World(
       result(i)(j) = resources.get(i, j)
 
     result
+  }
+
+  /**
+   * Returns all home pheromone maps
+   *
+   * @return Array of all home pheromone maps
+   */
+  def homePheroMaps(): Array[Array[Array[Double]]] = {
+    homePheromones.map(doubleGrid2Array)
+  }
+
+  /**
+   * Returns all war pheromone maps
+   *
+   * @return Array of all war pheromone maps
+   */
+  def warPheroMaps(): Array[Array[Array[Double]]] = {
+    warPheromones.map(doubleGrid2Array)
+  }
+
+  /**
+   * Returns all resource pheromone maps
+   *
+   * @return Array of all resource pheromone maps
+   */
+  def resPheroMaps(): Array[Array[Array[Double]]] = {
+    resPheromones.map(doubleGrid2Array)
   }
 
   private def allAnts: List[Ant] = antBag2AntList (ants.getAllObjects)

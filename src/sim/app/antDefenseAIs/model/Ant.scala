@@ -95,14 +95,14 @@ private[antDefenseAIs] abstract class Ant(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def resPheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir)
+  protected def resPheroOf(dir: world.Direction.Value) = world.resPheroOf(this, dir)
 
   /**
    * Resource pheromone intensity of the tribe of the ant at its current position
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
-  protected def resPheroOf() = world.homePheroOf(this)
+  protected def resPheroOf() = world.resPheroOf(this)
 
   /**
    * War pheromone intensity of the tribe of the ant in the given direction
@@ -110,14 +110,14 @@ private[antDefenseAIs] abstract class Ant(
    * @param dir Direction where to investigate the pheromone intensity
    * @return War pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def warPheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir)
+  protected def warPheroOf(dir: world.Direction.Value) = world.warPheroOf(this, dir)
 
   /**
    * War pheromone intensity of the tribe of the ant at its current position
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
-  protected def warPheroOf() = world.homePheroOf(this)
+  protected def warPheroOf() = world.warPheroOf(this)
 
   /**
    * Set home pheromone intensity of the tribe of the ant at its current position
