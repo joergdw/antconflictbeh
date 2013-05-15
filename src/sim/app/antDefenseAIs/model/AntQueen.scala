@@ -49,7 +49,7 @@ private final class AntQueen(
   private var _deposit: Int = startRessources /** Resources the queen owns */
 
   /**
-   * Returns the amount of resources in the queens deposit
+   * Returns the intensity of resources in the queens deposit
    *
    * @return Amount of resources in the queens deposit
    */
@@ -65,7 +65,7 @@ private final class AntQueen(
   /**
    * Used to give the queen resources
    *
-   * @param amount amount of resources the queen receives
+   * @param amount intensity of resources the queen receives
    */
   def receiveRes(amount: Int) {
     assert(amount >= 0)

@@ -26,7 +26,9 @@ import Ant.maximumHitpoints
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
  */
-private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) extends Steppable {
+private[antDefenseAIs] abstract class Ant(
+  val tribeID: Int,
+  val world: World) extends Steppable {
 
   protected final var hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
   protected final var mobility: Float = 0.5f /** Probability to avoid to be hit */
@@ -47,22 +49,6 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
    * @return Current position of that ant as (Int, Int)
    */
   def currentPos: (Int, Int) = world.currentPos(this)
-
-  /**
-   * Returns the positions of all the fields within a given distance. Current position of the ant is excluded.
-   *
-   * @param distance Maximum distance of a field which coordinates are included in the result
-   * @return Positions within a given distance to the ant; Current position of the ant is excluded
-   */
-  protected def nearPos(distance: Int) = world.nearPos(this, distance)
-
-  /**
-   * Returns the positions of all the fields within a given distance.
-   *
-   * @param distance Maximum distance of a field which coordinates are included in the result
-   * @return Positions within a given distance to the ant
-   */
-  protected def neighbourhood(distance: Int) = world.neighbourhood(this, distance)
 
   /**
    * All directions in which the ant can go right now
@@ -134,33 +120,30 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   protected def warPheroOf() = world.homePheroOf(this)
 
   /**
-   * Set home pheromone intensity of the tribe of the ant at the given position
+   * Set home pheromone intensity of the tribe of the ant at its current position
    *
-   * @param pos Position where to set the pheromone intensity
-   * @param amount New intensity
+   * @param intensity New intensity
    */
-  protected def setHomePheroOn(pos: (Int, Int), amount: Double) {
-    world.setHomePheroOn(this, pos, amount)
+  protected def setHomePhero(intensity: Double) {
+    world.setHomePheroOn(this, currentPos, intensity)
   }
 
   /**
-   * Set resource pheromone intensity of the tribe of the ant at the given position
+   * Set resource pheromone intensity of the tribe of the ant at its current position
    *
-   * @param pos Position where to set the pheromone intensity
-   * @param amount New intensity
+   * @param intensity New intensity
    */
-  protected def setResPheroOn(pos: (Int, Int), amount: Double) {
-    world.setResPheroOn(this, pos, amount)
+  protected def setResPhero(intensity: Double) {
+    world.setResPheroOn(this, currentPos, intensity)
   }
 
   /**
-   * Set war pheromone intensity of the tribe of the ant at the given position
+   * Set war pheromone intensity of the tribe of the ant at its current position
    *
-   * @param pos Position where to set the pheromone intensity
-   * @param amount New intensity
+   * @param intensity New intensity
    */
-  protected def setWarPheroOn(pos: (Int, Int), amount: Double) {
-    world.setWarPheroOn(this, pos, amount)
+  protected def setWarPhero(intensity: Double) {
+    world.setWarPheroOn(this, currentPos, intensity)
   }
 
 
@@ -189,13 +172,17 @@ private[antDefenseAIs] abstract class Ant(val tribeID: Int, val world: World) ex
   final def isKilled: Boolean = hitpoints == 0
 
   /**
-   * True if the field on position pos returns at least one enemy
+   * Counts the number of ants within the neighbourhood fulfilling a predicate.
    *
-   * @param position Position to be searched for enemies
-   * @return True iff the field on the given position contains at least one enemy
+   * The size of the observed neighbourhood is indicated by `antsSensingRange`.
+   *
+   * @param range Range in which will be searched
+   * @param p Predicate
+   * @return Number of ants in the neighbourhood fulfilling the predicate p
    */
-  def enemySensedOn(position: (Int, Int)): Boolean = {
-    def predicate(b: Boolean, a: Ant): Boolean = b || a.tribeID != this.tribeID
-    world.antsOn(position).foldLeft(false: Boolean)(predicate)
+  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
+    val ants: List[Ant] = world.neighbourhood(this, range).map(world.antsOn).flatten
+    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
+    ants.foldLeft(0: Int)(adder)
   }
 }

@@ -67,7 +67,7 @@ import java.lang.StrictMath._
 private[antDefenseAIs] class ArtificialAnt(
   override val tribeID: Int,
   override val world: World,
-  override val behaviourConf: ArtificialAntBehaviourConf) extends AntWorker(tribeID, world, behaviourConf) {
+  val behaviourConf: ArtificialAntBehaviourConf) extends AntWorker(tribeID, world) {
   import behaviourConf._
 
   /**
@@ -135,7 +135,7 @@ private[antDefenseAIs] class ArtificialAnt(
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(warPheroOf).reverse.head
     val adaptedValue = gamma * warPheroOf(bestNeighbour)
 
-    setWarPheroOn(currentPos, min(warPheroOf(), adaptedValue))
+    setWarPhero(min(warPheroOf(), adaptedValue))
   }
 
 
@@ -240,7 +240,7 @@ private[antDefenseAIs] class ArtificialAnt(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
    */
   final protected def followHomeWay() {
-    val direction = chooseDirectionBy(homePheroOf)
+    val direction = chooseDirectionBy(valueDirectionWithPhero(homePheroOf))
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
@@ -253,11 +253,76 @@ private[antDefenseAIs] class ArtificialAnt(
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields
    */
   final protected def careForFood() {
-    val direction = chooseDirectionBy(resPheroOf)
+    val direction = chooseDirectionBy(valueDirectionWithPhero(resPheroOf))
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
     mineRes()
+  }
+
+  /**
+   * Adapts the home-pheromones of the current field.
+   */
+  def adaptHomePhero() {
+    val bestNeighbour: world.Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
+    val adaptedValue = if (currentPos == myQueen.currentPos)
+      1.0d
+    else
+      gamma * homePheroOf(bestNeighbour)
+
+    // To avoid pheromone value > 1 and worse value than before
+    setHomePhero(min(1, max(homePheroOf(), adaptedValue)))
+  }
+
+  /**
+   * Adapts the ressource-pheromones of the current field.
+   */
+  def adaptResPhero() {
+    val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
+    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
+
+    setResPhero(min(1, adaptedValue))
+  }
+
+  /**
+   * Chooses a direction to go to.
+   *
+   * Works in the following way: With a probability of (1 - `explorationRate`) the (valid) direction with
+   * the best evaluation is chosen. In the other case there will be chosen a random direction.
+   *
+   * @param evaluate Function to evaluate
+   * @return Direction chosen
+   */
+  protected def chooseDirectionBy(evaluate: world.Direction.Value => Double): world.Direction.Value = {
+    val directionsValued: List[(world.Direction.Value, Double)] =
+      validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
+
+    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
+
+    if (world.random.nextDouble() <= (1.0d - explorationRate))
+      valDirsSorted.head._1
+    else
+      valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1
+  }
+
+  // Calculates an all over all value for a direction
+  protected def valueDirectionWithPhero(pheroInDir: world.Direction.Value => Double)(dir: world.Direction.Value): Double = {
+
+    // Calculates a normalized value of a direction influenced by the pheromone
+    def dirValueByPhero(dir: world.Direction.Value): Double = {
+      val bestPheroInNeighbourhood = validDirections.map(pheroInDir).max
+
+      if (bestPheroInNeighbourhood == 0)
+        0
+      else
+        pheroInDir(dir) / bestPheroInNeighbourhood
+    }
+
+    // Calculates a normalized value of a direction influenced by the last direction
+    def dirValueByDir(dir: world.Direction.Value): Double =
+      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
+
+    alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
   }
 
   def adaptEmotion() {
@@ -281,6 +346,6 @@ private[antDefenseAIs] class ArtificialAnt(
     // Adapt emotion
     emotion = if (evalueSituation().get < 1) Emotion.fearsome else Emotion.battlesome
     if (emotion == Emotion.fearsome) // Start war pheromone route
-      setWarPheroOn(currentPos, 1)
+      setWarPhero(1)
   }
 }

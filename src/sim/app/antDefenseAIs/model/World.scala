@@ -13,7 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 import StrictMath.max
-import scala.collection.mutable.HashMap
+import scala.collection.mutable
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.engine.{Stoppable, SimState, Steppable}
@@ -22,7 +22,6 @@ import sim.util.IntBag
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 import sim.app.antDefenseAIs.setup.Simulation
-import scala.collection.mutable
 
 /**
  * World
@@ -162,10 +161,6 @@ private[antDefenseAIs] final class World(
     }
   }
 
-  /**
-   * Offers methods and names for directions.
-   */
-
   // For each tribe there will be a store for all the pheromone-types.
   // Only public for mason graphical capabilities. Other classes should use the access methods of this class
   val homePheromones = new Array[DoubleGrid2D](tribeTypes.length)
@@ -259,16 +254,16 @@ private[antDefenseAIs] final class World(
   /**
    * Amount of resources on the given position
    *
-   * @param pos Position of which the amount of resources should be counted
+   * @param pos Position of which the intensity of resources should be counted
    * @return Amount of resources on the given position
    */
   def resOn(pos: (Int, Int)): Int = resources.get(pos._1, pos._2)
 
   /**
-   * Sets a new amount of resources on the given position
+   * Sets a new intensity of resources on the given position
    *
-   * @param pos Position of which the amount of resources should be set
-   * @param amount New amount of resources on the given position
+   * @param pos Position of which the intensity of resources should be set
+   * @param amount New intensity of resources on the given position
    */
   def setResOn(pos: (Int, Int), amount: Int) {
     resources.set(pos._1, pos._2, amount)
@@ -538,7 +533,7 @@ private[antDefenseAIs] final class World(
   /**
    * Counts resources owned by the ant queen of each tribe
    *
-   * @return field i contains the amount of resources the queen of tribe i has
+   * @return field i contains the intensity of resources the queen of tribe i has
    */
   def resourceStat: Array[Int] = {
     val result = new Array[Int](queens.length)
@@ -552,7 +547,7 @@ private[antDefenseAIs] final class World(
   /**
    * Amount of resources owned at the current time by each tribe.
    *
-   * @return Field i contains the total amount of resources owned by ants of the tribe i
+   * @return Field i contains the total intensity of resources owned by ants of the tribe i
    */
   def totalResStat(): Array[Int] = {
     val ants: List[Ant]  = allAnts

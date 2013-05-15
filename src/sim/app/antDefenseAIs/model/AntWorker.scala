@@ -18,8 +18,6 @@ private[antDefenseAIs] object AntWorker {
 }
 
 
-import StrictMath.{min, max}
-
 import AntWorker._
 
 /**
@@ -30,9 +28,7 @@ import AntWorker._
  */
 private[antDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
-  override val world: World,
-  val behaviourConf: BehaviourConf) extends Ant(tribeID, world) {
-  import behaviourConf._
+  override val world: World) extends Ant(tribeID, world) {
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
@@ -41,47 +37,6 @@ private[antDefenseAIs] abstract class AntWorker(
 
 
   //////////////////// Basic operations of ants //////////////////////////////////////
-
-  /**
-   * Chooses a direction to go to.
-   *
-   * Works in the following way: With a probability of (1 - `explorationRate`) the (valid) direction with
-   * the best evaluation is chosen. In the other case there will be chosen a random direction.
-   *
-   * @param evaluate Function to evaluate
-   * @return Direction chosen
-   */
-  def chooseDirectionBy(evaluate: world.Direction.Value => Double): world.Direction.Value = {
-    val directionsValued: List[(world.Direction.Value, Double)] =
-      validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
-
-    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
-
-    if (world.random.nextDouble() <= (1.0d - explorationRate))
-      valDirsSorted.head._1
-    else
-      valDirsSorted.apply( 1 + world.random.nextInt(valDirsSorted.size - 1))._1
-  }
-
-  // Calculates an all over all value for a direction
-  final def valueDirectionWithPhero(pheroOn: ((Int, Int)) => Double)(dir: world.Direction.Value): Double = {
-    // Calculates a normalized value of a direction influenced by the pheromone
-    def dirValueByPhero(dir: world.Direction.Value): Double = {
-      val bestPheroInNeighbourhood = neighbourhood(1).map(pheroOn).max
-
-      val targetPos = world.Direction.inDirection(currentPos, dir)
-      if (bestPheroInNeighbourhood == 0)
-        0
-      else
-        pheroOn(targetPos) / bestPheroInNeighbourhood
-    }
-
-    // Calculates a normalized value of a direction influenced by the last direction
-    def dirValueByDir(dir: world.Direction.Value): Double =
-      world.Direction.directionDistance(lastDirection, dir) / world.Direction.MaxDirDistance
-
-    alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
-  }
 
   /**
    * Drops the resources on the current place. If the queen is there, she
@@ -109,45 +64,6 @@ private[antDefenseAIs] abstract class AntWorker(
       world.setResOn(pos, world.resOn(pos) - 1)
       transporting += 1
     }
-  }
-
-  /**
-   * Adapts the home-pheromones of the current field.
-   */
-  def adaptHomePhero() {
-    val bestNeighbour: world.Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
-    val adaptedValue = if (currentPos == myQueen.currentPos)
-      1.0d
-    else
-      gamma * homePheroOf(bestNeighbour)
-
-    // To avoid pheromone value > 1 and worse value than before
-    setHomePheroOn(currentPos, min(1, max(homePheroOf(), adaptedValue)))
-  }
-
-  /**
-   * Adapts the ressource-pheromones of the current field.
-   */
-  def adaptResPhero() {
-    val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
-
-    setResPheroOn(currentPos, min(1, adaptedValue))
-  }
-
-  /**
-   * Counts the number of ants within the neighbourhood fulfilling a predicate.
-   *
-   * The size of the observed neighbourhood is indicated by `antsSensingRange`.
-   *
-   * @param range Range in which will be searched
-   * @param p Predicate
-   * @return Number of ants in the neighbourhood fulfilling the predicate p
-   */
-  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
-    val ants: List[Ant] = neighbourhood(range).map(world.antsOn).flatten
-    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
-    ants.foldLeft(0: Int)(adder)
   }
 
 
