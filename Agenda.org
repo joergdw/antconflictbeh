@@ -61,7 +61,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  10) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
      Int, Int)) hinzufügen.
 
-** DONE Benutzeroberfläche und Simulationskontrolle [5/5]
+** DONE Benutzeroberfläche und Simulationskontrolle [6/7]
  1) [X] Pinselwerkzeug zum Kartendesign entwickeln
  2) [X] Statistikwerkzeug: Verlorene, eigene Ameisen
  3) /Optional:/ Aggressive Ameisen, die versuchen zu kämpfen, werden auf der Karte durch ein anderes Symbol dargestellt.
@@ -79,8 +79,9 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  10) /Optional:/ Jeder Stamm hält seine Pheromonkarte in einem Fenster, mit veschiedenen Reitern. Je Reiter eine
      Karte. (Das macht dann nach gegenwärtigem Stand drei Reiter pro Fenster.) /Zu aufwändig!/
  11) /Wird nicht gemacht, wegen nötiger Umstrukturierung:/ Statistikwerkzeug: Besiegte, gegnerische Ameisen
- 12) [ ] Zwei Simulationen daraus machen, die aus dem Menü heraus abrufbar sind. (Wie ~sim.app.antforaging~)
- 13) [ ] GUI-lose Simulation daraus machen, die einen Simulationsbericht erstellt.
+ 12) /Wird nicht mehr gemacht, weil nun alles über die Kommandozeile geregelt werden kann./ Zwei Simulationen daraus
+     machen, die aus dem Menü heraus abrufbar sind. (Wie ~sim.app.antforaging~)
+ 13) [X] Ein Experiment soll einen Simulationsbericht erstellen können
  14) [ ] GUI-lose Simulation so bearbeiten, dass sie im batch-modus ausgeführt werden kann. (Erfordert die
      Implementierung eines Abbruchkriteriums für die Simulation)
 

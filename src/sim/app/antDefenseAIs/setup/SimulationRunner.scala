@@ -100,7 +100,7 @@ object SimulationRunner {
       }
       else {
         SimState.doLoop(experiment.getClass, args)
-        // TODO: Print experiment report
+        println(experiment.getReport())
         System.exit(0)
       }
     }

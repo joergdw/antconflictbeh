@@ -14,7 +14,6 @@ package sim.app.antDefenseAIs.setup;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 
 import sim.app.antDefenseAIs.model.Ant;
 import sim.display.Controller;
@@ -299,13 +298,7 @@ public class ExperimentGUI extends GUIState {
 
         // TODO: Print experiment report
         Experiment experiment = (Experiment) state;
-        System.out.println("Population overview: " + Arrays.toString(experiment.world().populationStat()));
-        // System.out.println(Arrays.toString(experiment.world().resourceStat()));
-        System.out.println("Resource overview: " + Arrays.toString(experiment.world().totalResStat()));
-        // System.out.println(Arrays.deepToString(experiment.world().resourceMap()));
-        System.out.println("Killed overview: " + Arrays.toString(experiment.world().killedAntsByTribe()));
-        System.out.println("Died overview: " + Arrays.toString(experiment.world().diedAntsByTribe()));
-        System.out.println("Total losses overview: " + Arrays.toString(experiment.world().lostAntsByTribe()));
+        System.out.println(experiment.getReport());
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;

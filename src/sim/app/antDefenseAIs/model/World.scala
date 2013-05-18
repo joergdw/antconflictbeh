@@ -215,8 +215,8 @@ private[antDefenseAIs] final class World(
     // Remove dead ants and too old ants from the world and age and schedule again all other ants
     for (ant <- allAnts) {
       ant match {
-        case _ if ant.isKilled => removeAnt(ant); killedAntsByTribe(ant.tribeID) += 1 // and adapt statistic
-        case _ if ant.age >= ant.maximumAge => removeAnt(ant); diedAntsByTribe(ant.tribeID) += 1
+        case _ if ant.isKilled => removeAnt(ant); _killedAntsByTribe(ant.tribeID) += 1 // and adapt statistic
+        case _ if ant.age >= ant.maximumAge => removeAnt(ant); _diedAntsByTribe(ant.tribeID) += 1
         case other: Ant => other.age += 1  // age a living ant
       }
     }
@@ -477,7 +477,7 @@ private[antDefenseAIs] final class World(
    */
  private def placeNewAnt(ant: Ant, pos: (Int, Int)) {
    if (ants.getObjectLocation(ant) != null) new IllegalStateException("Ant already placed on world")
-   if (populationStat(ant.tribeID) >= maxPopulation)
+   if (populationStat()(ant.tribeID) >= maxPopulation)
      throw new IllegalStateException("Maximum population already reached: " + maxPopulation)
 
    assert(ants.setObjectLocation(ant, toInd2D(pos)))
@@ -498,8 +498,8 @@ private[antDefenseAIs] final class World(
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
 
-  val killedAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size) /** Killed number of ants by each tribe */
-  val diedAntsByTribe: Array[Int] =  new Array[Int](tribeTypes.size) /** Number of ants died because of age by each tribe */
+  private val _killedAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size) /** Killed number of ants by each tribe */
+  private val _diedAntsByTribe: Array[Int] =  new Array[Int](tribeTypes.size) /** Number of ants died because of age by each tribe */
 
   /**
    * Total number of ants lost by each tribe
@@ -509,17 +509,24 @@ private[antDefenseAIs] final class World(
   def lostAntsByTribe(): Array[Int] = {
     val result = new Array[Int](tribeTypes.size)
     for (i <- 0 until result.size)
-      result(i) = killedAntsByTribe(i) + diedAntsByTribe(i)
+      result(i) = _killedAntsByTribe(i) + _diedAntsByTribe(i)
 
     result
   }
+
+  /**
+   * Lost ants by each tribe due to overaging
+   *
+   * @return Lost ants by each tribe due to overaging
+   */
+  def lostAntsByAge(): Array[Int] = _diedAntsByTribe.clone()
 
   /**
    * Counts population of all tribes
    *
    * @return field i contains the total population of the tribe with the ID i
    */
-  def populationStat: Array[Int] = {
+  def populationStat(): Array[Int] = {
     val objects = ants.getAllObjects
     val result = new Array[Int](tribeTypes.length)
 
@@ -534,9 +541,9 @@ private[antDefenseAIs] final class World(
   /**
    * Counts resources owned by the ant queen of each tribe
    *
-   * @return field i contains the intensity of resources the queen of tribe i has
+   * @return field i contains the amount of resources the queen of tribe i has
    */
-  def resourceStat: Array[Int] = {
+  def resourceStat(): Array[Int] = {
     val result = new Array[Int](queens.length)
     for (i <- 0 until result.length) {
       result(i) = queens(i).deposit

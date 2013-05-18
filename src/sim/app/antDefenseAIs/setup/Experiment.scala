@@ -38,4 +38,62 @@ abstract class Experiment(var s: Long) extends SimState(s) {
     super.start()
     world.start()
   }
+
+  /**
+   * Report of the current state of the experiment
+   *
+   * @return Report message of the current state of the experiment
+   */
+  def getReport(): String = {
+    def header() = {
+      import java.util.Date
+      import java.sql.Timestamp
+
+      "Experiment Report\n--------------------\n" +
+      "Current System Time: " + new Timestamp(new Date().getTime).toString + "\n\n"
+    }
+
+    def populationReport(): String = {
+      val population: Array[Int] = world.populationStat()
+      var message = "* Population overview:\n"
+
+      for (i <- 0 until numberOfTribes) {
+        message = message concat "\tTribe " + i + " has " + population(i) + " ants\n"
+      }
+
+     message concat "\n"
+    }
+
+    def resourceReport(): String = {
+      val resourcesTotal: Array[Int] = world.totalResStat()
+      val resourcesQueens: Array[Int] = world.resourceStat()
+      var message: String = "* Resource overview:\n"
+
+      for (i <- 0 until numberOfTribes) {
+        message = message concat "\tTribe " + i + " owns " + resourcesTotal(i) + " resources"
+        message = message concat ", " + resourcesQueens(i) + " has the queen and"
+        message = message concat " " + (resourcesTotal(i) - resourcesQueens(i)) + " are carried by the workers."
+        message = message concat "\n"
+      }
+
+      message concat "\n"
+    }
+
+    def lossesReport(): String = {
+      val totalLosses = world.lostAntsByTribe()
+      val lostByAge = world.lostAntsByAge()
+      var message: String = "* Losses overview:\n"
+
+      for (i <- 0 until numberOfTribes) {
+        message = message concat "\tTribe " + i + " suffered " + totalLosses(i) + " losses"
+        message = message concat ", " + lostByAge(i) + " of them by age and"
+        message = message concat " " + (totalLosses(i) - lostByAge(i)) + " due to enemy contact."
+        message = message concat "\n"
+      }
+
+      message concat "\n"
+    }
+
+    header + populationReport() + resourceReport() + lossesReport()
+  }
 }
