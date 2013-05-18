@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License 3 as published by
@@ -21,8 +21,7 @@ import sim.app.antDefenseAIs.model.World
  *
  * @param s Seed for random data generator
  */
-abstract class Simulation(var s: Long) extends SimState(s) {
-  // TODO: Because of its high logical and theoretical coherence with the World-Class it is better to merge them.
+abstract class Experiment(var s: Long) extends SimState(s) {
 
   val world: World
 

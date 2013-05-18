@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License 3 as published by
@@ -21,7 +21,7 @@ import sim.util.IntBag
 
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
-import sim.app.antDefenseAIs.setup.Simulation
+import sim.app.antDefenseAIs.setup.Experiment
 
 /**
  * World
@@ -42,8 +42,9 @@ import sim.app.antDefenseAIs.setup.Simulation
  * @param tribeTypes Constructors of the different types of the tribe
  */
 private[antDefenseAIs] final class World(
-  val sim: Simulation,
-  val height: Int, val width: Int,
+  val sim: Experiment,
+  val width: Int,
+  val height: Int,
   val maxPopulation: Int = Int.MaxValue,
   private val startPositions: Array[(Int, Int)],
   val resources: IntGrid2D,
@@ -55,7 +56,7 @@ private[antDefenseAIs] final class World(
   val maxResAmount: Int = {
     var result = 0
 
-    for (i <- 0 until resources.getHeight; j <- 0 until resources.getWidth) {
+    for (i <- 0 until resources.getWidth; j <- 0 until resources.getHeight) {
       result = max(result, resources.get(i, j))
     }
 
@@ -69,7 +70,7 @@ private[antDefenseAIs] final class World(
 
   // ASSERT: all start positions in range of `height` and `width`
 
-  val ants: SparseGrid2D = new SparseGrid2D(height, width) /** Agents: multiples can be on one field */
+  val ants: SparseGrid2D = new SparseGrid2D(width, height) /** Agents: multiples can be on one field */
 
   /**
    * Modelling directions and its internals.
@@ -171,9 +172,9 @@ private[antDefenseAIs] final class World(
 
   for (i <- 0 until tribeTypes.length) { // foreach tribe
     // Create pheromone maps
-    homePheromones(i) = new DoubleGrid2D(height, width, 0.0d)
-    resPheromones(i) = new DoubleGrid2D(height, width, 0.0d)
-    warPheromones(i) = new DoubleGrid2D(height, width, 0.0d)
+    homePheromones(i) = new DoubleGrid2D(width, height, 0.0d)
+    resPheromones(i) = new DoubleGrid2D(width, height, 0.0d)
+    warPheromones(i) = new DoubleGrid2D(width, height, 0.0d)
 
     queens(i) = new AntQueen(nextTribeID(), this, tribeTypes(i)) // Create queen
     assert(ants.setObjectLocation(queens(i), startPositions(i)._1, startPositions(i)._2)) // Place queen on world
@@ -222,7 +223,7 @@ private[antDefenseAIs] final class World(
 
     // Evaporation
     for (warPheroMap <- warPheromones) {
-      for (i <- 0 until height; j <- 0 until width) {
+      for (i <- 0 until width; j <- 0 until height) {
         val threshold = 0.1e-2 // lowest possible value
 
         val old = warPheroMap.get(i, j)
@@ -573,7 +574,7 @@ private[antDefenseAIs] final class World(
    * @return Current resource distribution
    */
   def resourceMap(): Array[Array[Int]] = {
-    val result = Array.ofDim[Int](height, height)
+    val result = Array.ofDim[Int](width, height)
     for (i <- 0 until result.length; j <- 0 until result(i).length)
       result(i)(j) = resources.get(i, j)
 

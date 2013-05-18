@@ -10,6 +10,7 @@
  *
  * See the License.txt file for more details.
  */
+
 package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
@@ -18,17 +19,17 @@ import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
 import sim.app.antDefenseAIs.setup.MapCreationHelpers._
 import sim.app.antDefenseAIs.model._
 
+final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
 
-final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
-
-  val width = 57
-  val height = 57
+  val width = 200
+  val height = 200
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, artificialStandardGenerator)
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal,  // TODO: Adapt tribes
+    lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
-  val resDistrib: Array[Array[Int]] = Array.ofDim(width, height)
+  val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
 
   /* Construction of the resource distribution.
    * A map-pattern consisting of some to the two queens symmetric resource-spots
@@ -45,8 +46,19 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
 
 
   val resourceMap: IntGrid2D = intArray2IntGrid(resDistrib)
+  val startPositions = Array(
+    (width/2, height/2),
+    (0, 0),
+    (width/2, 0),
+    (width - 1, 0),
+    (0, height/2),
+    (width - 1, height/2),
+    (0, height - 1),
+    (width/2, height - 1),
+    (width - 1, height - 1)
+  )
 
   val world: World = new World(sim = this, height = height, width = width,
-    startPositions = Array((0, 0), (width - 1, height - 1)), resources = resourceMap,
+    startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
 }

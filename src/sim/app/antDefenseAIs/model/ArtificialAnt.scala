@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License 3 as published by

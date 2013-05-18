@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 by Jörg D. Weisbarth <joerg.bretten@web.de>
+ * Copyright © 2013 by Jörg D. Weisbarth
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License 3 as published by
@@ -28,7 +28,7 @@ import sim.portrayal.grid.SparseGridPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.gui.SimpleColorMap;
 
-public class SimulationWithGUI extends GUIState {
+public class ExperimentGUI extends GUIState {
     private int antDisplaySize = 400;
     private int pheroDisplaySize = 200;
 
@@ -56,11 +56,22 @@ public class SimulationWithGUI extends GUIState {
 
 
 ////////// Constructors and constructor related helpers ////////////////////////////////////// ////////////////
-    public SimulationWithGUI() { super(new Setup_1vs1(System.currentTimeMillis())); initialiseDisplays();}
-    public SimulationWithGUI(SimState state) { super(state); initialiseDisplays();}
+    public ExperimentGUI() {
+        super(new Setup_1vs1(System.currentTimeMillis()));
+        initialiseDisplays();
+    }
+
+    public ExperimentGUI(Experiment sim) {
+        super(sim);
+        initialiseDisplays();
+    }
+
+    public ExperimentGUI(SimState state) {
+        super(state); initialiseDisplays();
+    }
 
     private void initialiseDisplays() {
-        int t = ((Simulation) state).numberOfTribes();
+        int t = ((Experiment) state).numberOfTribes();
         homePheroDisplays = new Display2D[t];
         resPheroDisplays = new Display2D[t];
         warPheroDisplays = new Display2D[t];
@@ -103,10 +114,10 @@ public class SimulationWithGUI extends GUIState {
     }
 
     private void setupAntPortrayal() {
-        final Simulation simulation = (Simulation) state;
+        final Experiment experiment = (Experiment) state;
 
         // tell the portrayals what to portray and how to portray them
-        ants.setField(simulation.world().ants());
+        ants.setField(experiment.world().ants());
         ants.setPortrayalForAll(new OvalPortrayal2D() {
             public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
                 Ant ant = (Ant) object;
@@ -122,11 +133,11 @@ public class SimulationWithGUI extends GUIState {
     }
 
     private void setupResourcePortrayal() {
-        final Simulation simulation = (Simulation) state;
+        final Experiment experiment = (Experiment) state;
 
         // Portrayal for the resource-map
-        resources.setMap(new SimpleColorMap(0, simulation.maxResAmount(), Color.white, Color.black));
-        resources.setField(simulation.world().resources());
+        resources.setMap(new SimpleColorMap(0, experiment.maxResAmount(), Color.white, Color.black));
+        resources.setField(experiment.world().resources());
         resources.setValueName("Amount resources");
         resources.setPortrayalForAll(new OvalPortrayal2D());
 
@@ -136,13 +147,13 @@ public class SimulationWithGUI extends GUIState {
     }
 
     private void setupPheromonePortrayals() {
-        final Simulation simulation = (Simulation) state;
+        final Experiment experiment = (Experiment) state;
 
         // Portrayals for the different Pheromone-Grids
         for (int i = 0; i < homePheros.length; ++i) {
-            homePheros[i].setField(simulation.world().homePheromones()[i]);
-            resPheros[i].setField(simulation.world().resPheromones()[i]);
-            warPheros[i].setField(simulation.world().warPheromones()[i]);
+            homePheros[i].setField(experiment.world().homePheromones()[i]);
+            resPheros[i].setField(experiment.world().resPheromones()[i]);
+            warPheros[i].setField(experiment.world().warPheromones()[i]);
 
             homePheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
@@ -286,14 +297,15 @@ public class SimulationWithGUI extends GUIState {
     public void quit() {
         super.quit();
 
-        Simulation sim = (Simulation) state;
-        System.out.println("Population overview: " + Arrays.toString(sim.world().populationStat()));
-        // System.out.println(Arrays.toString(sim.world().resourceStat()));
-        System.out.println("Resource overview: " + Arrays.toString(sim.world().totalResStat()));
-        // System.out.println(Arrays.deepToString(sim.world().resourceMap()));
-        System.out.println("Killed overview: " + Arrays.toString(sim.world().killedAntsByTribe()));
-        System.out.println("Died overview: " + Arrays.toString(sim.world().diedAntsByTribe()));
-        System.out.println("Total losses overview: " + Arrays.toString(sim.world().lostAntsByTribe()));
+        // TODO: Print experiment report
+        Experiment experiment = (Experiment) state;
+        System.out.println("Population overview: " + Arrays.toString(experiment.world().populationStat()));
+        // System.out.println(Arrays.toString(experiment.world().resourceStat()));
+        System.out.println("Resource overview: " + Arrays.toString(experiment.world().totalResStat()));
+        // System.out.println(Arrays.deepToString(experiment.world().resourceMap()));
+        System.out.println("Killed overview: " + Arrays.toString(experiment.world().killedAntsByTribe()));
+        System.out.println("Died overview: " + Arrays.toString(experiment.world().diedAntsByTribe()));
+        System.out.println("Total losses overview: " + Arrays.toString(experiment.world().lostAntsByTribe()));
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;
