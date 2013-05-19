@@ -23,7 +23,7 @@ object SimulationRunner {
   private var experiment: Experiment = new Setup_1vs1(System.currentTimeMillis())
 
   /**
-   * True if the experiment should be runned with graphical user interface
+   * True if the experiment should be run with graphical user interface
    */
   private var withGUI: Boolean = true
 
@@ -53,14 +53,17 @@ object SimulationRunner {
 
     def parse(s: String): Option[this.Value] = {
       import scala.collection.immutable.HashMap
-      val h = HashMap[String, this.Value](
-        (nox.toString, nox),
-        (sim1vs1.toString, sim1vs1),
-        (normalOnMulti.toString, normalOnMulti),
-        (modOnMulti.toString, modOnMulti)
-      )
 
-      h.get(s)
+      val parserMap = {
+        var map = HashMap[String, this.Value]()
+
+        for (option <- Options.values)
+          map = map.+((option.toString, option))
+
+        map
+      }
+
+      parserMap get s
     }
   }
 

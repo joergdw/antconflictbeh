@@ -155,10 +155,14 @@ public class ExperimentGUI extends GUIState {
         final Experiment experiment = (Experiment) state;
 
         // Portrayals for the different Pheromone-Grids
-        for (int i = 0; i < homePheros.length; ++i) {
-            homePheros[i].setField(experiment.world().homePheromones()[i]);
-            resPheros[i].setField(experiment.world().resPheromones()[i]);
-            warPheros[i].setField(experiment.world().warPheromones()[i]);
+        int tribeID;
+        int[] tribeIDs = experiment.world().tribeIDs();
+        for (int i = 0; i < tribeIDs.length; ++i) {
+            tribeID = tribeIDs[i];
+
+            homePheros[i].setField(experiment.world().homePheromones().apply(tribeID));
+            resPheros[i].setField(experiment.world().resPheromones().apply(tribeID));
+            warPheros[i].setField(experiment.world().warPheromones().apply(tribeID));
 
             homePheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));

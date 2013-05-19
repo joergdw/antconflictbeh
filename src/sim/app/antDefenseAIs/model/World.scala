@@ -13,6 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 import StrictMath.max
+import scala.collection.immutable.HashMap
 import scala.collection.mutable
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
@@ -20,7 +21,6 @@ import sim.engine.{Stoppable, SimState, Steppable}
 import sim.util.IntBag
 
 import sim.app.antDefenseAIs.common.Common._
-import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 import sim.app.antDefenseAIs.setup.Experiment
 
 /**
@@ -65,6 +65,8 @@ private[antDefenseAIs] final class World(
 
   val random = experiment.random /** Random number generator */
 
+  if (experiment.numberOfTribes != tribeTypes.length)
+    throw new IllegalArgumentException("Not exactly as many colony types as colonies")
   if (startPositions.length != tribeTypes.length)
     throw new IllegalArgumentException("Not exactly as many start positions as colony types")
 
@@ -114,7 +116,6 @@ private[antDefenseAIs] final class World(
      *
      * Important knowledge for Mason topology: Field (x, y) is in column x, row y.
      */
-    import scala.collection.immutable.HashMap
     private val assocs = HashMap(
       (NorthWest, (-1, -1)),
       (North, (0, -1)),
@@ -145,7 +146,7 @@ private[antDefenseAIs] final class World(
      * @return First position in direction `dir` from position `pos`
      */
     def inDirection(pos: (Int, Int), dir: Value): (Int, Int) = {
-      val (x, y) = assocs.get(dir).get
+      val (x, y) = assocs(dir)
       (pos._1 + x, pos._2 + y)
     }
 
@@ -158,27 +159,60 @@ private[antDefenseAIs] final class World(
      */
     def directionIs(start: (Int, Int), target: (Int, Int)): Direction.Value = {
       val diff = (target._1 - start._1, target._2 - start._2)
-      assocsm1.get(diff).get
+      assocsm1(diff)
     }
+  }
+
+  private val queens: HashMap[Int, AntQueen] = {
+    import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
+
+    var m = HashMap[Int, AntQueen]()
+
+    for (i <- 0 until experiment.numberOfTribes) {
+      val id = nextTribeID()
+      val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
+      assert(ants.setObjectLocation(queen, startPositions(i)._1, startPositions(i)._2)) // Place queen on world
+
+      m = m.+((id, queen))
+    }
+
+    m
   }
 
   // For each tribe there will be a store for all the pheromone-types.
   // Only public for mason graphical capabilities. Other classes should use the access methods of this class
-  val homePheromones = new Array[DoubleGrid2D](tribeTypes.length)
-  val resPheromones = new Array[DoubleGrid2D](tribeTypes.length)
-  val warPheromones = new Array[DoubleGrid2D](tribeTypes.length)
+  val homePheromones: HashMap[Int, DoubleGrid2D] = {
+    var m: HashMap[Int, DoubleGrid2D] = HashMap()
 
-  private val queens: Array[AntQueen] = new Array[AntQueen](tribeTypes.length)
+    for (id <- queens.keys)
+      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
 
-  for (i <- 0 until tribeTypes.length) { // foreach tribe
-    // Create pheromone maps
-    homePheromones(i) = new DoubleGrid2D(width, height, 0.0d)
-    resPheromones(i) = new DoubleGrid2D(width, height, 0.0d)
-    warPheromones(i) = new DoubleGrid2D(width, height, 0.0d)
+    m
+  }
 
-    queens(i) = new AntQueen(nextTribeID(), this, tribeTypes(i)) // Create queen
-    assert(ants.setObjectLocation(queens(i), startPositions(i)._1, startPositions(i)._2)) // Place queen on world
-    homePheromones(i).set(startPositions(i)._1, startPositions(i)._2, 1.0d) // Adapt home-pheromone on queens place
+  val resPheromones: HashMap[Int, DoubleGrid2D] = {
+    var m: HashMap[Int, DoubleGrid2D] = HashMap()
+
+    for (id <- queens.keys)
+      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
+
+    m
+  }
+
+  val warPheromones: HashMap[Int, DoubleGrid2D] = {
+    var m: HashMap[Int, DoubleGrid2D] = HashMap()
+
+    for (id <- queens.keys)
+      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
+
+    m
+  }
+
+  // Adapt home-pheromone on queens place
+  for ((id, queen) <- queens) {
+    val homePheroMap = homePheromones(id)
+    val pos = currentPos(queen)
+    homePheroMap.set(pos._1, pos._2, 1.0d)
   }
 
   /**
@@ -188,7 +222,7 @@ private[antDefenseAIs] final class World(
     // World must do first step in every turn, otherwise it can occur that …
     experiment.schedule.scheduleRepeating(this)
 
-    for (queen <- queens) { // Schedule all queens
+    for ((id, queen) <- queens) { // Schedule all queens
       val stoper = experiment.schedule.scheduleRepeating(queen)
       stopOrders += ((queen, stoper))
     }
@@ -222,7 +256,7 @@ private[antDefenseAIs] final class World(
     }
 
     // Evaporation
-    for (warPheroMap <- warPheromones) {
+    for ((id, warPheroMap) <- warPheromones) {
       for (i <- 0 until width; j <- 0 until height) {
         val threshold = 0.1e-2 // lowest possible value
 
@@ -546,7 +580,7 @@ private[antDefenseAIs] final class World(
    * @return field i contains the amount of resources the queen of tribe i has
    */
   def resourceStat(): Array[Int] = {
-    val result = new Array[Int](queens.length)
+    val result = new Array[Int](tribeTypes.length)
     for (i <- 0 until result.length) {
       result(i) = queens(i).deposit
     }
@@ -578,6 +612,13 @@ private[antDefenseAIs] final class World(
   ///////////////////////////// Others ///////////////////////////////////
 
   /**
+   * All tribe ids of the tribes on the world
+   *
+   * @return Array of all tribe ids of the tribes on the world
+   */
+  def tribeIDs(): Array[Int] = queens.keys.toArray
+
+  /**
    * Returns map containing the current resource distribution
    *
    * @return Current resource distribution
@@ -588,33 +629,6 @@ private[antDefenseAIs] final class World(
       result(i)(j) = resources.get(i, j)
 
     result
-  }
-
-  /**
-   * Returns all home pheromone maps
-   *
-   * @return Array of all home pheromone maps
-   */
-  def homePheroMaps(): Array[Array[Array[Double]]] = {
-    homePheromones.map(doubleGrid2Array)
-  }
-
-  /**
-   * Returns all war pheromone maps
-   *
-   * @return Array of all war pheromone maps
-   */
-  def warPheroMaps(): Array[Array[Array[Double]]] = {
-    warPheromones.map(doubleGrid2Array)
-  }
-
-  /**
-   * Returns all resource pheromone maps
-   *
-   * @return Array of all resource pheromone maps
-   */
-  def resPheroMaps(): Array[Array[Array[Double]]] = {
-    resPheromones.map(doubleGrid2Array)
   }
 
   private def allAnts: List[Ant] = antBag2AntList (ants.getAllObjects)
