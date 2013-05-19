@@ -39,6 +39,8 @@ abstract class Experiment(var s: Long) extends SimState(s) {
     world.start()
   }
 
+  // TODO: Automatische Abbruch-Kriterien entwickeln und beachten.
+
   /**
    * Report of the current state of the experiment
    *

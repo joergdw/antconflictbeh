@@ -46,7 +46,7 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
 
   val resourceMap: IntGrid2D = intArray2IntGrid(resDistrib)
 
-  val world: World = new World(sim = this, height = height, width = width,
+  val world: World = new World(experiment = this, height = height, width = width,
     startPositions = Array((0, 0), (width - 1, height - 1)), resources = resourceMap,
     tribeTypes = tribes)
 }

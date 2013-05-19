@@ -49,7 +49,8 @@ public class ExperimentGUI extends GUIState {
     // Colour-map for the differen tribes
     private Color[] tribeColours = {Color.black, Color.blue, Color.red,
                                     Color.yellow, Color.cyan, Color.green,
-                                    Color.orange, Color.lightGray};
+                                    Color.orange, Color.lightGray, Color.magenta,
+                                    Color.darkGray, Color.pink};
 
     public static String getName() { return "Ant wars";}
 
@@ -63,6 +64,11 @@ public class ExperimentGUI extends GUIState {
     public ExperimentGUI(Experiment sim) {
         super(sim);
         initialiseDisplays();
+
+        if (sim.numberOfTribes() > tribeColours.length) {
+            throw new IllegalStateException("Not enough colours for amount of tribes defined:\n"
+            + "necessary colors: " + sim.numberOfTribes() + ", defined colours: " + tribeColours.length);
+        }
     }
 
     public ExperimentGUI(SimState state) {

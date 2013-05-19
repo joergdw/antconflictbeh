@@ -48,7 +48,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     die sich bereits auf einem Nahrungsfeld befindet, schaut sich erst die Nachbarfelder an, bevor sie weiter das
     derzeitige Feld abbaut.
 
-** DONE Sonstiges [3/4]
+** DONE Sonstiges [3/5]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
  3) [X] Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
@@ -85,8 +85,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  14) [ ] GUI-lose Simulation so bearbeiten, dass sie im batch-modus ausgeführt werden kann. (Erfordert die
      Implementierung eines Abbruchkriteriums für die Simulation)
 
-
-** TODO Quelltext-Arbeiten [10/12]
+** TODO Quelltext-Arbeiten [9/11]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [X] Konsistenzprüfung Koordinatentopologie; Siehe [[Mason Topologie]].
@@ -98,7 +97,9 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
    lohnt es sich dann auch eventuell die Anwendung in zwei Anwendungen zu spalten, damit sie mit einem Klick in der
    Anwendungsauswahl auswählbar sind. Das kann so gemacht werden, dass sie dennoch fast auf den kompletten Quelltext
    gemeinsam zugreifen.
- + [X] Fehlerkorrekturen
+ + [ ] Letztes Experiment (modOnMulti) implementieren (besonders die Karte!) und in das Objekt SimulationRunner
+   integrieren
+ + [ ] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [ ] Veröffentlichung bei einem Quelltext-Hoster
  + /Optional:/ Richtungskonzept durchziehen (überall, wo möglich) – Ameisen wissen jetzt grundsätzlich nicht mehr, wo
@@ -127,7 +128,7 @@ hochparallel mit Aktoren implementiert werden. Falls Lust dazu vorhanden ist, so
 (Message Passing Interface) für Großrechner.
 
 
-* Pseudo-Quelltexte [3/4]
+* Pseudo-Quelltexte [4/4]
 ** DONE Sonstige Gedanken [7/7]
  + [X] Ameisen lassen bei ihrem Tod die Ressourcen, die sie tragen, fallen.
  + [X] Das Heimpheromonfeld muss mit +<Unendlich> initialisiert werden, mit Ausnahme des Felds der Königin.
@@ -205,7 +206,9 @@ Dieses teilen sich alle Ameisen
 
       Falls Ameise nicht aggressiv: ökonomisches Verhalten
 
-** TODO Kampfverhalten aggressiver Ameisen
+** DONE Kampfverhalten aggressiver Ameisen
+Verhalten in stark modifizierter Variante übernommen (siehe Quelltext)
+
    /*
     TODO: Implementiere diesen Pseudocode
     Bemerkung: Die Ameise soll den Fall ausführen, der zuerst zutrifft.

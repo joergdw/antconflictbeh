@@ -68,7 +68,11 @@ object SimulationRunner {
    * Helpmessage for usage of this program
    */
   val helpMessage: String = {
-    "Helpmessage already not defined."
+    "Usage:\n" +
+      "Option " + Options.nox.toString + "\t" + Options.describe(Options.nox) + "\n" +
+      "Option " + Options.sim1vs1.toString + "\t" + Options.describe(Options.sim1vs1) + "\n" +
+      "Option " + Options.normalOnMulti.toString + "\t" + Options.describe(Options.normalOnMulti) + "\n" +
+      "Option " + Options.modOnMulti.toString + "\t" + Options.describe(Options.modOnMulti) + "\n"
   }
 
   def main(args: Array[String]) {

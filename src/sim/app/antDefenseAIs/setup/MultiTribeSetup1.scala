@@ -58,7 +58,7 @@ final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
     (width - 1, height - 1)
   )
 
-  val world: World = new World(sim = this, height = height, width = width,
+  val world: World = new World(experiment = this, height = height, width = width,
     startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
 }

@@ -34,7 +34,7 @@ import sim.app.antDefenseAIs.setup.Experiment
  * A world must be scheduled from its caller – for every single turn. That's necessary for performing regular
  * nature-like actions, like removing dead ants.
  *
- * @param sim Simulation the world is related to
+ * @param experiment Simulation the world is related to
  * @param resources Distribution of the resources on the map
  * @param height Height of the map
  * @param width  Width of the map
@@ -42,7 +42,7 @@ import sim.app.antDefenseAIs.setup.Experiment
  * @param tribeTypes Constructors of the different types of the tribe
  */
 private[antDefenseAIs] final class World(
-  val sim: Experiment,
+  val experiment: Experiment,
   val width: Int,
   val height: Int,
   val maxPopulation: Int = Int.MaxValue,
@@ -63,7 +63,7 @@ private[antDefenseAIs] final class World(
     result
   }
 
-  val random = sim.random /** Random numbergenerator */
+  val random = experiment.random /** Random number generator */
 
   if (startPositions.length != tribeTypes.length)
     throw new IllegalArgumentException("Not exactly as many start positions as colony types")
@@ -186,10 +186,10 @@ private[antDefenseAIs] final class World(
    */
   def start() {
     // World must do first step in every turn, otherwise it can occur that …
-    sim.schedule.scheduleRepeating(this)
+    experiment.schedule.scheduleRepeating(this)
 
     for (queen <- queens) { // Schedule all queens
-      val stoper = sim.schedule.scheduleRepeating(queen)
+      val stoper = experiment.schedule.scheduleRepeating(queen)
       stopOrders += ((queen, stoper))
     }
   }
@@ -467,7 +467,7 @@ private[antDefenseAIs] final class World(
      * @param ant Ant asking for the queen
      * @return Queen of the ant colony the ant belongs to
      */
-    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
+    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)  // TODO: Wieso geht das schief?
 
   /**
    * Places a given, new ant on the given position
@@ -476,12 +476,14 @@ private[antDefenseAIs] final class World(
    * @param pos Position to place the given ant on
    */
  private def placeNewAnt(ant: Ant, pos: (Int, Int)) {
-   if (ants.getObjectLocation(ant) != null) new IllegalStateException("Ant already placed on world")
+   if (ants.getObjectLocation(ant) != null)
+     throw new IllegalStateException("Ant already placed on world")
    if (populationStat()(ant.tribeID) >= maxPopulation)
-     throw new IllegalStateException("Maximum population already reached: " + maxPopulation)
+     throw new IllegalStateException("Maximum population of " + maxPopulation + " already reached" +
+      " by tribe " + ant.tribeID)
 
    assert(ants.setObjectLocation(ant, toInd2D(pos)))
-   val stoper = sim.schedule.scheduleRepeating(ant)
+   val stoper = experiment.schedule.scheduleRepeating(ant)
    stopOrders += ((ant, stoper))
  }
 
