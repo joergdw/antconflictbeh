@@ -20,7 +20,7 @@ object SimulationRunner {
   /**
    * Experiment which will be executed
    */
-  private var experiment: Experiment = new Setup_1vs1(System.currentTimeMillis())
+  private var experiment: Experiment = null
 
   /**
    * True if the experiment should be run with graphical user interface
@@ -92,7 +92,7 @@ object SimulationRunner {
       else {
         opt.get match {
           case Options.nox => withGUI = false
-          case Options.sim1vs1 => // correct simulation already set
+          case Options.sim1vs1 => experiment = new Setup_1vs1(System.currentTimeMillis())
           case Options.normalOnMulti => experiment = new MultiTribeSetup1(System.currentTimeMillis())
           case Options.modOnMulti => println("WARNING: Already not defined in class " + this.getClass.getCanonicalName)
         }

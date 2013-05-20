@@ -564,7 +564,7 @@ private[antDefenseAIs] final class World(
    */
   def populationStat(): Array[Int] = {
     val objects = ants.getAllObjects
-    val result = new Array[Int](tribeTypes.length)
+    val result = new Array[Int](experiment.numberOfTribes)        // TODO: adapt to hash-array
 
     for (i <- 0 until objects.size()) {
       val ant = objects.get(i).asInstanceOf[Ant]
