@@ -13,7 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object AntWorker {
-  val maximumAge: Int = 5000 /** Maximum age of a ant (in steps) */
+  val maximumAge: Int = 10000 /** Maximum age of a ant (in steps) */
   val backpackSize: Int = 5 /** Amount of resources which can be transported by an individual */
 }
 

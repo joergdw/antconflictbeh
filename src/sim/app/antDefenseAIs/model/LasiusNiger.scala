@@ -24,6 +24,7 @@ package sim.app.antDefenseAIs.model
  * @param alpha Influence of pheromone for determine next position. Should be between 0 and 1
  * @param explorationRate Probability that another than the best neighbour field will be chosen to move to
  * @param gamma Learning parameter according the one used paper
+ * @param notBored Value of boredom if the ant is not bored at all
  */
 private[antDefenseAIs] class LasiusBehaviourConf(
   val emotionalDwellTime: Int = 5,
@@ -32,7 +33,8 @@ private[antDefenseAIs] class LasiusBehaviourConf(
   val minAggressivenessProb: Double = 0.257d,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
-  override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
+  override val gamma: Double = 0.98d,
+  val notBored: Int = 500) extends BehaviourConf(alpha, explorationRate, gamma)
 
 
 private[antDefenseAIs] class LasiusNigerGenerator(
@@ -92,7 +94,6 @@ private[antDefenseAIs] class LasiusNiger(
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
-  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
   private var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
 
   /**

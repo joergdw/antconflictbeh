@@ -15,6 +15,7 @@ package sim.app.antDefenseAIs.setup
 import sim.engine.SimState
 
 import sim.app.antDefenseAIs.model.World
+import scala.collection.immutable.HashMap
 
 /**
  * Contains some preferences for the simulation
@@ -56,25 +57,25 @@ abstract class Experiment(var s: Long) extends SimState(s) {
     }
 
     def populationReport(): String = {
-      val population: Array[Int] = world.populationStat()
+      val population: List[(Int, Int)] = world.populationStat().toList.sortBy(x => x._1)
       var message = "* Population overview:\n"
 
-      for (i <- 0 until numberOfTribes) {
-        message = message concat "\tTribe " + i + " has " + population(i) + " ants\n"
+      for ((id, number) <- population) {
+        message = message concat "\tTribe " + id + " has " + number + " ants\n"
       }
 
      message concat "\n"
     }
 
     def resourceReport(): String = {
-      val resourcesTotal: Array[Int] = world.totalResStat()
-      val resourcesQueens: Array[Int] = world.resourceStat()
+      val resourcesTotal: List[(Int, Int)] = world.totalResStat().toList.sortBy(x => x._1)
+      val resourcesQueens = world.resourceStat()
       var message: String = "* Resource overview:\n"
 
-      for (i <- 0 until numberOfTribes) {
-        message = message concat "\tTribe " + i + " owns " + resourcesTotal(i) + " resources"
-        message = message concat ", " + resourcesQueens(i) + " has the queen and"
-        message = message concat " " + (resourcesTotal(i) - resourcesQueens(i)) + " are carried by the workers."
+      for ((id, amount) <- resourcesTotal) {
+        message = message concat "\tTribe " + id + " owns " + amount + " resources"
+        message = message concat ", " + resourcesQueens(id) + " has the queen and"
+        message = message concat " " + (amount - resourcesQueens(id)) + " are carried by the workers."
         message = message concat "\n"
       }
 
@@ -82,14 +83,14 @@ abstract class Experiment(var s: Long) extends SimState(s) {
     }
 
     def lossesReport(): String = {
-      val totalLosses = world.lostAntsByTribe()
+      val totalLosses = world.lostAntsByTribe().toList.sortBy(x => x._1)
       val lostByAge = world.lostAntsByAge()
       var message: String = "* Losses overview:\n"
 
-      for (i <- 0 until numberOfTribes) {
-        message = message concat "\tTribe " + i + " suffered " + totalLosses(i) + " losses"
-        message = message concat ", " + lostByAge(i) + " of them by age and"
-        message = message concat " " + (totalLosses(i) - lostByAge(i)) + " due to enemy contact."
+      for ((id, total) <- totalLosses) {
+        message = message concat "\tTribe " + id + " suffered " + total + " losses"
+        message = message concat ", " + lostByAge(id) + " of them by age and"
+        message = message concat " " + (total - lostByAge(id)) + " due to enemy contact."
         message = message concat "\n"
       }
 

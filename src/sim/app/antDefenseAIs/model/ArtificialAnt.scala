@@ -40,12 +40,14 @@ private[antDefenseAIs] class ArtificialAntGenerator(
  * @param alpha Influence of pheromone for determine next position. Should be between 0 and 1
  * @param explorationRate Probability that another than the best neighbour field will be chosen to move to
  * @param gamma Learning parameter according the one used paper
+ * @param notBored Value of boredom if the ant is not bored at all
  */
 class ArtificialAntBehaviourConf(
   val emotionalDwellTime: Int = 10,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
-  override val gamma: Double = 0.98d) extends BehaviourConf(alpha, explorationRate, gamma)
+  override val gamma: Double = 0.98d,
+  val notBored: Int = 500) extends BehaviourConf(alpha, explorationRate, gamma)
 
 
 private[antDefenseAIs] object ArtificialAnt {
@@ -80,7 +82,6 @@ private[antDefenseAIs] class ArtificialAnt(
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
-  val notBored: Int = 100 /** Value of boredom, 100 if an ant is not bored at all */
   private var boredom: Int = notBored /** 0 if an ant is „bored“ of searching abortively food and wants to go home */
 
   private object Emotion extends Enumeration {

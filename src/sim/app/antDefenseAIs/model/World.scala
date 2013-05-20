@@ -249,8 +249,16 @@ private[antDefenseAIs] final class World(
     // Remove dead ants and too old ants from the world and age and schedule again all other ants
     for (ant <- allAnts) {
       ant match {
-        case _ if ant.isKilled => removeAnt(ant); _killedAntsByTribe(ant.tribeID) += 1 // and adapt statistic
-        case _ if ant.age >= ant.maximumAge => removeAnt(ant); _diedAntsByTribe(ant.tribeID) += 1
+        case _ if ant.isKilled => {
+          removeAnt(ant)
+          val n = _killedAntsByTribe(ant.tribeID)
+          _killedAntsByTribe += ((ant.tribeID, n + 1))
+        }
+        case _ if ant.age >= ant.maximumAge => {
+          removeAnt(ant)
+          val n = _diedAntsByTribe(ant.tribeID)
+          _diedAntsByTribe += ((ant.tribeID, n + 1))
+        }
         case other: Ant => other.age += 1  // age a living ant
       }
     }
@@ -501,7 +509,7 @@ private[antDefenseAIs] final class World(
      * @param ant Ant asking for the queen
      * @return Queen of the ant colony the ant belongs to
      */
-    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)  // TODO: Wieso geht das schief?
+    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
 
   /**
    * Places a given, new ant on the given position
@@ -534,18 +542,38 @@ private[antDefenseAIs] final class World(
 
   ///////////////////////// Statistic related stuff /////////////////////////////////
 
-  private val _killedAntsByTribe: Array[Int] = new Array[Int](tribeTypes.size) /** Killed number of ants by each tribe */
-  private val _diedAntsByTribe: Array[Int] =  new Array[Int](tribeTypes.size) /** Number of ants died because of age by each tribe */
+  /** Number of ants killed by foreign colonies by each tribe */
+  private val _killedAntsByTribe: mutable.HashMap[Int, Int] = {
+    val result = mutable.HashMap[Int, Int]()
+
+    for (queen <- queens.values) {
+      result += ((queen.tribeID, 0))
+    }
+
+    result
+  }
+
+  /** Number of ants died because of age by each tribe */
+  private val _diedAntsByTribe: mutable.HashMap[Int, Int] = {
+    val result = mutable.HashMap[Int, Int]()
+
+    for (queen <- queens.values) {
+      result += ((queen.tribeID, 0))
+    }
+
+    result
+  }
 
   /**
    * Total number of ants lost by each tribe
    *
    * @return Total number of ants lost by each tribe
    */
-  def lostAntsByTribe(): Array[Int] = {
-    val result = new Array[Int](tribeTypes.size)
-    for (i <- 0 until result.size)
-      result(i) = _killedAntsByTribe(i) + _diedAntsByTribe(i)
+  def lostAntsByTribe(): HashMap[Int, Int] = {
+    var result = HashMap[Int, Int]()
+
+    for (id <- queens.keys)
+      result = result.+((id, _killedAntsByTribe(id) + _diedAntsByTribe(id)))
 
     result
   }
@@ -555,20 +583,24 @@ private[antDefenseAIs] final class World(
    *
    * @return Lost ants by each tribe due to overaging
    */
-  def lostAntsByAge(): Array[Int] = _diedAntsByTribe.clone()
+  def lostAntsByAge(): mutable.HashMap[Int, Int] = _diedAntsByTribe.clone()
 
   /**
    * Counts population of all tribes
    *
-   * @return field i contains the total population of the tribe with the ID i
+   * @return HashMap that contains for each tribeID (key) the corresponding population
    */
-  def populationStat(): Array[Int] = {
+  def populationStat(): HashMap[Int, Int] = {
     val objects = ants.getAllObjects
-    val result = new Array[Int](experiment.numberOfTribes)        // TODO: adapt to hash-array
+    var result = HashMap[Int, Int]()
+
+    for (queen <- queens.values)
+      result = result.+((queen.tribeID, 0)) // Start with 0 for each tribe
 
     for (i <- 0 until objects.size()) {
       val ant = objects.get(i).asInstanceOf[Ant]
-      result(ant.tribeID) += 1
+      val n: Int = result(ant.tribeID)
+      result = result.+((ant.tribeID, n + 1))
     }
 
     result
@@ -579,11 +611,11 @@ private[antDefenseAIs] final class World(
    *
    * @return field i contains the amount of resources the queen of tribe i has
    */
-  def resourceStat(): Array[Int] = {
-    val result = new Array[Int](tribeTypes.length)
-    for (i <- 0 until result.length) {
-      result(i) = queens(i).deposit
-    }
+  def resourceStat(): HashMap[Int, Int] = {
+    var result = HashMap[Int, Int]()
+
+    for (queen <- queens.values)
+      result = result + ((queen.tribeID, queen.deposit))
 
     result
   }
@@ -593,19 +625,23 @@ private[antDefenseAIs] final class World(
    *
    * @return Field i contains the total intensity of resources owned by ants of the tribe i
    */
-  def totalResStat(): Array[Int] = {
+  def totalResStat(): mutable.HashMap[Int, Int] = {
     val ants: List[Ant]  = allAnts
-    val result = new Array[Int](tribeTypes.length)
+    val result = mutable.HashMap[Int, Int]()
+
+    for (queen <- queens.values)
+      result += ((queen.tribeID, 0)) // Start with 0 for each tribe
 
     for (ant <- ants) {
-      ant match {
-        case worker: AntWorker => result(worker.tribeID) += worker.inBackpack
-        case queen: AntQueen => result(queen.tribeID) += queen.deposit
-        case otherAnt => new Exception("Counting rules for class " + otherAnt.getClass.getName + " not known")
-      }
+      val n: Int = result(ant.tribeID)
+      val diff: Int = ant match {
+                        case worker: AntWorker => worker.inBackpack
+                        case queen: AntQueen => queen.deposit
+                      }
+      result += ((ant.tribeID, n + diff))
     }
 
-    result
+    result.clone()
   }
 
 

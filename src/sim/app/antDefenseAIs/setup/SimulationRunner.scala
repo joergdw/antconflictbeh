@@ -20,7 +20,7 @@ object SimulationRunner {
   /**
    * Experiment which will be executed
    */
-  private var experiment: Experiment = null
+  private var experiment: Option[Experiment] = None
 
   /**
    * True if the experiment should be run with graphical user interface
@@ -92,22 +92,27 @@ object SimulationRunner {
       else {
         opt.get match {
           case Options.nox => withGUI = false
-          case Options.sim1vs1 => experiment = new Setup_1vs1(System.currentTimeMillis())
-          case Options.normalOnMulti => experiment = new MultiTribeSetup1(System.currentTimeMillis())
+          case Options.sim1vs1 => experiment = Some(new Setup_1vs1(System.currentTimeMillis()))
+          case Options.normalOnMulti => experiment = Some(new MultiTribeSetup1(System.currentTimeMillis()))
           case Options.modOnMulti => println("WARNING: Already not defined in class " + this.getClass.getCanonicalName)
         }
       }
     }
 
-    if (allArgumentsValid) { // Start Simulation with desired configuration
+    if (experiment.isEmpty) {
+      println("No experiment type defined. Please choose a valid option for the experiment.")
+      println(helpMessage)
+      System.exit(1)
+    }
+    else if (allArgumentsValid) { // Start Simulation with desired configuration
       if (withGUI) {
-        val video: ExperimentGUI = new ExperimentGUI(experiment)
+        val video: ExperimentGUI = new ExperimentGUI(experiment.get)
         val console: Console = new Console(video)
         console.setVisible(true)
       }
       else {
         SimState.doLoop(experiment.getClass, args)
-        println(experiment.getReport())
+        println(experiment.get.getReport())
         System.exit(0)
       }
     }
