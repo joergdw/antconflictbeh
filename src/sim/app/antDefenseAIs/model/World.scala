@@ -375,7 +375,10 @@ private[antDefenseAIs] final class World(
   private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
     currentPos(ant) match {
       case None => None
-      case Some(pos) => Some(resPheromones(ant.tribeID).get(pos._1, pos._2))
+      case Some(pos) => {
+        val pheroPos = Direction.inDirection(pos, dir)
+        Some(resPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      }
     }
   }
 
