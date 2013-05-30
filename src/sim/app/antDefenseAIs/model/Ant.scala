@@ -48,21 +48,21 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @return Current position of that ant as (Int, Int)
    */
-  def currentPos: Option[(Int, Int)] = world.currentPos(this)
+  protected[this] def currentPos: (Int, Int) = world.currentPos(this).get
 
   /**
    * All directions in which the ant can go right now
    *
    * @return All directions in which the ant can go right now
    */
-  protected def validDirections = world.validDirections(this).get
+  protected[this] def validDirections = world.validDirections(this).get
 
   /**
    * Moves ant into the given direction
    *
    * @param direction New position of the ant
    */
-  protected def moveTo(direction: world.Direction.Value) {
+  protected[this] def moveTo(direction: world.Direction.Value) {
     world.move(this, direction)
     lastDirection = direction
   }
@@ -80,14 +80,14 @@ private[antDefenseAIs] abstract class Ant(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def homePheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir).get
+  protected[this] def homePheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir).get
 
   /**
    * Home pheromone intensity of the tribe of the ant at its current position
    *
    * @return Home pheromone intensity of the tribe of the ant at its current position
    */
-  protected def homePheroOf() = world.homePheroOf(this).get
+  protected[this] def homePheroOf() = world.homePheroOf(this).get
 
   /**
    * Resource pheromone intensity of the tribe of the ant in the given direction
@@ -95,14 +95,14 @@ private[antDefenseAIs] abstract class Ant(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def resPheroOf(dir: world.Direction.Value) = world.resPheroOf(this, dir).get
+  protected[this] def resPheroOf(dir: world.Direction.Value) = world.resPheroOf(this, dir).get
 
   /**
    * Resource pheromone intensity of the tribe of the ant at its current position
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
-  protected def resPheroOf() = world.resPheroOf(this).get
+  protected[this] def resPheroOf() = world.resPheroOf(this).get
 
   /**
    * War pheromone intensity of the tribe of the ant in the given direction
@@ -110,22 +110,22 @@ private[antDefenseAIs] abstract class Ant(
    * @param dir Direction where to investigate the pheromone intensity
    * @return War pheromone intensity of the tribe of the ant in the given direction
    */
-  protected def warPheroOf(dir: world.Direction.Value) = world.warPheroOf(this, dir).get
+  protected[this] def warPheroOf(dir: world.Direction.Value) = world.warPheroOf(this, dir).get
 
   /**
    * War pheromone intensity of the tribe of the ant at its current position
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
-  protected def warPheroOf() = world.warPheroOf(this).get
+  protected[this] def warPheroOf() = world.warPheroOf(this).get
 
   /**
    * Set home pheromone intensity of the tribe of the ant at its current position
    *
    * @param intensity New intensity
    */
-  protected def setHomePhero(intensity: Double) {
-    world.setHomePheroOn(this, currentPos.get, intensity)
+  protected[this] def setHomePhero(intensity: Double) {
+    world.setHomePheroOn(this, currentPos, intensity)
   }
 
   /**
@@ -134,7 +134,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param intensity New intensity
    */
   protected def setResPhero(intensity: Double) {
-    world.setResPheroOn(this, currentPos.get, intensity)
+    world.setResPheroOn(this, currentPos, intensity)
   }
 
   /**
@@ -143,7 +143,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param intensity New intensity
    */
   protected def setWarPhero(intensity: Double) {
-    world.setWarPheroOn(this, currentPos.get, intensity)
+    world.setWarPheroOn(this, currentPos, intensity)
   }
 
 
@@ -169,7 +169,7 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @return True iff ant is dead
    */
-  final def isKilled: Boolean = hitpoints <= 0
+  final def isKilled: Boolean = hitpoints == 0
 
   /**
    * Counts the number of ants within the neighbourhood fulfilling a predicate.
@@ -180,7 +180,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param p Predicate
    * @return Number of ants in the neighbourhood fulfilling the predicate p
    */
-  protected def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
+  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
     val ants: List[Ant] = world.neighbourhood(this, range).get.map(world.antsOn).flatten
     def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
     ants.foldLeft(0: Int)(adder)

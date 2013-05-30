@@ -44,11 +44,12 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   final def dropResources() {
     val pos = currentPos
-    if (pos == myQueen.currentPos)
+    val qPos: Option[(Int, Int)] = world.currentPos(myQueen)
+    if (qPos.isDefined && pos == qPos.get)
       myQueen.receiveRes(transporting)
     else {
-      val res = world.resOn(pos.get) + transporting
-      world.setResOn(pos.get, res)
+      val res = world.resOn(pos) + transporting
+      world.setResOn(pos, res)
     }
 
     transporting = 0
@@ -58,7 +59,7 @@ private[antDefenseAIs] abstract class AntWorker(
    * Mines, if possible, resources.
    */
   def mineRes() {
-    val pos = currentPos.get
+    val pos = currentPos
     val spaceLeft: Boolean = backpackSize > transporting // space left in bag?
     if (spaceLeft && world.resOn(pos) > 0) {
       world.setResOn(pos, world.resOn(pos) - 1)

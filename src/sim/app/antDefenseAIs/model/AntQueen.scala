@@ -77,8 +77,8 @@ private final class AntQueen(
    * Queen places all owned resources her current position
    */
   def dropDeposit() {
-    val res = world.resOn(currentPos.get) + deposit
-    world.setResOn(currentPos.get, res)
+    val res = world.resOn(currentPos) + deposit
+    world.setResOn(currentPos, res)
     _deposit = 0
   }
 

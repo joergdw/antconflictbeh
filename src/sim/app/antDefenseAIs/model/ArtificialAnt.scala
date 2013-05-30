@@ -161,7 +161,8 @@ private[antDefenseAIs] class ArtificialAnt(
           actEconomically()
       }
       case Emotion.fearsome => {
-        if (currentPos == myQueen.currentPos)
+        val queenPos = world.currentPos(myQueen)
+        if (queenPos.isDefined && currentPos == queenPos.get)
           emotion = Emotion.normal
         else {
           followHomeWay()
@@ -182,23 +183,23 @@ private[antDefenseAIs] class ArtificialAnt(
    * If there are no enemies around, the ant will move into a direction.
    */
   def actMilitarily() {
-    def pos = currentPos.get // ant moves during execution of this procedure
-    val foreignAntsOnOwnField = world.antsOn(pos).filter(a => a.tribeID != tribeID)
+
+    val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
       hit(foreignAntsOnOwnField.head)
     else {
       def directionContainsEnemy(dir: world.Direction.Value): Boolean = {
-        val destiny = world.Direction.inDirection(pos, dir)
+        val destiny = world.Direction.inDirection(currentPos, dir)
         val foreignAntsInDirection = world.antsOn(destiny).filter(a => a.tribeID != tribeID)
         foreignAntsInDirection.size > 0
       }
 
-      val directionsContainingEnemies = world.validDirections(this).get.filter(directionContainsEnemy)
+      val directionsContainingEnemies = validDirections.filter(directionContainsEnemy)
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
 
         moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
-        val foreignAntsOnNewField = world.antsOn(pos).filter(a => a.tribeID != tribeID)
+        val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
         hit(foreignAntsOnNewField.head)
 
       } else {
@@ -217,18 +218,17 @@ private[antDefenseAIs] class ArtificialAnt(
     * In any other case the ant cares for food.
     */
   final protected def actEconomically() {
-
     val backpack_full: Boolean = transporting >= AntWorker.backpackSize
     val isBored: Boolean = boredom == 0
 
     if (backpack_full || isBored) {
-      if (currentPos == myQueen.currentPos) { // queen is under the ant
+      val queenPos: Option[(Int, Int)] = world.currentPos(myQueen)
+      if (queenPos.isDefined && currentPos == queenPos.get) { // queen is under the ant
         dropResources()
         boredom = notBored
       }
       else
         followHomeWay()
-
     }
     else
       careForFood()
@@ -266,10 +266,12 @@ private[antDefenseAIs] class ArtificialAnt(
    */
   def adaptHomePhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
-    val adaptedValue = if (currentPos == myQueen.currentPos)
-      1.0d
-    else
-      gamma * homePheroOf(bestNeighbour)
+
+    val adaptedValue = world.currentPos(myQueen) match {
+      case None => 0 // queen is killed an there is no home
+      case Some(qPos) if currentPos == qPos => 1.0d
+      case _ => gamma * homePheroOf(bestNeighbour)
+    }
 
     // To avoid pheromone value > 1 and worse value than before
     setHomePhero(min(1, max(homePheroOf(), adaptedValue)))
@@ -280,7 +282,7 @@ private[antDefenseAIs] class ArtificialAnt(
    */
   def adaptResPhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = (world.resOn(currentPos.get) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
+    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
 
     setResPhero(min(1, adaptedValue))
   }
