@@ -331,7 +331,7 @@ private[antDefenseAIs] final class World(
    * @param direction Direction to move the ant to
    */
   private[model] def move(ant: Ant, direction: Direction.Value) {
-    val targetPosition = Direction.inDirection(toTuple(ants.getObjectLocation(ant)), direction)
+    val targetPosition = Direction.inDirection(currentPos(ant).get, direction) // ant must live
     ants.setObjectLocation(ant, toInd2D(targetPosition))
   }
 
@@ -479,9 +479,12 @@ private[antDefenseAIs] final class World(
    * @return List of positions within the given range.
    */
   def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] = {
-    neighbourhoodBags(ant, distance) match {
+    currentPos(ant) match {
       case None => None
-      case Some((xBag, yBag)) => Some(toTupleList(xBag, yBag))
+      case Some(pos) => {
+        val (xBag, yBag) = neighbourhoodBags(pos, distance)
+        Some(toTupleList(xBag, yBag))
+      }
     }
   }
 
@@ -491,16 +494,11 @@ private[antDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant
    * @return Tuple of bags with the x and the corresponding y-positions
    */
-  private def neighbourhoodBags(ant: Ant, distance: Int): Option[(IntBag, IntBag)] = {
-    currentPos(ant) match {
-      case None => None
-      case Some((x, y)) => {
-        val xBag: IntBag = new IntBag()
-        val yBag: IntBag = new IntBag()
-        ants.getNeighborsMaxDistance(x, y, distance, false, xBag, yBag)
-        Some((xBag, yBag))
-      }
-    }
+  private[this] def neighbourhoodBags(pos: (Int, Int), distance: Int): (IntBag, IntBag) = {
+    val xBag: IntBag = new IntBag()
+    val yBag: IntBag = new IntBag()
+    ants.getNeighborsMaxDistance(pos._1, pos._2, distance, false, xBag, yBag)
+    (xBag, yBag)
   }
 
   /**
@@ -554,7 +552,7 @@ private[antDefenseAIs] final class World(
    * @param ant Ant to place on the map
    * @param pos Position to place the given ant on
    */
- private def placeNewAnt(ant: Ant, pos: (Int, Int)) {
+ private[this] def placeNewAnt(ant: Ant, pos: (Int, Int)) {
    if (ants.getObjectLocation(ant) != null)
      throw new IllegalStateException("Ant already placed on world")
    if (populationStat()(ant.tribeID) >= maxPopulation)
@@ -572,7 +570,7 @@ private[antDefenseAIs] final class World(
    * @param ant Ant to place on the map
    */
  private[model] def placeNewAnt(ant: Ant) {
-   placeNewAnt(ant, currentPos(queenOf(ant)).get)
+   placeNewAnt(ant, currentPos(queenOf(ant)).get) // queen must have invoked this method
  }
 
 
@@ -580,7 +578,7 @@ private[antDefenseAIs] final class World(
   ///////////////////////// Statistic related stuff /////////////////////////////////
 
   /** Number of ants killed by foreign colonies by each tribe */
-  private val _killedAntsByTribe: mutable.HashMap[Int, Int] = {
+  private[this] val _killedAntsByTribe: mutable.HashMap[Int, Int] = {
     val result = mutable.HashMap[Int, Int]()
 
     for (queen <- queens.values) {
@@ -591,7 +589,7 @@ private[antDefenseAIs] final class World(
   }
 
   /** Number of ants died because of age by each tribe */
-  private val _diedAntsByTribe: mutable.HashMap[Int, Int] = {
+  private[this] val _diedAntsByTribe: mutable.HashMap[Int, Int] = {
     val result = mutable.HashMap[Int, Int]()
 
     for (queen <- queens.values) {
