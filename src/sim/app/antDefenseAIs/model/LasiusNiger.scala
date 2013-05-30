@@ -209,23 +209,23 @@ private[antDefenseAIs] class LasiusNiger(
    * If there are no enemies around, the ant will act economically.
    */
   protected def actMilitarily() {
-
-    val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
+    def pos = currentPos.get // ant moves during execution of this procedure
+    val foreignAntsOnOwnField = world.antsOn(pos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
       hit(foreignAntsOnOwnField.head)
     else {
       def directionContainsEnemy(dir: world.Direction.Value): Boolean = {
-        val destiny = world.Direction.inDirection(currentPos, dir)
+        val destiny = world.Direction.inDirection(pos, dir)
         val foreignAntsInDirection = world.antsOn(destiny).filter(a => a.tribeID != tribeID)
         foreignAntsInDirection.size > 0
       }
 
-      val directionsContainingEnemies = world.validDirections(this).filter(directionContainsEnemy)
+      val directionsContainingEnemies = world.validDirections(this).get.filter(directionContainsEnemy)
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
 
         moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
-        val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
+        val foreignAntsOnNewField = world.antsOn(pos).filter(a => a.tribeID != tribeID)
         hit(foreignAntsOnNewField.head)
 
       } else
@@ -301,7 +301,7 @@ private[antDefenseAIs] class LasiusNiger(
    */
   def adaptResPhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
+    val adaptedValue = (world.resOn(currentPos.get) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
 
     setResPhero(min(1, adaptedValue))
   }

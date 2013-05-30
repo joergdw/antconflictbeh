@@ -50,7 +50,10 @@ private[antDefenseAIs] final class World(
   val resources: IntGrid2D,
   private val tribeTypes: Array[AntGenerator]) extends Steppable {
 
-  val pheroThreshould: Double = 0.0000000001d /** Next phero-value: zero */
+  if (experiment.numberOfTribes != tribeTypes.length)
+    throw new IllegalArgumentException("Not exactly as many colony types as colonies")
+  if (startPositions.length != tribeTypes.length)
+    throw new IllegalArgumentException("Not exactly as many start positions as colony types")
 
 /** Maximum number of resources on a field */
   val maxResAmount: Int = {
@@ -64,11 +67,6 @@ private[antDefenseAIs] final class World(
   }
 
   val random = experiment.random /** Random number generator */
-
-  if (experiment.numberOfTribes != tribeTypes.length)
-    throw new IllegalArgumentException("Not exactly as many colony types as colonies")
-  if (startPositions.length != tribeTypes.length)
-    throw new IllegalArgumentException("Not exactly as many start positions as colony types")
 
   // ASSERT: all start positions in range of `height` and `width`
 
@@ -211,7 +209,7 @@ private[antDefenseAIs] final class World(
   // Adapt home-pheromone on queens place
   for ((id, queen) <- queens) {
     val homePheroMap = homePheromones(id)
-    val pos = currentPos(queen)
+    val pos = currentPos(queen).get
     homePheroMap.set(pos._1, pos._2, 1.0d)
   }
 
@@ -219,7 +217,6 @@ private[antDefenseAIs] final class World(
    * Starts the simulation of the world
    */
   def start() {
-    // World must do first step in every turn, otherwise it can occur that …
     experiment.schedule.scheduleRepeating(this)
 
     for ((id, queen) <- queens) { // Schedule all queens
@@ -234,7 +231,7 @@ private[antDefenseAIs] final class World(
   // Stoppable object for each ant to take it out of scheduling
   private val stopOrders: mutable.HashMap[Ant, Stoppable] = mutable.HashMap()
 
-  def step(state: SimState) {
+  override def step(state: SimState) {
     def removeAnt(ant: Ant) { // Actions to do to remove an ant
       ant match {
         case worker: AntWorker => worker.dropResources()
@@ -276,7 +273,7 @@ private[antDefenseAIs] final class World(
       }
     }
 
-//    for (resPheroMap <- resPheromones) {
+//    for (resPheroMap <- resPheromones) {        // TODO: Remove unnecessary code
 //      for (i <- 0 until height; j <- 0 until width) {
 //        val threshold = 0.1e-40 // lowest possible value
 //
@@ -345,9 +342,14 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Double = {
-    val pos = Direction.inDirection(currentPos(ant), dir)
-    homePheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => {
+        val pheroPos = Direction.inDirection(pos, dir)
+        Some(homePheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      }
+    }
   }
 
   /**
@@ -356,9 +358,11 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return Home pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def homePheroOf(ant: Ant): Double = {
-    val pos = currentPos(ant)
-    homePheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def homePheroOf(ant: Ant): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => Some(homePheromones(ant.tribeID).get(pos._1, pos._2))
+    }
   }
 
   /**
@@ -368,9 +372,11 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Double = {
-    val pos = Direction.inDirection(currentPos(ant), dir)
-    resPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => Some(resPheromones(ant.tribeID).get(pos._1, pos._2))
+    }
   }
 
   /**
@@ -379,9 +385,11 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return Resource pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def resPheroOf(ant: Ant): Double = {
-    val pos = currentPos(ant)
-    resPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def resPheroOf(ant: Ant): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => Some(resPheromones(ant.tribeID).get(pos._1, pos._2))
+    }
   }
 
   /**
@@ -391,9 +399,14 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return War pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Double = {
-    val pos = Direction.inDirection(currentPos(ant), dir)
-    warPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => {
+        val pheroPos = Direction.inDirection(pos, dir)
+        Some(warPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      }
+    }
   }
 
   /**
@@ -402,9 +415,11 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return War pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def warPheroOf(ant: Ant): Double = {
-    val pos = currentPos(ant)
-    warPheromones(ant.tribeID).get(pos._1, pos._2)
+  private[model] def warPheroOf(ant: Ant): Option[Double] = {
+    currentPos(ant) match {
+      case None => None
+      case Some(pos) => Some(warPheromones(ant.tribeID).get(pos._1, pos._2))
+    }
   }
 
   /**
@@ -450,8 +465,12 @@ private[antDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant. Default is `1`
    * @return List of positions within the given range.
    */
-  def nearPos(ant: Ant, distance: Int = 1): List[(Int, Int)] =
-    neighbourhood(ant, distance).filter(pos => pos != currentPos(ant))
+  def nearPos(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
+    neighbourhood(ant, distance) match {
+      case None => None
+      case Some(poss) => Some(poss.filter(pos => pos != currentPos(ant).get))
+    }
+
 
   /**
    * Calculates all the neighbour positions within a certain distance.
@@ -459,9 +478,11 @@ private[antDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant. Default is `1`
    * @return List of positions within the given range.
    */
-  def neighbourhood(ant: Ant, distance: Int = 1): List[(Int, Int)] = {
-    val (xBag, yBag) = neighbourhoodBags(ant, distance)
-    toTupleList(xBag, yBag)
+  def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] = {
+    neighbourhoodBags(ant, distance) match {
+      case None => None
+      case Some((xBag, yBag)) => Some(toTupleList(xBag, yBag))
+    }
   }
 
   /**
@@ -470,12 +491,16 @@ private[antDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant
    * @return Tuple of bags with the x and the corresponding y-positions
    */
-  private def neighbourhoodBags(ant: Ant, distance: Int): (IntBag, IntBag) = {
-    val (x, y) = currentPos(ant)
-    val xBag: IntBag = new IntBag()
-    val yBag: IntBag = new IntBag()
-    ants.getNeighborsMaxDistance(x, y, distance, false, xBag, yBag)
-    (xBag, yBag)
+  private def neighbourhoodBags(ant: Ant, distance: Int): Option[(IntBag, IntBag)] = {
+    currentPos(ant) match {
+      case None => None
+      case Some((x, y)) => {
+        val xBag: IntBag = new IntBag()
+        val yBag: IntBag = new IntBag()
+        ants.getNeighborsMaxDistance(x, y, distance, false, xBag, yBag)
+        Some((xBag, yBag))
+      }
+    }
   }
 
   /**
@@ -484,14 +509,21 @@ private[antDefenseAIs] final class World(
    * @param ant Ant for which all possible movement directions are calculated
    * @return All directions in which an given ant can move from its current position
    */
-  private[model] def validDirections(ant: Ant): List[Direction.Value] = {
-    def isValid(dir: Direction.Value): Boolean = {
-      val neighbours = neighbourhood(ant)
-      val destiny = Direction.inDirection(currentPos(ant), dir)
-      neighbours.contains(destiny)
-    }
+  private[model] def validDirections(ant: Ant): Option[List[Direction.Value]] = {
+    val pos = currentPos(ant)
 
-    Direction.values.filter(isValid).toList
+    if (pos.isEmpty)
+      None
+
+    else {
+      def isValid(dir: Direction.Value): Boolean = {
+        val neighbours = neighbourhood(ant).get
+        val destiny = Direction.inDirection(pos.get, dir)
+        neighbours.contains(destiny)
+      }
+
+      Some(Direction.values.filter(isValid).toList)
+    }
   }
 
 
@@ -501,7 +533,12 @@ private[antDefenseAIs] final class World(
    * @param ant Ant asking for her current position
    * @return Current position of `ant`.
    */
-  def currentPos(ant: Ant): (Int, Int) = toTuple(ants.getObjectLocation(ant))
+  def currentPos(ant: Ant): Option[(Int, Int)] = {
+    ants.getObjectLocation(ant) match {
+      case null => None
+      case location => Some(toTuple(location))
+    }
+  }
 
     /**
      * Returns a reference to the queen of the given ant
@@ -535,7 +572,7 @@ private[antDefenseAIs] final class World(
    * @param ant Ant to place on the map
    */
  private[model] def placeNewAnt(ant: Ant) {
-   placeNewAnt(ant, currentPos(queenOf(ant)))
+   placeNewAnt(ant, currentPos(queenOf(ant)).get)
  }
 
 
@@ -642,6 +679,15 @@ private[antDefenseAIs] final class World(
     }
 
     result.clone()
+  }
+
+  def queensSurvived(): HashMap[Int, Boolean] = {
+    var result = HashMap[Int, Boolean]()
+    for ((id, queen) <- queens) {
+      result = result + ((id, !queen.isKilled))
+    }
+
+    result
   }
 
 

@@ -61,4 +61,6 @@ final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
   val world: World = new World(experiment = this, height = height, width = width,
     startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
+
+  override def experimentShouldBeStopped(): Boolean = false
 }

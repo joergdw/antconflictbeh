@@ -111,8 +111,8 @@ object SimulationRunner {
         console.setVisible(true)
       }
       else {
-        SimState.doLoop(experiment.getClass, args)
-        println(experiment.get.getReport())
+        SimState.doLoop(experiment.get.getClass, args)
+        println(experiment.get.giveReport())
         System.exit(0)
       }
     }

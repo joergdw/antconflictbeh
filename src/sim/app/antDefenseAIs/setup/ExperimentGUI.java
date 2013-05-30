@@ -308,7 +308,7 @@ public class ExperimentGUI extends GUIState {
 
         // TODO: Print experiment report
         Experiment experiment = (Experiment) state;
-        System.out.println(experiment.getReport());
+        System.out.println(experiment.giveReport());
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;

@@ -49,4 +49,26 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
   val world: World = new World(experiment = this, height = height, width = width,
     startPositions = Array((0, 0), (width - 1, height - 1)), resources = resourceMap,
     tribeTypes = tribes)
+
+
+  /**
+   * True if only one tribe left and experiment didn't just start
+   *
+   * @return True if only one tribe left and experiment didn't just start
+   */
+  override def experimentShouldBeStopped(): Boolean = {
+
+    if (schedule.getSteps >= 100) { // not stop before at least 100 steps are done
+      val populations = world.populationStat()
+
+      var livingTribes: Int = 0
+      for (pop <- populations.values)
+        if (pop > 1) // check if only queen is left
+          livingTribes += 1
+
+      livingTribes <= 1
+    }
+    else
+      false
+  }
 }

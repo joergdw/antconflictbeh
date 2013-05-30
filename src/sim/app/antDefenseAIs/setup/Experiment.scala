@@ -12,17 +12,16 @@
  */
 package sim.app.antDefenseAIs.setup
 
-import sim.engine.SimState
+import sim.engine.{Steppable, SimState}
 
 import sim.app.antDefenseAIs.model.World
-import scala.collection.immutable.HashMap
 
 /**
  * Contains some preferences for the simulation
  *
  * @param s Seed for random data generator
  */
-abstract class Experiment(var s: Long) extends SimState(s) {
+abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
 
   val world: World
 
@@ -37,17 +36,37 @@ abstract class Experiment(var s: Long) extends SimState(s) {
 
   override def start() {
     super.start()
+    schedule.scheduleRepeating(this)
     world.start()
   }
 
-  // TODO: Automatische Abbruch-Kriterien entwickeln und beachten.
+  /**
+   * Stops the simulation as soon as the stopping criteria defined with `experimentShouldBeStopped` is fullfilled.
+   *
+   * @param state Parameter not used
+   */
+  override def step(state: SimState) {
+    if (experimentShouldBeStopped()) {
+
+      schedule.scheduleOnceIn(0,
+        new Steppable() {
+          override def step(state: SimState) {
+            state.kill()
+            assert (schedule.scheduleComplete())
+            println("Experiment done, empty scheduling queue.")
+          }
+        })
+    }
+  }
+
+  def experimentShouldBeStopped(): Boolean
 
   /**
    * Report of the current state of the experiment
    *
    * @return Report message of the current state of the experiment
    */
-  def getReport(): String = {
+  def giveReport(): String = {
     def header() = {
       import java.util.Date
       import java.sql.Timestamp
@@ -97,6 +116,17 @@ abstract class Experiment(var s: Long) extends SimState(s) {
       message concat "\n"
     }
 
-    header + populationReport() + resourceReport() + lossesReport()
+    def queensReport(): String = {
+      val survivedState = world.queensSurvived().toList.sortBy(x => x._1)
+      var message: String = "* Queens status report:\n"
+
+      for((id, survived) <- survivedState) {
+        message = message concat "\tThe queen of tribe " + id + " survived = " + survived + "\n"
+      }
+
+      message concat "\n"
+    }
+
+    header + populationReport() + resourceReport() + lossesReport() + queensReport()
   }
 }
