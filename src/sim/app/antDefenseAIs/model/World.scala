@@ -685,7 +685,7 @@ private[antDefenseAIs] final class World(
   def queensSurvived(): HashMap[Int, Boolean] = {
     var result = HashMap[Int, Boolean]()
     for ((id, queen) <- queens) {
-      result = result + ((id, !queen.isKilled))
+      result = result + ((id, ants.getObjectLocation(queen) != null))
     }
 
     result

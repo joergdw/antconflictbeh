@@ -59,7 +59,17 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
     }
   }
 
+  /**
+   * True if the experiment should be stopped.
+   *
+   * @return True if the experiment should be stopped
+   */
   def experimentShouldBeStopped(): Boolean
+
+  /**
+   * Actions performed at the end of an experiment
+   */
+  override def finish() = println(giveReport())
 
   /**
    * Report of the current state of the experiment

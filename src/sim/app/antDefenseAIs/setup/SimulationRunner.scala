@@ -16,12 +16,10 @@ import sim.engine.SimState
 import sim.display.Console
 
 object SimulationRunner {
-
   /**
    * Experiment which will be executed
    */
-  private var experiment: Option[Experiment] = None
-
+  private var experimentType: Option[Class[_ <: Experiment]] = None: Option[java.lang.Class[_ <: Experiment]]
   /**
    * True if the experiment should be run with graphical user interface
    */
@@ -35,6 +33,7 @@ object SimulationRunner {
     val sim1vs1 = Value("--1vs1")
     val normalOnMulti = Value("--normalOnMulti")
     val modOnMulti = Value("--modifiedOnMulti")
+    val help = Value("--help")
 
     /**
      * Describes options
@@ -48,6 +47,7 @@ object SimulationRunner {
         case `sim1vs1` => "Duel between one normal tribe and one modified tribe"
         case `normalOnMulti` => "Simulation of a normal tribe among many other normal tribes"
         case `modOnMulti` => "Simulation of a modyfied tribe among many other normal tribes"
+        case `help` => "This message"
       }
     }
 
@@ -75,50 +75,45 @@ object SimulationRunner {
       "Option " + Options.nox.toString + "\t" + Options.describe(Options.nox) + "\n" +
       "Option " + Options.sim1vs1.toString + "\t" + Options.describe(Options.sim1vs1) + "\n" +
       "Option " + Options.normalOnMulti.toString + "\t" + Options.describe(Options.normalOnMulti) + "\n" +
-      "Option " + Options.modOnMulti.toString + "\t" + Options.describe(Options.modOnMulti) + "\n"
+      "Option " + Options.modOnMulti.toString + "\t" + Options.describe(Options.modOnMulti) + "\n" +
+      "Option " + Options.help.toString + "\t" + Options.describe(Options.help) + "\n"
   }
 
   def main(args: Array[String]) {
-    var allArgumentsValid: Boolean = true
+    var restArgs = args.toSet
 
     // Optionhandling
     for (option <- args) {
       val opt = Options.parse(option)
 
-      if (opt == None) {
-        allArgumentsValid = false
-        println("Invalid option: " + option)
-      }
-      else {
+      if (opt.isDefined) {
         opt.get match {
           case Options.nox => withGUI = false
-          case Options.sim1vs1 => experiment = Some(new Setup_1vs1(System.currentTimeMillis()))
-          case Options.normalOnMulti => experiment = Some(new MultiTribeSetup1(System.currentTimeMillis()))
+          case Options.sim1vs1 => experimentType = Some(classOf[Setup_1vs1])
+          case Options.normalOnMulti => experimentType = Some(classOf[MultiTribeSetup1])
           case Options.modOnMulti => println("WARNING: Already not defined in class " + this.getClass.getCanonicalName)
+          case Options.help => println(helpMessage)
         }
+        restArgs = restArgs - option
       }
     }
 
-    if (experiment.isEmpty) {
+    if (experimentType.isEmpty) {
       println("No experiment type defined. Please choose a valid option for the experiment.")
       println(helpMessage)
       System.exit(1)
     }
-    else if (allArgumentsValid) { // Start Simulation with desired configuration
-      if (withGUI) {
-        val video: ExperimentGUI = new ExperimentGUI(experiment.get)
-        val console: Console = new Console(video)
-        console.setVisible(true)
-      }
-      else {
-        SimState.doLoop(experiment.get.getClass, args)
-        println(experiment.get.giveReport())
-        System.exit(0)
-      }
+    else if (withGUI) {
+      val experiment: Experiment =
+        experimentType.get.getConstructor(classOf[Array[Long]]).newInstance(Array(System.currentTimeMillis()))
+
+      val video: ExperimentGUI = new ExperimentGUI(experiment)
+      val console: Console = new Console(video)
+      console.setVisible(true)
     }
     else {
-      println(helpMessage)
-      System.exit(1)
+      SimState.doLoop(experimentType.get, restArgs.toArray)
+      System.exit(0)
     }
   }
 }
