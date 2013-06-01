@@ -105,7 +105,7 @@ object SimulationRunner {
     }
     else if (withGUI) {
       val experiment: Experiment =
-        experimentType.get.getConstructor(classOf[Array[Long]]).newInstance(Array(System.currentTimeMillis()))
+        experimentType.get.getConstructor(classOf[Long]).newInstance(new java.lang.Long(System.currentTimeMillis()))
 
       val video: ExperimentGUI = new ExperimentGUI(experiment)
       val console: Console = new Console(video)

@@ -287,15 +287,15 @@ public class ExperimentGUI extends GUIState {
         }
 
         // Chart display
-        chart = new sim.util.media.chart.TimeSeriesChartGenerator();           // TODO: Problematic instruction. Execution of method stops here
-        chart.setTitle("Population statistics");
-        chart.setRangeAxisLabel("Put the name of your charted series here");
-        chart.setDomainAxisLabel("Time");
-        chartFrame = chart.createFrame();
-        // perhaps you might move the chart to where you like.
-        chartFrame.setVisible(true);
-        chartFrame.pack();
-        c.registerFrame(chartFrame);
+//        chart = new sim.util.media.chart.TimeSeriesChartGenerator();           // TODO: Problematic instruction. Execution of method stops here
+//        chart.setTitle("Population statistics");
+//        chart.setRangeAxisLabel("Put the name of your charted series here");
+//        chart.setDomainAxisLabel("Time");
+//        chartFrame = chart.createFrame();
+//        // perhaps you might move the chart to where you like.
+//        chartFrame.setVisible(true);
+//        chartFrame.pack();
+//        c.registerFrame(chartFrame);
 
         // the console automatically moves itself to the right of all
         // of its registered frames -- you might wish to rearrange the
@@ -305,10 +305,6 @@ public class ExperimentGUI extends GUIState {
 
     public void quit() {
         super.quit();
-
-        // TODO: Print experiment report
-        Experiment experiment = (Experiment) state;
-        System.out.println(experiment.giveReport());
 
         if (antDisplayFrame !=null) antDisplayFrame.dispose();
         antDisplayFrame = null;
