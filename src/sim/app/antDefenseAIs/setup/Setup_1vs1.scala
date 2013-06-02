@@ -21,8 +21,7 @@ import sim.app.antDefenseAIs.model._
 
 final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
 
-  val width = 57
-  val height = 57
+  val (width, height) = (49, 49)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
   private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, artificialStandardGenerator)
@@ -36,11 +35,11 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
    * One line of resources goes from the one corner to the other.
    */
   {
-    for (i <- 0 until height; j <- 0 until width if (i == j) && (i % 8 == 0)) {
+    for (i <- 0 until height; j <- 0 until width if (i == j) && (i % 16 == 0)) {
       brushSoft(resDistrib, 5, 5, 10, (i, j))
     }
 
-    brushSoft(resDistrib, 5, 5, 20, (43, 13), (13, 43))
+    brushSoft(resDistrib, 6, 5, 20, (39, 9), (9, 39))
   }
 
 

@@ -69,7 +69,9 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
   /**
    * Actions performed at the end of an experiment
    */
-  override def finish() = println(giveReport())
+  override def finish() {
+    println(giveReport())
+  }
 
   /**
    * Report of the current state of the experiment
