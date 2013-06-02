@@ -21,8 +21,7 @@ import sim.app.antDefenseAIs.model._
 
 final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
 
-  val width = 200
-  val height = 200
+  val (width, height) = (90, 90)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
   private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal,  // TODO: Adapt tribes
@@ -32,16 +31,12 @@ final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
 
   /* Construction of the resource distribution.
-   * A map-pattern consisting of some to the two queens symmetric resource-spots
-   *
-   * One line of resources goes from the one corner to the other.
+   * A map-pattern consisting of horizontal lines of resource-spots
    */
   {
-    for (i <- 0 until height; j <- 0 until width if (i == j) && (i % 8 == 0)) {
-      brushSoft(resDistrib, 5, 5, 10, (i, j))
+    for (column <- 0 until height; row <- 0 until width if ((column - 5) % 16 == 0) && ((row + 12) % 16 == 0)) {
+      brushSoft(resDistrib, 5, 5, 10, (column, row))
     }
-
-    brushSoft(resDistrib, 5, 5, 20, (43, 13), (13, 43))
   }
 
 

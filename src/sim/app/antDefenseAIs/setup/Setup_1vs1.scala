@@ -35,8 +35,8 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
    * One line of resources goes from the one corner to the other.
    */
   {
-    for (i <- 0 until height; j <- 0 until width if (i == j) && (i % 16 == 0)) {
-      brushSoft(resDistrib, 5, 5, 10, (i, j))
+    for (column <- 0 until height; row <- 0 until width if (column == row) && (column % 16 == 0)) {
+      brushSoft(resDistrib, 5, 5, 10, (column, row))
     }
 
     brushSoft(resDistrib, 6, 5, 20, (39, 9), (9, 39))
@@ -56,7 +56,7 @@ final class Setup_1vs1(var sd: Long) extends Experiment(sd) {
    * @return True if only one tribe left and experiment didn't just start
    */
   override def experimentShouldBeStopped(): Boolean = {
-    if (schedule.getSteps >= 1000) return true // TODO: Debug-Code
+    if (schedule.getSteps >= 100) return true // TODO: Debug-Code
     if (schedule.getSteps >= 100) { // not stop before at least 100 steps are done
       val populations = world.populationStat()
 
