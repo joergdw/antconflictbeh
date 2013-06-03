@@ -85,7 +85,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  14) [X] GUI-lose Simulation so bearbeiten, dass sie im batch-modus ausgeführt werden kann. (Erfordert die
      Implementierung eines Abbruchkriteriums für die Simulation)
 
-** TODO Quelltext-Arbeiten [9/11]
+** TODO Quelltext-Arbeiten [10/12]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [X] Konsistenzprüfung Koordinatentopologie; Siehe [[Mason Topologie]].
@@ -97,7 +97,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
    lohnt es sich dann auch eventuell die Anwendung in zwei Anwendungen zu spalten, damit sie mit einem Klick in der
    Anwendungsauswahl auswählbar sind. Das kann so gemacht werden, dass sie dennoch fast auf den kompletten Quelltext
    gemeinsam zugreifen.
- + [ ] Letztes Experiment (modOnMulti) implementieren (besonders die Karte!) und in das Objekt SimulationRunner
+ + [X] Letztes Experiment (modOnMulti) implementieren (besonders die Karte!) und in das Objekt SimulationRunner
    integrieren
  + [ ] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
