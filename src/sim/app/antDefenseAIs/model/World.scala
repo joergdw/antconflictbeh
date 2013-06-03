@@ -171,8 +171,20 @@ private[antDefenseAIs] final class World(
       val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
       assert(ants.setObjectLocation(queen, startPositions(i)._1, startPositions(i)._2)) // Place queen on world
 
-      m = m.+((id, queen))
+      m = m + ((id, queen))
     }
+
+    m
+  }
+
+  /**
+   * Map of all start positions for each tribe
+   */
+  val startPositionsByID: HashMap[Int, (Int, Int)] = {
+    var m = HashMap[Int, (Int, Int)]()
+
+    for ((id, queen) <- queens)
+      m = m + ((id, currentPos(queen).get))
 
     m
   }
@@ -183,7 +195,7 @@ private[antDefenseAIs] final class World(
     var m: HashMap[Int, DoubleGrid2D] = HashMap()
 
     for (id <- queens.keys)
-      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
+      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
 
     m
   }
@@ -192,7 +204,7 @@ private[antDefenseAIs] final class World(
     var m: HashMap[Int, DoubleGrid2D] = HashMap()
 
     for (id <- queens.keys)
-      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
+      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
 
     m
   }
@@ -201,7 +213,7 @@ private[antDefenseAIs] final class World(
     var m: HashMap[Int, DoubleGrid2D] = HashMap()
 
     for (id <- queens.keys)
-      m = m.+((id, new DoubleGrid2D(width, height, 0.0d)))
+      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
 
     m
   }
@@ -601,7 +613,7 @@ private[antDefenseAIs] final class World(
     var result = HashMap[Int, Int]()
 
     for (id <- queens.keys)
-      result = result.+((id, _killedAntsByTribe(id) + _diedAntsByTribe(id)))
+      result = result + ((id, _killedAntsByTribe(id) + _diedAntsByTribe(id)))
 
     result
   }
@@ -623,12 +635,12 @@ private[antDefenseAIs] final class World(
     var result = HashMap[Int, Int]()
 
     for (queen <- queens.values)
-      result = result.+((queen.tribeID, 0)) // Start with 0 for each tribe
+      result = result + ((queen.tribeID, 0)) // Start with 0 for each tribe
 
     for (i <- 0 until objects.size()) {
       val ant = objects.get(i).asInstanceOf[Ant]
       val n: Int = result(ant.tribeID)
-      result = result.+((ant.tribeID, n + 1))
+      result = result + ((ant.tribeID, n + 1))
     }
 
     result

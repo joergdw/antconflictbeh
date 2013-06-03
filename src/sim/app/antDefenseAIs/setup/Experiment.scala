@@ -95,7 +95,8 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
       var message = "* Population overview:\n"
 
       for ((id, number) <- population) {
-        message = message concat "\tTribe " + id + " has " + number + " ants\n"
+        val pos = world.startPositionsByID(id)
+        message = message concat "\tTribe " + id + " has " + number + " ants and start position " + pos + "\n"
       }
 
      message concat "\n"
@@ -135,9 +136,8 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
       val survivedState = world.queensSurvived().toList.sortBy(x => x._1)
       var message: String = "* Queens status report:\n"
 
-      for((id, survived) <- survivedState) {
+      for((id, survived) <- survivedState)
         message = message concat "\tThe queen of tribe " + id + " survived = " + survived + "\n"
-      }
 
       message concat "\n"
     }
