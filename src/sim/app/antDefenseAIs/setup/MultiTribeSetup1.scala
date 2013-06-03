@@ -56,8 +56,5 @@ class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
     startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
 
-  override def stopCriteriaFulfilled(): Boolean = {
-    if (schedule.getSteps >= 100) return true // TODO: Debug-Code
-    schedule.getSteps >= 5000
-  }
+  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 5000
 }

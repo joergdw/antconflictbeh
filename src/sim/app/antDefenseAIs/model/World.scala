@@ -273,17 +273,7 @@ private[antDefenseAIs] final class World(
       }
     }
 
-//    for (resPheroMap <- resPheromones) {        // TODO: Remove unnecessary code
-//      for (i <- 0 until height; j <- 0 until width) {
-//        val threshold = 0.1e-40 // lowest possible value
-//
-//        val old = resPheroMap.get(i, j)
-//        val evaporationRate: Double = 1.0
-//
-//        val newer = if (old < threshold) 0 else old * evaporationRate
-//        resPheroMap.set(i, j, newer)
-//      }
-//    }
+    // Evaporation can be implemented here
 
     // Diffusion can be implemented here
   }

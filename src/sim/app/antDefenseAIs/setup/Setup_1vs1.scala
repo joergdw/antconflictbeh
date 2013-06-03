@@ -56,7 +56,6 @@ class Setup_1vs1(var sd: Long) extends Experiment(sd) {
    * @return True if only one tribe left and experiment didn't just start
    */
   override def stopCriteriaFulfilled(): Boolean = {
-    if (schedule.getSteps >= 100) return true // TODO: Debug-Code
     if (schedule.getSteps >= 100) { // not stop before at least 100 steps are done
       val populations = world.populationStat()
 
