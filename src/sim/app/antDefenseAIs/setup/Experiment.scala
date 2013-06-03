@@ -23,6 +23,8 @@ import sim.app.antDefenseAIs.model.World
  */
 abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
 
+  val name: String = getClass.getName
+
   val world: World
 
   /**
@@ -41,12 +43,12 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
   }
 
   /**
-   * Stops the simulation as soon as the stopping criteria defined with `experimentShouldBeStopped` is fullfilled.
+   * Stops the simulation as soon as the stopping criteria defined with `stopCriteriaFulfilled` is fulfilled.
    *
    * @param state Parameter not used
    */
   override def step(state: SimState) {
-    if (experimentShouldBeStopped()) {
+    if (stopCriteriaFulfilled()) {
 
       schedule.scheduleOnceIn(0,
         new Steppable() {
@@ -64,7 +66,7 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
    *
    * @return True if the experiment should be stopped
    */
-  def experimentShouldBeStopped(): Boolean
+  def stopCriteriaFulfilled(): Boolean
 
   /**
    * Actions performed at the end of an experiment
@@ -84,7 +86,8 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
       import java.sql.Timestamp
 
       "Experiment Report\n--------------------\n" +
-      "Current System Time: " + new Timestamp(new Date().getTime).toString + "\n\n"
+      "Current System Time: " + new Timestamp(new Date().getTime).toString + "\n" +
+      "Experiment name: " + name + "\n\n"
     }
 
     def populationReport(): String = {

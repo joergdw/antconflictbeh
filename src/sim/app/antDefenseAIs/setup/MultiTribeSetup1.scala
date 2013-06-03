@@ -14,17 +14,16 @@
 package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
-
 import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
 import sim.app.antDefenseAIs.setup.MapCreationHelpers._
 import sim.app.antDefenseAIs.model._
 
-final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
+class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (90, 90)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal,  // TODO: Adapt tribes
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal,
     lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
@@ -57,7 +56,7 @@ final class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
     startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
 
-  override def experimentShouldBeStopped(): Boolean = {
+  override def stopCriteriaFulfilled(): Boolean = {
     if (schedule.getSteps >= 100) return true // TODO: Debug-Code
     schedule.getSteps >= 5000
   }

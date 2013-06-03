@@ -91,7 +91,7 @@ object SimulationRunner {
           case Options.nox => withGUI = false
           case Options.sim1vs1 => experimentType = Some(classOf[Setup_1vs1])
           case Options.normalOnMulti => experimentType = Some(classOf[MultiTribeSetup1])
-          case Options.modOnMulti => println("WARNING: Already not defined in class " + this.getClass.getCanonicalName)
+          case Options.modOnMulti => experimentType = Some(classOf[MultiTribeSetup2])
           case Options.help => println(helpMessage)
         }
         restArgs = restArgs - option
