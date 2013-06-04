@@ -219,11 +219,14 @@ private[antDefenseAIs] class LasiusNiger(
         foreignAntsInDirection.size > 0
       }
 
-      val directionsContainingEnemies = validDirections.filter(directionContainsEnemy)
+      val validDirs = validDirections
+      val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
 
         moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
+        adaptHomePhero()
+        adaptResPhero()
         val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
         hit(foreignAntsOnNewField.head)
 

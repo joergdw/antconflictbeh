@@ -187,6 +187,7 @@ private[antDefenseAIs] class ArtificialAnt(
     val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
     if (foreignAntsOnOwnField.size > 0)
       hit(foreignAntsOnOwnField.head)
+
     else {
       def directionContainsEnemy(dir: world.Direction.Value): Boolean = {
         val destiny = world.Direction.inDirection(currentPos, dir)
@@ -194,7 +195,9 @@ private[antDefenseAIs] class ArtificialAnt(
         foreignAntsInDirection.size > 0
       }
 
-      val directionsContainingEnemies = validDirections.filter(directionContainsEnemy)
+      val validDirs = validDirections
+
+      val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: world.Direction.Value) = world.Direction.directionDistance(lastDirection, dir)
 
@@ -203,8 +206,10 @@ private[antDefenseAIs] class ArtificialAnt(
         hit(foreignAntsOnNewField.head)
 
       } else {
-       val dir = chooseDirectionBy(direction => 0.0d) // Pheromones don't matter, (but old directions still do)
+       val dir = validDirs(world.random.nextInt(validDirs.size)) // Choose totally random direction
        moveTo(dir)
+       adaptHomePhero()
+       adaptResPhero()
       }
     }
   }
@@ -350,5 +355,19 @@ private[antDefenseAIs] class ArtificialAnt(
     emotion = if (evalueSituation().get < 1) Emotion.fearsome else Emotion.battlesome
     if (emotion == Emotion.fearsome) // Start war pheromone route
       setWarPhero(1)
+  }
+
+  /**
+   * Mines, if possible, resources. Boredom increased if no resources.
+   * No boredom if try successful.
+   */
+  override def mineRes() {
+    val tmp = transporting
+    super.mineRes()
+
+    if (transporting > tmp) // successfull mined
+      boredom = notBored
+    else
+      boredom -= 1
   }
 }

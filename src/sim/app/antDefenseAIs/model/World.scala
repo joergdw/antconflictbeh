@@ -285,7 +285,20 @@ private[antDefenseAIs] final class World(
       }
     }
 
-    // Evaporation can be implemented here
+    // Evaporation for war-pheromones
+    for (warPheroMap <- warPheromones.values) {
+      for (i <- 0 until height; j <- 0 until width) {
+        val threshold = 0.1e-40 // lowest possible value
+
+        val old = warPheroMap.get(i, j)
+        val evaporationRate: Double = 0.98
+
+        val newer = if (old < threshold) 0 else old * evaporationRate
+        warPheroMap.set(i, j, newer)
+      }
+    }
+
+    // Other evaporation can be implemented here
 
     // Diffusion can be implemented here
   }
