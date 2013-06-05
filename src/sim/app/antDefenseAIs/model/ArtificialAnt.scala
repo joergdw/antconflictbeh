@@ -156,6 +156,8 @@ private[antDefenseAIs] class ArtificialAnt(
           }
           else
             moveTo(warPheroDir)
+            adaptHomePhero()
+            adaptResPhero()
         }
         else
           actEconomically()

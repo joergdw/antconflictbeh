@@ -23,50 +23,29 @@ class Setup_1vs1(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (49, 49)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
-  val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, artificialStandardGenerator)
+  val lasiusNigerAggressive = new LasiusNigerGenerator(
+    new LasiusBehaviourConf(
+      maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
+  val artificialNormal = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerAggressive)
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(width, height)
 
-  /* Construction of the resource distribution.
-   * A map-pattern consisting of some to the two queens symmetric resource-spots
-   *
-   * One line of resources goes from the one corner to the other.
-   */
+  // Construction of the resource distribution
   {
-    for (column <- 0 until height; row <- 0 until width if (column == row) && (column % 16 == 0)) {
+    for (column <- 0 until height; row <- 0 until width if (column % 16 == 0) && (row % 16 == 0)) {
       brushSoft(resDistrib, 5, 5, 10, (column, row))
     }
-
-    brushSoft(resDistrib, 6, 5, 20, (39, 9), (9, 39))
   }
 
 
   val resourceMap: IntGrid2D = intArray2IntGrid(resDistrib)
 
   val world: World = new World(experiment = this, height = height, width = width,
-    startPositions = Array((0, 0), (width - 1, height - 1)), resources = resourceMap,
+    startPositions = Array((0, height / 2), (width - 1, height / 2)), resources = resourceMap,
     tribeTypes = tribes)
 
 
-  /**
-   * True if only one tribe left and experiment didn't just start
-   *
-   * @return True if only one tribe left and experiment didn't just start
-   */
-  override def stopCriteriaFulfilled(): Boolean = {
-    if (schedule.getSteps >= 100) { // not stop before at least 100 steps are done
-      val populations = world.populationStat()
-
-      var livingTribes: Int = 0
-      for (pop <- populations.values)
-        if (pop > 1) // check if only queen is left
-          livingTribes += 1
-
-      livingTribes <= 1
-    }
-    else
-      false
-  }
+  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 2000
 }

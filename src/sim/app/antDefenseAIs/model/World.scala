@@ -79,14 +79,14 @@ private[antDefenseAIs] final class World(
    */
   private[model] object Direction extends Enumeration {
 
-    val NorthWest = Value(0, "north west") /** Direction north west */
-    val North = Value(1, "north") /** Direction north */
-    val NorthEast = Value(2, "north east") /** Direction north east */
-    val East = Value(3, "east") /** Direction east */
-    val SouthEast = Value(4, "south east") /** Direction south west */
-    val South = Value(5, "south") /** Direction south */
-    val SouthWest = Value(6, "south west") /** Direction south-west */
-    val West = Value(7, "west") /** Direction west */
+    val SouthWest = Value("south west") /** Direction south-west */
+    val West = Value("west") /** Direction west */
+    val NorthWest = Value("north west") /** Direction north west */
+    val North = Value("north") /** Direction north */
+    val NorthEast = Value("north east") /** Direction north east */
+    val East = Value("east") /** Direction east */
+    val SouthEast = Value("south east") /** Direction south west */
+    val South = Value("south") /** Direction south */
 
     /**
      * Distance of directions

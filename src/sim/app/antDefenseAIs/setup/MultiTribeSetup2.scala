@@ -22,8 +22,11 @@ class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (90, 90)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
-  val artificialStandardGenerator = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(artificialStandardGenerator, lasiusNigerNormal, lasiusNigerNormal,
+  val artificialNormal = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
+  val lasiusNigerAggressive = new LasiusNigerGenerator(
+    new LasiusBehaviourConf(
+      maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerAggressive, lasiusNigerNormal, lasiusNigerNormal,
     lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
@@ -56,5 +59,5 @@ class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
     startPositions = startPositions, resources = resourceMap,
     tribeTypes = tribes)
 
-  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 5000
+  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 2000
 }
