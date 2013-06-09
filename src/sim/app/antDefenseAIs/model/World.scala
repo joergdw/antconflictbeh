@@ -115,25 +115,25 @@ private[antDefenseAIs] final class World(
      * Important knowledge for Mason topology: Field (x, y) is in column x, row y.
      */
     private val assocs = HashMap(
-      (NorthWest, (-1, -1)),
-      (North, (0, -1)),
-      (NorthEast, (1, -1)),
-      (West, (-1, 0)),
-      (East, (1, 0)),
-      (SouthWest, (-1, 1)),
-      (South, (0, 1)),
-      (SouthEast, (1, 1))
+      NorthWest -> (-1, -1),
+      North -> (0, -1),
+      NorthEast -> (1, -1),
+      West -> (-1, 0),
+      East -> (1, 0),
+      SouthWest -> (-1, 1),
+      South -> (0, 1),
+      SouthEast -> (1, 1)
     )
 
     private val assocsm1 = HashMap( // assocs inverse
-      ((-1, -1), NorthWest),
-      ((0, -1), North),
-      ((1, -1), NorthEast),
-      ((-1, 0), West),
-      ((1, 0), East),
-      ((-1, 1), SouthWest),
-      ((0, 1), South),
-      ((1, 1), SouthEast)
+      (-1, -1) -> NorthWest,
+      (0, -1) -> North,
+      (1, -1) -> NorthEast,
+      (-1, 0) -> West,
+      (1, 0) -> East,
+      (-1, 1) -> SouthWest,
+      (0, 1) -> South,
+      (1, 1) -> SouthEast
     )
 
     /**
