@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [5/6]
+* Implementierungsliste [6/6]
 ** DONE Militärverhalten normaler Ameisen [7/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -48,17 +48,15 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
     die sich bereits auf einem Nahrungsfeld befindet, schaut sich erst die Nachbarfelder an, bevor sie weiter das
     derzeitige Feld abbaut.
 
-** DONE Sonstiges [4/5]
+** DONE Sonstiges [5/5]
  1) [X] Maximaler Pheromonwert für Ressourcenpheromone (ist 1,0)
  2) [X] Klasse für Karte einführen, mit Begleitobjekt, dass die verschiedenen Kartentypen bereithält.
  3) [X] Queen kann auch sterben und verhält sich in noch mehr Punkten wie eine normale Ameise.
  4) [X] Pheromonverdunstung (nur für Kriegspheromone implementiert)
- 5) [ ] Pheromondiffussion (Wichtig für die Kommunikation der offensiven Ameisen über Kriegspheromone)
- 6) /Optional:/ Ameisen lassen im Kampf Ressourcen, die sie tragen, fallen.
- 7) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
+ 5) [X] Pheromondiffussion (Wichtig für die Kommunikation der offensiven Ameisen über Kriegspheromone)
+ 6) /Optional:/ Ameisen gehen Feldern, die zu voll sind, aus dem Weg. (Eventuell wird dann eine „Vergrößerung“ der
     Königin auf mehrere Felder benötigt, damit die Ameisen bei großer Populationszahl noch an sie herankommen)
- 8) /Optional:/ Ameisen können altersbedingt sterben.
- 9) /Wird nicht gemacht/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
+ 7) /Optional:/ Kompatibilitätsschicht Scala-Mason für implizite Typtransformierung (Int2D <-> (Int, Int); bzw.: Int3D <-> (Int,
     Int, Int)) hinzufügen.
 
 ** DONE Benutzeroberfläche und Simulationskontrolle [7/7]
@@ -85,7 +83,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  14) [X] GUI-lose Simulation so bearbeiten, dass sie im batch-modus ausgeführt werden kann. (Erfordert die
      Implementierung eines Abbruchkriteriums für die Simulation)
 
-** TODO Quelltext-Arbeiten [11/12]
+** DONE Quelltext-Arbeiten [12/12]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [X] Konsistenzprüfung Koordinatentopologie; Siehe [[Mason Topologie]].
@@ -101,12 +99,9 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
    integrieren
  + [X] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
- + [ ] Veröffentlichung bei einem Quelltext-Hoster
- + /Optional:/ Richtungskonzept durchziehen (überall, wo möglich) – Ameisen wissen jetzt grundsätzlich nicht mehr, wo
-   sie sind. Und auch die Sache mit Ressourcen fallen lassen etc. wird von der Welt übernommen.
- + /Optional:/ Arrays in „World.scala“ dort wo es sinnvoll ist durch Hashmaps (Schlüssel: TribeID) ersetzen.
+ + [X] Veröffentlichung bei einem Quelltext-Hoster
  + /Optional:/ Dokumentationen dazu schreiben
- + /Optional:/ Architekturänderung: Nur ein Ameisenarbeitertyp. Das Verhalten wird über einen Scala ~trait~ injiziert.
+ + /Optional:/ Monaden für „Option“ nutzen, um Fallunterscheidungen in World.scala loszuwerden.
 
 
 * Gedanken-Sammelsurium, Implementierungsideen und -hinweise
@@ -126,107 +121,3 @@ Als Darstellungs-Material können die „Chickens“ aus zero-k genommen werden.
 Genetischer Parametrisierungs-Modus für die ganzen Verhaltensparameter. Das ist sehr ressourcenaufwändig und muss daher
 hochparallel mit Aktoren implementiert werden. Falls Lust dazu vorhanden ist, sogar noch paralleler mit Hilfe des MPI
 (Message Passing Interface) für Großrechner.
-
-
-* Pseudo-Quelltexte [4/4]
-** DONE Sonstige Gedanken [7/7]
- + [X] Ameisen lassen bei ihrem Tod die Ressourcen, die sie tragen, fallen.
- + [X] Das Heimpheromonfeld muss mit +<Unendlich> initialisiert werden, mit Ausnahme des Felds der Königin.
- + [X] Das Nahrungspheromonenfeld muss mit 0 initialisiert werden.
- + /Wird nicht gemacht!/ Die Verdunstung: Nach x Schritten werden alle Felder um 1 dekrementiert
- + /Wird nicht gemacht!/ Die Diffussion
- + [X] Lernparameter so wählen: 0 < gamma < 1. Z.B: gamma = 0.9d
- + [X] Double-Felder für die Pheromone wählen, Außnahme: Heimpheromon, das bitte mit Int
- + [X] Möglichkeit die Bevölkerung zu zählen.
- + [X] Es muss ein Mechanismus hinein, damit Ameisen nicht in jedem Schritt ihr Verhalten zu einem Artgenossen eines
-   anderen Stammes ändern.
-
-   /Idee:/ Aggresivitätszähler zwischen -10 (defensiv) über 0 (kann neue Aggresivität berechnen) bis +10 (aggresiv). Die
-   Zeit nähert den Zustand an 0 an.
-
-** DONE Wirtschafstverhalten
-Dieses teilen sich alle Ameisen
- * Modibestimmung
-   + Fall :: Ameise hat maximal viel Nahrung oder ist „gelangweilt”:
-     - Wahr :: ~Gehe nach Hause~
-     - Falsch :: ~Suche nach Nahrung~
-
- * Gehe nach Hause
-   + Fall :: Ameise ist schon zu Hause
-     - Wahr :: Gibt etwaige Ressourcen an die Königin und verliere alle
-               Langeweile beim Suchen von Ressourcen.
-     - Falsch :: ~Folge Pheromonroute nach Hause~
-
- * Folge Pheromonroute nach Hause :: Ameise befindet sich gerade auf Position
-      s. Sie nimmt immer den bisher optimalen Weg und passt nur die
-      Nahrungspheromone an.
-   + s' := Nachbarfeld mit größtem Heim-Pheromon
-   + Ameise geht nach s'
-   + ~Anpassung des Nahrungspheromonwerts der aktuellen Position~
-
- * Suche nach Nahrung :: Ameise befindet sich gerade auf Position s.
-   + s' := Zielfeld. Mit gewisser Wkt. ist es das Feld mit der höchsten
-     Nahrungspheromon-Rate. Ansonsten kann es irgendein anderes Feld sein. Diese
-     Wahrscheinlichkeit hängt von der Explorationsrate ab.
-   + Ameise geht nach s'
-   + ~Anpassung des Nahrungspheromonwerts der aktuellen Position~
-   + ~Anpassung des Heimheromonwerts der aktuellen Position~
-   + ~Baue Ressourcen ab~
-
- * Anpassung des Nahrungspheromonwerts der aktuellen Position :: Die aktuelle
-      Position ist s.
-   + r(s) := Menge an Nahrung (= Wert des Feldes) auf diesem Feld
-   + s' := Nachbarfeld von s, mit dem höchsten Nahrungspheromonenwert
-   + NahrungsPhero(s) := r(s) + gamma * NahrungsPhero(s')
-
- * Anpassung des Heimpheromonwerts der aktuellen Position :: Die aktuelle
-      Position ist s.
-   + s' := Nachbarfeld, mit dem /geringsten/ Heimwert
-   + HeimPhero(s) := min(HeimPhero(s), HeimPhero(s') + 1)
-
- * Baue Ressourcen ab :: Baut, wenn möglich, ressourcen ab. Wenn nicht, dann
-      wird die Ameise etwas gelangweilter.
-   + Fall :: Aktuelles Feld enthält Nahrung
-     - Wahr :: Nahrung wird abgebaut und Langweilezähler auf den Maximalwert
-               gesetzt.
-     - Falsch :: Die Ameise wird etwas gelangweilter (Langweilezähler -= 1)
-   
-** DONE Kampfverhalten normaler Ameisen
- * Modibestimmung
- + Fall :: Feind in der Nähe?
-   - Falsch :: ~Wirtschaftsverhalten~
-   - Wahr :: ~Aggressiv sein?~
-
- * Aggressiv sein?
-      Falls Ameise nicht aggressiv, geht sie mit bestimmter Wahrscheinlichkeit (abh. von Nahrungspheromonen)
-      in den aggressiven Zustand
-
-      Falls Ameise aggressiv (taktisches Verhalten)
-        Verfolge den Feind. Ist er auf dem gleichen Feld, so greife ihn an
-
-      Falls Ameise nicht aggressiv: ökonomisches Verhalten
-
-** DONE Kampfverhalten aggressiver Ameisen
-Verhalten in stark modifizierter Variante übernommen (siehe Quelltext)
-
-   /*
-    TODO: Implementiere diesen Pseudocode
-    Bemerkung: Die Ameise soll den Fall ausführen, der zuerst zutrifft.
-
-      Fall 1: Feindliche Einheiten in der Nähe und in der Überzahl:
-        Rufe weiträumig um Hilfe und
-        wahre Distanz
-
-      Fall 2: Feindliche Einheiten in der Nähe und in der Unterzahl
-        Rufe nur eigene Einheiten im Umkreis herbei
-
-      Fall 1: Andere Ameise schreit irgendwo um Hilfe
-        Ameise lässt alles stehen und liegen und bewegt sich in Richtung Angriff
-        Sie legt dabei keine Pheromonroute an
-
-      Fall 2: Ameise hat vollen Rucksack
-        Sie läuft in Richtung Königin. Sobald sie sich nahe genug bei ihr befindet, gibt sie die Fracht ab
-        Pheromon wird abgegeben
-
-    Fall 3:
-    */

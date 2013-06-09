@@ -357,15 +357,11 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => {
-        val pheroPos = Direction.inDirection(pos, dir)
-        Some(homePheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
-      }
-    }
-  }
+  private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
+    currentPos(ant) flatMap(pos => {
+      val pheroPos = Direction.inDirection(pos, dir)
+      Some(homePheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+    })
 
   /**
    * Home pheromone intensity of the tribe of the given ant at its current position
@@ -373,12 +369,8 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return Home pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def homePheroOf(ant: Ant): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => Some(homePheromones(ant.tribeID).get(pos._1, pos._2))
-    }
-  }
+  private[model] def homePheroOf(ant: Ant): Option[Double] =
+    currentPos(ant) flatMap (pos => Some(homePheromones(ant.tribeID).get(pos._1, pos._2)))
 
   /**
    * Resource pheromone intensity of the tribe of the given ant in the given direction
@@ -387,15 +379,11 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => {
-        val pheroPos = Direction.inDirection(pos, dir)
-        Some(resPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
-      }
-    }
-  }
+  private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
+    currentPos(ant) flatMap(pos => {
+      val pheroPos = Direction.inDirection(pos, dir)
+      Some(resPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+    })
 
   /**
    * Resource pheromone intensity of the tribe of the given ant at its current position
@@ -403,12 +391,8 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return Resource pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def resPheroOf(ant: Ant): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => Some(resPheromones(ant.tribeID).get(pos._1, pos._2))
-    }
-  }
+  private[model] def resPheroOf(ant: Ant): Option[Double] =
+    currentPos(ant) flatMap (pos => Some(resPheromones(ant.tribeID).get(pos._1, pos._2)))
 
   /**
    * War pheromone intensity of the tribe of the given ant in the given direction
@@ -417,15 +401,11 @@ private[antDefenseAIs] final class World(
    * @param dir Direction where to investigate the pheromone intensity
    * @return War pheromone intensity of the tribe of the given ant in the given position
    */
-  private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => {
-        val pheroPos = Direction.inDirection(pos, dir)
-        Some(warPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
-      }
-    }
-  }
+  private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
+    currentPos(ant) flatMap (pos => {
+      val pheroPos = Direction.inDirection(pos, dir)
+      Some(warPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+    })
 
   /**
    * War pheromone intensity of the tribe of the given ant at its current position
@@ -433,12 +413,8 @@ private[antDefenseAIs] final class World(
    * @param ant Ant which wants the result
    * @return War pheromone intensity of the tribe of the given at its current position
    */
-  private[model] def warPheroOf(ant: Ant): Option[Double] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => Some(warPheromones(ant.tribeID).get(pos._1, pos._2))
-    }
-  }
+  private[model] def warPheroOf(ant: Ant): Option[Double] =
+    currentPos(ant) flatMap (pos => Some(warPheromones(ant.tribeID).get(pos._1, pos._2)))
 
   /**
    * Set home pheromone intensity of the tribe of the given ant at the given position
@@ -484,10 +460,7 @@ private[antDefenseAIs] final class World(
    * @return List of positions within the given range.
    */
   def nearPos(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
-    neighbourhood(ant, distance) match {
-      case None => None
-      case Some(poss) => Some(poss.filter(pos => pos != currentPos(ant).get))
-    }
+    neighbourhood(ant, distance) flatMap (poss => Some(poss.filter(pos => pos != currentPos(ant).get)))
 
 
   /**
@@ -496,15 +469,11 @@ private[antDefenseAIs] final class World(
    * @param distance Maximum distance of a field towards the current position of the ant. Default is `1`
    * @return List of positions within the given range.
    */
-  def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] = {
-    currentPos(ant) match {
-      case None => None
-      case Some(pos) => {
-        val (xBag, yBag) = neighbourhoodBags(pos, distance)
-        Some(toTupleList(xBag, yBag))
-      }
-    }
-  }
+  def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
+    currentPos(ant) flatMap (pos => {
+      val (xBag, yBag) = neighbourhoodBags(pos, distance)
+      Some(toTupleList(xBag, yBag))
+    })
 
   /**
    * Calculates in two bags the x-positions an the y-positions of the neighbourhood within a given range

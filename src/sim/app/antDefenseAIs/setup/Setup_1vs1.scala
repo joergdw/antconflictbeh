@@ -27,7 +27,7 @@ class Setup_1vs1(var sd: Long) extends Experiment(sd) {
     new LasiusBehaviourConf(
       maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
   val artificialNormal = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerAggressive)
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, artificialNormal)
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(width, height)

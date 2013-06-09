@@ -26,7 +26,7 @@ class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
   val lasiusNigerAggressive = new LasiusNigerGenerator(
     new LasiusBehaviourConf(
       maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerAggressive, lasiusNigerNormal, lasiusNigerNormal,
+  private val tribes: Array[AntGenerator] = Array(artificialNormal, lasiusNigerNormal, lasiusNigerNormal,
     lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
