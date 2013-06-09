@@ -49,15 +49,12 @@ private[antDefenseAIs] class LasiusNigerGenerator(
    */
   def apply(tribeID: Int, world: World) = new LasiusNiger(tribeID, world, behaviourConf)
 
-  def apply(ant: Ant) = {
-    if (behaviourConf.isInstanceOf[LasiusBehaviourConf])
-      new LasiusNiger(ant, behaviourConf.asInstanceOf[LasiusBehaviourConf])
-
-    else
-      throw new IllegalArgumentException("Configuration not of required type.")
-  }
+  def apply(ant: Ant) =
+    behaviourConf match {
+      case c: LasiusBehaviourConf => new LasiusNiger(ant, behaviourConf)
+      case _                      => throw new IllegalArgumentException("Configuration not of required type.")
+    }
 }
-
 
 private[antDefenseAIs] object LasiusNiger {
   val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
@@ -305,7 +302,7 @@ private[antDefenseAIs] class LasiusNiger(
    */
   def adaptResPhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
+    val adaptedValue = world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount
 
     setResPhero(min(1, adaptedValue))
   }
@@ -325,7 +322,7 @@ private[antDefenseAIs] class LasiusNiger(
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
-    if (world.random.nextDouble() <= (1.0d - explorationRate))
+    if (world.random.nextDouble() <= 1.0d - explorationRate)
       valDirsSorted.head._1
     else
       valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1

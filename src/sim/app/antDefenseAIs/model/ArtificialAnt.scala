@@ -23,13 +23,11 @@ private[antDefenseAIs] class ArtificialAntGenerator(
    */
   def apply(tribeID: Int, world: World, beh: ArtificialAntBehaviourConf) = new ArtificialAnt(tribeID, world, beh)
 
-  def apply(ant: Ant): AntWorker = {
-    if (behaviourConf.isInstanceOf[ArtificialAntBehaviourConf])
-      new ArtificialAnt(ant, behaviourConf.asInstanceOf[ArtificialAntBehaviourConf])
-
-    else
-      throw new IllegalArgumentException("Configuration not of required type.")
-  }
+  def apply(ant: Ant) =
+    behaviourConf match {
+      case c: ArtificialAntBehaviourConf => new ArtificialAnt(ant, behaviourConf)
+      case _                             => throw new IllegalArgumentException("Configuration not of required type.")
+    }
 }
 
 /**
@@ -289,7 +287,7 @@ private[antDefenseAIs] class ArtificialAnt(
    */
   def adaptResPhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = (world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount)
+    val adaptedValue = world.resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / world.maxResAmount
 
     setResPhero(min(1, adaptedValue))
   }
@@ -309,7 +307,7 @@ private[antDefenseAIs] class ArtificialAnt(
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
-    if (world.random.nextDouble() <= (1.0d - explorationRate))
+    if (world.random.nextDouble() <= 1.0d - explorationRate)
       valDirsSorted.head._1
     else
       valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1
