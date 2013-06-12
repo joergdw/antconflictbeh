@@ -348,8 +348,8 @@ private[antDefenseAIs] class ArtificialAnt(
     }
   }
 
-  override def receiveHit(opponent: Ant) {
-    super.receiveHit(opponent)
+  override def receiveHitFrom(opponent: Ant) {
+    super.receiveHitFrom(opponent)
 
     // Adapt emotion
     emotion = if (evalueSituation().get < 1) Emotion.fearsome else Emotion.battlesome

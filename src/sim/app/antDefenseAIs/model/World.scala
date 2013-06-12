@@ -18,7 +18,7 @@ import scala.collection.mutable
 
 import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.engine.{Stoppable, SimState, Steppable}
-import sim.util.IntBag
+import sim.util.{Bag, IntBag}
 
 import sim.app.antDefenseAIs.common.Common._
 import sim.app.antDefenseAIs.setup.Experiment
@@ -186,14 +186,14 @@ private[antDefenseAIs] final class World(
      *
      * @return Current population of the colony
      */
-    def population(): Int = allAnts.count(a => a.tribeID == queen.tribeID)
+    def population(): Int = allAnts count (a => a.tribeID == queen.tribeID)
 
     /**
      * Total amount of resources hold by the ants of a colony
      *
      * @return Total amount of resources hold by the ants of a colony
      */
-    def resources(): Int = allAnts.filter(a => a.tribeID == queen.tribeID).foldLeft(0)((i, a) => i + a.inBackpack())
+    def resources(): Int = (allAnts filter (a => a.tribeID == queen.tribeID)).foldLeft(0)((i, a) => i + a.inBackpack())
 
     /**
      * Total amount of resources hold by the queen of a colony
@@ -208,6 +208,10 @@ private[antDefenseAIs] final class World(
      * @return True iff the queen has survived until now
      */
     def queenSurvived(): Boolean = (ants getObjectLocation queen) != null
+
+    val (hit_made, hit_gotten) = (0, 1)
+    val (sit_mayority, sit_minority) = (0, 1)
+    val analyzeTable = Array.ofDim[Int](2, 2)
   }
 
 
@@ -221,10 +225,10 @@ private[antDefenseAIs] final class World(
 
       val startPos = startPositions(i)
       val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
-      assert(ants.setObjectLocation(queen, startPos._1, startPos._2)) // Place queen on world
+      assert(ants setObjectLocation (queen, startPos._1, startPos._2)) // Place queen on world
 
       val homePheromones = new DoubleGrid2D(width, height, 0.0d)
-      homePheromones.set(startPos._1, startPos._2, 1.0d) // Adapt home-pheromone on queens place
+      homePheromones set (startPos._1, startPos._2, 1.0d) // Adapt home-pheromone on queens place
 
       val resPheromones = new DoubleGrid2D(width, height, 0.0d)
       val warPheromones = new DoubleGrid2D(width, height, 0.0d)
@@ -295,7 +299,7 @@ private[antDefenseAIs] final class World(
         val evaporationRate: Double = 0.9
 
         val newer = if (old < threshold) 0 else old * evaporationRate
-        warPheroMap.set(i, j, newer)
+        warPheroMap set(i, j, newer)
       }
     }
 
@@ -361,7 +365,7 @@ private[antDefenseAIs] final class World(
   private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
     currentPosOf(ant) flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
-      Some(colonyInfos(ant.tribeID).homePheromones.get(pheroPos._1, pheroPos._2))
+      Some(colonyInfos(ant.tribeID).homePheromones get (pheroPos._1, pheroPos._2))
     })
 
   /**
@@ -447,7 +451,35 @@ private[antDefenseAIs] final class World(
    * @param amount New intensity
    */
   private[model] def setWarPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
-    colonyInfos(ant.tribeID).warPheromones.set(pos._1, pos._2, amount)
+    colonyInfos(ant.tribeID).warPheromones set (pos._1, pos._2, amount)
+  }
+
+  /**
+   * Give a hit from one ant to the other
+   *
+   * Internals of ant behaviour routed via World-class to collect statistical data.
+   *
+   * @param giver Ant hitting an opponent
+   * @param receiver Ant being hit
+   */
+  private[model] def hit(giver: Ant)(receiver: Ant) {
+    val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver) get) count (a => a.tribeID == giver.tribeID)
+    val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver) get) count (a => a.tribeID == giver.tribeID)
+
+    val cInfoAttacker = colonyInfos(giver tribeID)
+    val cInfoAttacked = colonyInfos(receiver tribeID)
+
+
+    if (nearAttackingAnts > nearAttackedAnts) {
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacked.sit_mayority) += 1
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_gotten)(cInfoAttacked.sit_minority) += 1
+    }
+    else {
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacked.sit_minority) += 1
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_gotten)(cInfoAttacked.sit_mayority) += 1
+    }
+
+    receiver receiveHitFrom giver
   }
 
 
@@ -472,7 +504,7 @@ private[antDefenseAIs] final class World(
    */
   def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
     currentPosOf(ant) flatMap (pos => {
-      val (xBag, yBag) = neighbourhoodBags(pos, distance)
+      val (xBag, yBag) = neighbourhoodBags (pos, distance)
       Some(toTupleList(xBag, yBag))
     })
 
@@ -585,4 +617,11 @@ private[antDefenseAIs] final class World(
   }
 
   private def allAnts: List[Ant] = antBag2AntList (ants.getAllObjects)
+
+  private def antsInNeighbourhoodOf(pos: (Int, Int)): List[Ant] = {
+    val (xBag, yBag) = neighbourhoodBags(pos, 1)
+    val bag = new Bag()
+    ants.getObjectsAtLocations(xBag, yBag, bag)
+    antBag2AntList(bag)
+  }
 }

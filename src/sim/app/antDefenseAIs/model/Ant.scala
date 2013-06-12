@@ -31,7 +31,7 @@ private[antDefenseAIs] abstract class Ant(
   val world: World) extends Steppable {
 
   protected final var hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
-  protected final var mobility: Float = 0.5f /** Probability to avoid to be hit */
+  protected final var mobility: Float = 0f /** Probability to avoid to be hit */
   protected final var attack: Int = 1 /** Damage an ant does to another */
   private[model] final var age: Int = 0 /** Current age of the ant */
   protected[this] final var _inBackpack: Int = 0 /** Amount of resources transported by this ant */
@@ -158,8 +158,8 @@ private[antDefenseAIs] abstract class Ant(
   /**
    * Adaptions after receiving a hit
    */
-  protected def receiveHit(opponent: Ant) {
-    if (world.random.nextDouble() < mobility) // If ant can
+  private[model] def receiveHitFrom(opponent: Ant) {
+    if (world.random.nextDouble() >= mobility) // If ant can ...
       hitpoints = hitpoints - attack
   }
 
@@ -168,8 +168,8 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @param opponent Opponent receiving a hit
    */
-  protected def hit(opponent: Ant) {
-    opponent receiveHit this
+  private[model] def hit(opponent: Ant) {
+    world.hit(this)(opponent)
   }
 
   /**
