@@ -15,9 +15,9 @@ package sim.app.antDefenseAIs.model
 import sim.engine.SimState
 
 private[antDefenseAIs] object AntQueen {
-  val startRessources = 10 /** Amount of resources a tribe starts with. Should be >= `productionCost` */
+  val startRessources = 15 /** Amount of resources a tribe starts with. Should be >= `productionCost` */
   val productionTime: Int = 10 /** time to produce an ant*/
-  val productionCost: Int = 10 /** costs to produce an ant */
+  val productionCost: Int = 15 /** costs to produce an ant */
   val maximumAge: Int = Integer.MAX_VALUE /** Maximum age of a queen (in steps) */
   /**
    * Creates an NormalAntWorker

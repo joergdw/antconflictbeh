@@ -57,7 +57,7 @@ private[antDefenseAIs] class LasiusNigerGenerator(
 }
 
 private[antDefenseAIs] object LasiusNiger {
-  val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
+  val antsSensingRange: Int = 2 /** Radius of the area the ant can sense other individuals */
 }
 
 

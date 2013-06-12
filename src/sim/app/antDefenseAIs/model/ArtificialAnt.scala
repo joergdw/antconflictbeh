@@ -49,7 +49,7 @@ class ArtificialAntBehaviourConf(
 
 
 private[antDefenseAIs] object ArtificialAnt {
-  val antsSensingRange: Int = 3 /** Radius of the area the ant can sense other individuals */
+  val antsSensingRange: Int = 4 /** Radius of the area the ant can sense other individuals */
 }
 
 
@@ -152,23 +152,17 @@ private[antDefenseAIs] class ArtificialAnt(
             emotion = Emotion.battlesome
             actMilitarily()
           }
-          else
+          else {
             moveTo(warPheroDir)
             adaptHomePhero()
             adaptResPhero()
+            adaptWarPhero()
+          }
         }
         else
           actEconomically()
       }
-      case Emotion.fearsome => {
-        val queenPos = world.currentPosOf(myQueen)
-        if (queenPos.isDefined && currentPos == queenPos.get)
-          emotion = Emotion.normal
-        else {
-          followHomeWay()
-          adaptWarPhero()
-        }
-      }
+      case Emotion.fearsome => followHomeWay()
       case Emotion.battlesome => actMilitarily()
     }
 
@@ -210,6 +204,7 @@ private[antDefenseAIs] class ArtificialAnt(
        moveTo(dir)
        adaptHomePhero()
        adaptResPhero()
+       adaptWarPhero()
       }
     }
   }
@@ -250,6 +245,7 @@ private[antDefenseAIs] class ArtificialAnt(
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
+    adaptWarPhero()
   }
 
   /**
@@ -263,6 +259,7 @@ private[antDefenseAIs] class ArtificialAnt(
     moveTo(direction)
     adaptHomePhero()
     adaptResPhero()
+    adaptWarPhero()
     mineRes()
   }
 
@@ -344,7 +341,11 @@ private[antDefenseAIs] class ArtificialAnt(
         case None => // Do noting because no strangers in the area
         case Some(n) => if (n >= 1) emotion = Emotion.battlesome
       }
-      case Emotion.fearsome => // Do nothing
+      case Emotion.fearsome => {
+        val queenPos = world.currentPosOf(myQueen)
+        if (queenPos.isDefined && currentPos == queenPos.get)
+          emotion = Emotion.normal
+      }
     }
   }
 
