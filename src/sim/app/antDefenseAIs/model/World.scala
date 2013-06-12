@@ -161,68 +161,81 @@ private[antDefenseAIs] final class World(
     }
   }
 
-  private val queens: HashMap[Int, AntQueen] = {
+  /**
+   * Info-Datatype containing all the necessary information associated with each colony
+   *
+   * @param initialStartPosition Start position of the colony at the beginning of the simulation
+   * @param queen Queen of the associated colony
+   * @param homePheromones Storage of the home-pheromones of the colony
+   * @param resPheromones Storage of the resource-pheromones of the colony
+   * @param warPheromones Storage of the war-pheromones of the colony
+   * @param beingKilled Number of ants being killed in conflicts
+   * @param deceased Number of ants died due to other reasons (currently only age)
+   */
+  private[antDefenseAIs] class ColonyInfo(
+    val initialStartPosition: (Int, Int),
+    val queen: AntQueen,
+    val homePheromones: DoubleGrid2D,
+    val resPheromones: DoubleGrid2D,
+    val warPheromones: DoubleGrid2D,
+    var beingKilled: Int,
+    var deceased: Int) {
+
+    /**
+     * Current population of the colony
+     *
+     * @return Current population of the colony
+     */
+    def population(): Int = allAnts.count(a => a.tribeID == queen.tribeID)
+
+    /**
+     * Total amount of resources hold by the ants of a colony
+     *
+     * @return Total amount of resources hold by the ants of a colony
+     */
+    def resources(): Int = allAnts.filter(a => a.tribeID == queen.tribeID).foldLeft(0)((i, a) => i + a.inBackpack())
+
+    /**
+     * Total amount of resources hold by the queen of a colony
+     *
+     * @return Total amount of resources hold by the queen of a colony
+     */
+    def deposit(): Int = queen inBackpack()
+
+    /**
+     * True iff the queen has survived until now
+     *
+     * @return True iff the queen has survived until now
+     */
+    def queenSurvived(): Boolean = (ants getObjectLocation queen) != null
+  }
+
+
+  val colonyInfos: HashMap[Int, ColonyInfo] = {
     import sim.app.antDefenseAIs.model.TribeIDGenerator.nextTribeID
 
-    var m = HashMap[Int, AntQueen]()
+    var m = HashMap[Int, ColonyInfo]()
 
     for (i <- 0 until experiment.numberOfTribes) {
       val id = nextTribeID()
-      val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
-      assert(ants.setObjectLocation(queen, startPositions(i)._1, startPositions(i)._2)) // Place queen on world
 
-      m = m + ((id, queen))
+      val startPos = startPositions(i)
+      val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
+      assert(ants.setObjectLocation(queen, startPos._1, startPos._2)) // Place queen on world
+
+      val homePheromones = new DoubleGrid2D(width, height, 0.0d)
+      homePheromones.set(startPos._1, startPos._2, 1.0d) // Adapt home-pheromone on queens place
+
+      val resPheromones = new DoubleGrid2D(width, height, 0.0d)
+      val warPheromones = new DoubleGrid2D(width, height, 0.0d)
+
+      m = m + ((id, new ColonyInfo(
+        startPos, queen, homePheromones,
+        resPheromones, warPheromones,
+        beingKilled = 0, deceased = 0)))
     }
 
     m
-  }
-
-  /**
-   * Map of all start positions for each tribe
-   */
-  val startPositionsByID: HashMap[Int, (Int, Int)] = {
-    var m = HashMap[Int, (Int, Int)]()
-
-    for ((id, queen) <- queens)
-      m = m + ((id, currentPos(queen).get))
-
-    m
-  }
-
-  // For each tribe there will be a store for all the pheromone-types.
-  // Only public for mason graphical capabilities. Other classes should use the access methods of this class
-  val homePheromones: HashMap[Int, DoubleGrid2D] = {
-    var m: HashMap[Int, DoubleGrid2D] = HashMap()
-
-    for (id <- queens.keys)
-      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
-
-    m
-  }
-
-  val resPheromones: HashMap[Int, DoubleGrid2D] = {
-    var m: HashMap[Int, DoubleGrid2D] = HashMap()
-
-    for (id <- queens.keys)
-      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
-
-    m
-  }
-
-  val warPheromones: HashMap[Int, DoubleGrid2D] = {
-    var m: HashMap[Int, DoubleGrid2D] = HashMap()
-
-    for (id <- queens.keys)
-      m = m + ((id, new DoubleGrid2D(width, height, 0.0d)))
-
-    m
-  }
-
-  // Adapt home-pheromone on queens place
-  for ((id, queen) <- queens) {
-    val homePheroMap = homePheromones(id)
-    val pos = currentPos(queen).get
-    homePheroMap.set(pos._1, pos._2, 1.0d)
   }
 
   /**
@@ -231,7 +244,8 @@ private[antDefenseAIs] final class World(
   def start() {
     experiment.schedule.scheduleRepeating(this)
 
-    for ((id, queen) <- queens) { // Schedule all queens
+    for ((id, cInfo) <- colonyInfos) { // Schedule all queens
+      val queen = cInfo.queen
       val stoper = experiment.schedule.scheduleRepeating(queen)
       stopOrders += ((queen, stoper))
     }
@@ -260,38 +274,25 @@ private[antDefenseAIs] final class World(
       ant match {
         case _ if ant.isKilled => {
           removeAnt(ant)
-          val n = _killedAntsByTribe(ant.tribeID)
-          _killedAntsByTribe += ((ant.tribeID, n + 1))
+          colonyInfos(ant.tribeID).beingKilled += 1
         }
         case _ if ant.age >= ant.maximumAge => {
           removeAnt(ant)
-          val n = _diedAntsByTribe(ant.tribeID)
-          _diedAntsByTribe += ((ant.tribeID, n + 1))
+          colonyInfos(ant.tribeID).deceased += 1
         }
         case other: Ant => other.age += 1  // age a living ant
       }
     }
 
-    // Evaporation
-    for ((id, warPheroMap) <- warPheromones) {
+    // Evaporation of war-pheromones
+    for ((id, cInfo) <- colonyInfos) {
+      val warPheroMap = cInfo.warPheromones
+
       for (i <- 0 until width; j <- 0 until height) {
         val threshold = 0.1e-2 // lowest possible value
 
         val old = warPheroMap.get(i, j)
         val evaporationRate: Double = 0.9
-
-        val newer = if (old < threshold) 0 else old * evaporationRate
-        warPheroMap.set(i, j, newer)
-      }
-    }
-
-    // Evaporation for war-pheromones
-    for (warPheroMap <- warPheromones.values) {
-      for (i <- 0 until height; j <- 0 until width) {
-        val threshold = 0.1e-40 // lowest possible value
-
-        val old = warPheroMap.get(i, j)
-        val evaporationRate: Double = 0.98
 
         val newer = if (old < threshold) 0 else old * evaporationRate
         warPheroMap.set(i, j, newer)
@@ -346,7 +347,7 @@ private[antDefenseAIs] final class World(
    * @param direction Direction to move the ant to
    */
   private[model] def move(ant: Ant, direction: Direction.Value) {
-    val targetPosition = Direction.inDirection(currentPos(ant).get, direction) // ant must live
+    val targetPosition = Direction.inDirection(currentPosOf(ant).get, direction) // ant must live
     ants.setObjectLocation(ant, toInd2D(targetPosition))
   }
 
@@ -358,9 +359,9 @@ private[antDefenseAIs] final class World(
    * @return Home pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPos(ant) flatMap(pos => {
+    currentPosOf(ant) flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
-      Some(homePheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      Some(colonyInfos(ant.tribeID).homePheromones.get(pheroPos._1, pheroPos._2))
     })
 
   /**
@@ -370,7 +371,7 @@ private[antDefenseAIs] final class World(
    * @return Home pheromone intensity of the tribe of the given at its current position
    */
   private[model] def homePheroOf(ant: Ant): Option[Double] =
-    currentPos(ant) flatMap (pos => Some(homePheromones(ant.tribeID).get(pos._1, pos._2)))
+    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).homePheromones.get(pos._1, pos._2)))
 
   /**
    * Resource pheromone intensity of the tribe of the given ant in the given direction
@@ -380,9 +381,9 @@ private[antDefenseAIs] final class World(
    * @return Resource pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPos(ant) flatMap(pos => {
+    currentPosOf(ant) flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
-      Some(resPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      Some(colonyInfos(ant.tribeID).resPheromones.get(pheroPos._1, pheroPos._2))
     })
 
   /**
@@ -392,7 +393,7 @@ private[antDefenseAIs] final class World(
    * @return Resource pheromone intensity of the tribe of the given at its current position
    */
   private[model] def resPheroOf(ant: Ant): Option[Double] =
-    currentPos(ant) flatMap (pos => Some(resPheromones(ant.tribeID).get(pos._1, pos._2)))
+    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).resPheromones.get(pos._1, pos._2)))
 
   /**
    * War pheromone intensity of the tribe of the given ant in the given direction
@@ -402,9 +403,9 @@ private[antDefenseAIs] final class World(
    * @return War pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPos(ant) flatMap (pos => {
+    currentPosOf(ant) flatMap (pos => {
       val pheroPos = Direction.inDirection(pos, dir)
-      Some(warPheromones(ant.tribeID).get(pheroPos._1, pheroPos._2))
+      Some(colonyInfos(ant.tribeID).warPheromones.get(pheroPos._1, pheroPos._2))
     })
 
   /**
@@ -414,7 +415,7 @@ private[antDefenseAIs] final class World(
    * @return War pheromone intensity of the tribe of the given at its current position
    */
   private[model] def warPheroOf(ant: Ant): Option[Double] =
-    currentPos(ant) flatMap (pos => Some(warPheromones(ant.tribeID).get(pos._1, pos._2)))
+    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).warPheromones.get(pos._1, pos._2)))
 
   /**
    * Set home pheromone intensity of the tribe of the given ant at the given position
@@ -424,7 +425,7 @@ private[antDefenseAIs] final class World(
    * @param amount New intensity
    */
   private[model] def setHomePheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
-    homePheromones(ant.tribeID).set(pos._1, pos._2, amount)
+    colonyInfos(ant.tribeID).homePheromones.set(pos._1, pos._2, amount)
   }
 
   /**
@@ -435,7 +436,7 @@ private[antDefenseAIs] final class World(
    * @param amount New intensity
    */
   private[model] def setResPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
-    resPheromones(ant.tribeID).set(pos._1, pos._2, amount)
+    colonyInfos(ant.tribeID).resPheromones.set(pos._1, pos._2, amount)
   }
 
   /**
@@ -446,11 +447,11 @@ private[antDefenseAIs] final class World(
    * @param amount New intensity
    */
   private[model] def setWarPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
-    warPheromones(ant.tribeID).set(pos._1, pos._2, amount)
+    colonyInfos(ant.tribeID).warPheromones.set(pos._1, pos._2, amount)
   }
 
 
-  ///////////////////////// Other methods for the ants ///////////////////////////////
+  //--------------------------- Other methods for the ants -------------------------------
 
   /**
    * Calculates all the neighbour positions within a certain distance.
@@ -460,7 +461,7 @@ private[antDefenseAIs] final class World(
    * @return List of positions within the given range.
    */
   def nearPos(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
-    neighbourhood(ant, distance) flatMap (poss => Some(poss.filter(pos => pos != currentPos(ant).get)))
+    neighbourhood(ant, distance) flatMap (poss => Some(poss.filter(pos => pos != currentPosOf(ant).get)))
 
 
   /**
@@ -470,7 +471,7 @@ private[antDefenseAIs] final class World(
    * @return List of positions within the given range.
    */
   def neighbourhood(ant: Ant, distance: Int = 1): Option[List[(Int, Int)]] =
-    currentPos(ant) flatMap (pos => {
+    currentPosOf(ant) flatMap (pos => {
       val (xBag, yBag) = neighbourhoodBags(pos, distance)
       Some(toTupleList(xBag, yBag))
     })
@@ -495,7 +496,7 @@ private[antDefenseAIs] final class World(
    * @return All directions in which an given ant can move from its current position
    */
   private[model] def validDirections(ant: Ant): Option[List[Direction.Value]] = {
-    val pos = currentPos(ant)
+    val pos = currentPosOf(ant)
 
     if (pos.isEmpty)
       None
@@ -518,7 +519,7 @@ private[antDefenseAIs] final class World(
    * @param ant Ant asking for her current position
    * @return Current position of `ant`.
    */
-  def currentPos(ant: Ant): Option[(Int, Int)] = {
+  def currentPosOf(ant: Ant): Option[(Int, Int)] = {
     ants.getObjectLocation(ant) match {
       case null => None
       case location => Some(toTuple(location))
@@ -531,7 +532,7 @@ private[antDefenseAIs] final class World(
      * @param ant Ant asking for the queen
      * @return Queen of the ant colony the ant belongs to
      */
-    private[model] def queenOf(ant: Ant): AntQueen = queens(ant.tribeID)
+    private[model] def queenOf(ant: Ant): AntQueen = colonyInfos(ant.tribeID).queen
 
   /**
    * Places a given, new ant on the given position
@@ -542,7 +543,7 @@ private[antDefenseAIs] final class World(
  private[this] def placeNewAnt(ant: Ant, pos: (Int, Int)) {
    if (ants.getObjectLocation(ant) != null)
      throw new IllegalStateException("Ant already placed on world")
-   if (populationStat()(ant.tribeID) >= maxPopulation)
+   if (colonyInfos(ant.tribeID).population() >= maxPopulation)
      throw new IllegalStateException("Maximum population of " + maxPopulation + " already reached" +
       " by tribe " + ant.tribeID)
 
@@ -557,133 +558,18 @@ private[antDefenseAIs] final class World(
    * @param ant Ant to place on the map
    */
  private[model] def placeNewAnt(ant: Ant) {
-   placeNewAnt(ant, currentPos(queenOf(ant)).get) // queen must have invoked this method
+   placeNewAnt(ant, currentPosOf(queenOf(ant)).get) // queen must have invoked this method
  }
 
 
-
-  ///////////////////////// Statistic related stuff /////////////////////////////////
-
-  /** Number of ants killed by foreign colonies by each tribe */
-  private[this] val _killedAntsByTribe: mutable.HashMap[Int, Int] = {
-    val result = mutable.HashMap[Int, Int]()
-
-    for (queen <- queens.values) {
-      result += ((queen.tribeID, 0))
-    }
-
-    result
-  }
-
-  /** Number of ants died because of age by each tribe */
-  private[this] val _diedAntsByTribe: mutable.HashMap[Int, Int] = {
-    val result = mutable.HashMap[Int, Int]()
-
-    for (queen <- queens.values) {
-      result += ((queen.tribeID, 0))
-    }
-
-    result
-  }
-
-  /**
-   * Total number of ants lost by each tribe
-   *
-   * @return Total number of ants lost by each tribe
-   */
-  def lostAntsByTribe(): HashMap[Int, Int] = {
-    var result = HashMap[Int, Int]()
-
-    for (id <- queens.keys)
-      result = result + ((id, _killedAntsByTribe(id) + _diedAntsByTribe(id)))
-
-    result
-  }
-
-  /**
-   * Lost ants by each tribe due to overaging
-   *
-   * @return Lost ants by each tribe due to overaging
-   */
-  def lostAntsByAge(): mutable.HashMap[Int, Int] = _diedAntsByTribe.clone()
-
-  /**
-   * Counts population of all tribes
-   *
-   * @return HashMap that contains for each tribeID (key) the corresponding population
-   */
-  def populationStat(): HashMap[Int, Int] = {
-    val objects = ants.getAllObjects
-    var result = HashMap[Int, Int]()
-
-    for (queen <- queens.values)
-      result = result + ((queen.tribeID, 0)) // Start with 0 for each tribe
-
-    for (i <- 0 until objects.size()) {
-      val ant = objects.get(i).asInstanceOf[Ant]
-      val n: Int = result(ant.tribeID)
-      result = result + ((ant.tribeID, n + 1))
-    }
-
-    result
-  }
-
-  /**
-   * Counts resources owned by the ant queen of each tribe
-   *
-   * @return field i contains the amount of resources the queen of tribe i has
-   */
-  def resourceStat(): HashMap[Int, Int] = {
-    var result = HashMap[Int, Int]()
-
-    for (queen <- queens.values)
-      result = result + ((queen.tribeID, queen.deposit))
-
-    result
-  }
-
-  /**
-   * Amount of resources owned at the current time by each tribe.
-   *
-   * @return Field i contains the total intensity of resources owned by ants of the tribe i
-   */
-  def totalResStat(): mutable.HashMap[Int, Int] = {
-    val ants: List[Ant]  = allAnts
-    val result = mutable.HashMap[Int, Int]()
-
-    for (queen <- queens.values)
-      result += ((queen.tribeID, 0)) // Start with 0 for each tribe
-
-    for (ant <- ants) {
-      val n: Int = result(ant.tribeID)
-      val diff: Int = ant match {
-                        case worker: AntWorker => worker.inBackpack
-                        case queen: AntQueen => queen.deposit
-                      }
-      result += ((ant.tribeID, n + diff))
-    }
-
-    result.clone()
-  }
-
-  def queensSurvived(): HashMap[Int, Boolean] = {
-    var result = HashMap[Int, Boolean]()
-    for ((id, queen) <- queens) {
-      result = result + ((id, ants.getObjectLocation(queen) != null))
-    }
-
-    result
-  }
-
-
-  ///////////////////////////// Others ///////////////////////////////////
+  //-------------------------- Others --------------------------------------
 
   /**
    * All tribe ids of the tribes on the world
    *
    * @return Array of all tribe ids of the tribes on the world
    */
-  def tribeIDs(): Array[Int] = queens.keys.toArray
+  def tribeIDs(): Array[Int] = colonyInfos.keys.toArray
 
   /**
    * Returns map containing the current resource distribution

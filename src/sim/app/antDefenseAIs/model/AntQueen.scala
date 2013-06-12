@@ -39,21 +39,14 @@ import AntQueen._
  * @param world World the ant lives on
  * @param antGen Constructor of the ant type the queen should use for new ants
  */
-private final class AntQueen(
+private[antDefenseAIs] final class AntQueen(
   override val tribeID: Int,
   override val world: World,
   private val antGen: AntGenerator) extends Ant(tribeID, world) {
 
   override def maximumAge(): Int = AntQueen.maximumAge
 
-  private var _deposit: Int = startRessources /** Resources the queen owns */
-
-  /**
-   * Returns the intensity of resources in the queens deposit
-   *
-   * @return Amount of resources in the queens deposit
-   */
-  def deposit: Int = _deposit
+  _inBackpack = startRessources /** Resources the queen owns */
 
   /*
   0 means: no ant being produced
@@ -70,16 +63,16 @@ private final class AntQueen(
   def receiveRes(amount: Int) {
     assert(amount >= 0)
 
-    _deposit += amount
+    _inBackpack += amount
   }
 
   /**
    * Queen places all owned resources her current position
    */
   def dropDeposit() {
-    val res = world.resOn(currentPos) + deposit
+    val res = world.resOn(currentPos) + _inBackpack
     world.setResOn(currentPos, res)
-    _deposit = 0
+    _inBackpack = 0
   }
 
   /**
@@ -90,10 +83,10 @@ private final class AntQueen(
   override def step(state: SimState) {
     assert(0 <= productionState && productionState <= productionTime)
 
-    val tmp = _deposit - productionCost
+    val tmp = _inBackpack - productionCost
 
     if (tmp >= 0 && productionState == 0) { // enough resources and no other construction in progress?
-      _deposit = tmp
+      _inBackpack = tmp
       productionState += 1
     }
 

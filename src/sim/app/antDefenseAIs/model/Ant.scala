@@ -34,12 +34,20 @@ private[antDefenseAIs] abstract class Ant(
   protected final var mobility: Float = 0.5f /** Probability to avoid to be hit */
   protected final var attack: Int = 1 /** Damage an ant does to another */
   private[model] final var age: Int = 0 /** Current age of the ant */
+  protected[this] final var _inBackpack: Int = 0 /** Amount of resources transported by this ant */
 
   /** Last went direction */
   protected final var lastDirection: world.Direction.Value = {  // Initialise with random value
     val valueList = world.Direction.values.toList
     valueList.apply(world.random.nextInt(world.Direction.values.size))
   }
+
+  /**
+   * Amount of resources transported by this ant
+   *
+   * @return Amount of resources transported by this ant
+   */
+  def inBackpack(): Int = _inBackpack
 
   def maximumAge(): Int /** Maximum age of an ant */
 
@@ -48,7 +56,7 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @return Current position of that ant as (Int, Int)
    */
-  protected[this] def currentPos: (Int, Int) = world.currentPos(this).get
+  protected[this] def currentPos: (Int, Int) = world.currentPosOf(this).get
 
   /**
    * All directions in which the ant can go right now
@@ -63,7 +71,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param direction New position of the ant
    */
   protected[this] def moveTo(direction: world.Direction.Value) {
-    world.move(this, direction)
+    world move(this, direction)
     lastDirection = direction
   }
 
@@ -72,7 +80,7 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @return Queen of the ant
    */
-  private[model] def myQueen: AntQueen = world.queenOf(this)
+  private[model] def myQueen: AntQueen = world queenOf this
 
   /**
    * Home pheromone intensity of the tribe of the ant in the given direction
@@ -125,7 +133,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param intensity New intensity
    */
   protected[this] def setHomePhero(intensity: Double) {
-    world.setHomePheroOn(this, currentPos, intensity)
+    world setHomePheroOn(this, currentPos, intensity)
   }
 
   /**
@@ -134,7 +142,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param intensity New intensity
    */
   protected def setResPhero(intensity: Double) {
-    world.setResPheroOn(this, currentPos, intensity)
+    world setResPheroOn(this, currentPos, intensity)
   }
 
   /**
@@ -143,7 +151,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param intensity New intensity
    */
   protected def setWarPhero(intensity: Double) {
-    world.setWarPheroOn(this, currentPos, intensity)
+    world setWarPheroOn(this, currentPos, intensity)
   }
 
 
@@ -161,7 +169,7 @@ private[antDefenseAIs] abstract class Ant(
    * @param opponent Opponent receiving a hit
    */
   protected def hit(opponent: Ant) {
-    opponent receiveHit(this)
+    opponent receiveHit this
   }
 
   /**

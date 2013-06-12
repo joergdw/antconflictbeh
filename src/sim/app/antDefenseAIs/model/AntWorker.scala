@@ -30,13 +30,11 @@ private[antDefenseAIs] abstract class AntWorker(
   override val tribeID: Int,
   override val world: World) extends Ant(tribeID, world) {
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
-
-  protected var transporting: Int = 0 /** Amount of resources transported by this ant */
+  //------------------- Common variables and constants -----------------------------------
   override final def maximumAge(): Int = AntWorker.maximumAge
 
 
-  //////////////////// Basic operations of ants //////////////////////////////////////
+  //------------------- Basic operations of ant workers-----------------------------------
 
   /**
    * Drops the resources on the current place. If the queen is there, she
@@ -44,15 +42,15 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   final def dropResources() {
     val pos = currentPos
-    val qPos: Option[(Int, Int)] = world.currentPos(myQueen)
+    val qPos: Option[(Int, Int)] = world currentPosOf myQueen
     if (qPos.isDefined && pos == qPos.get)
-      myQueen.receiveRes(transporting)
+      myQueen receiveRes _inBackpack
     else {
-      val res = world.resOn(pos) + transporting
-      world.setResOn(pos, res)
+      val res = world.resOn(pos) + _inBackpack
+      world setResOn(pos, res)
     }
 
-    transporting = 0
+    _inBackpack = 0
   }
 
   /**
@@ -60,20 +58,10 @@ private[antDefenseAIs] abstract class AntWorker(
    */
   def mineRes() {
     val pos = currentPos
-    val spaceLeft: Boolean = backpackSize > transporting // space left in bag?
+    val spaceLeft: Boolean = backpackSize > _inBackpack // space left in bag?
     if (spaceLeft && world.resOn(pos) > 0) {
-      world.setResOn(pos, world.resOn(pos) - 1)
-      transporting += 1
+      world setResOn(pos, world.resOn(pos) - 1)
+      _inBackpack += 1
     }
   }
-
-
-  //////////////////////// Information revealing functions for other classes ////////////
-
-  /**
-   * Amount of resources transported by this ant
-   *
-   * @return Amount of resources transported by this ant
-   */
-  final def inBackpack: Int = transporting
 }

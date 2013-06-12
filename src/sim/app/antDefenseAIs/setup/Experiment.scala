@@ -81,6 +81,8 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
    * @return Report message of the current state of the experiment
    */
   def giveReport(): String = {
+    val colInfs = world.colonyInfos.toList.sortBy(x => x._1) // sorted by tribeID
+
     def header() = {
       import java.util.Date
       import java.sql.Timestamp
@@ -91,11 +93,11 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
     }
 
     def populationReport(): String = {
-      val population: List[(Int, Int)] = world.populationStat().toList.sortBy(x => x._1)
       var message = "* Population overview:\n"
 
-      for ((id, number) <- population) {
-        val pos = world.startPositionsByID(id)
+      for ((id, cInf) <- colInfs) {
+        val pos = cInf.initialStartPosition
+        val number = cInf.population()
         message = message concat "\tTribe " + id + " has " + number + " ants and start position " + pos + "\n"
       }
 
@@ -103,14 +105,14 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
     }
 
     def resourceReport(): String = {
-      val resourcesTotal: List[(Int, Int)] = world.totalResStat().toList.sortBy(x => x._1)
-      val resourcesQueens = world.resourceStat()
       var message: String = "* Resource overview:\n"
 
-      for ((id, amount) <- resourcesTotal) {
-        message = message concat "\tTribe " + id + " owns " + amount + " resources"
-        message = message concat ", " + resourcesQueens(id) + " has the queen and"
-        message = message concat " " + (amount - resourcesQueens(id)) + " are carried by the workers."
+      for ((id, cInf) <- colInfs) {
+        val (resourcesTotal, queenDeposit) = (cInf.resources(), cInf.deposit())
+
+        message = message concat "\tTribe " + id + " owns " + resourcesTotal + " resources"
+        message = message concat ", " + queenDeposit + " has the queen and"
+        message = message concat " " + (resourcesTotal - queenDeposit) + " are carried by the workers."
         message = message concat "\n"
       }
 
@@ -118,14 +120,14 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
     }
 
     def lossesReport(): String = {
-      val totalLosses = world.lostAntsByTribe().toList.sortBy(x => x._1)
-      val lostByAge = world.lostAntsByAge()
       var message: String = "* Losses overview:\n"
 
-      for ((id, total) <- totalLosses) {
-        message = message concat "\tTribe " + id + " suffered " + total + " losses"
-        message = message concat ", " + lostByAge(id) + " of them by age and"
-        message = message concat " " + (total - lostByAge(id)) + " due to enemy contact."
+      for ((id, cInf) <- colInfs) {
+        val (beingKilled, deceased) = (cInf.beingKilled, cInf.deceased)
+
+        message = message concat "\tTribe " + id + " suffered " + (beingKilled + deceased) + " losses"
+        message = message concat ", " + deceased + " of them by age and"
+        message = message concat " " + beingKilled + " due to enemy contact."
         message = message concat "\n"
       }
 
@@ -133,11 +135,10 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
     }
 
     def queensReport(): String = {
-      val survivedState = world.queensSurvived().toList.sortBy(x => x._1)
       var message: String = "* Queens status report:\n"
 
-      for((id, survived) <- survivedState)
-        message = message concat "\tThe queen of tribe " + id + " survived = " + survived + "\n"
+      for((id, cInf) <- colInfs)
+        message = message concat "\tThe queen of tribe " + id + " survived = " + cInf.queenSurvived() + "\n"
 
       message concat "\n"
     }

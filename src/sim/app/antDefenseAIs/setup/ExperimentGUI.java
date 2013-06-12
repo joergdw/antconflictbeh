@@ -16,6 +16,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import sim.app.antDefenseAIs.model.Ant;
+import sim.app.antDefenseAIs.model.World;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
@@ -160,9 +161,10 @@ public class ExperimentGUI extends GUIState {
         for (int i = 0; i < tribeIDs.length; ++i) {
             tribeID = tribeIDs[i];
 
-            homePheros[i].setField(experiment.world().homePheromones().apply(tribeID));
-            resPheros[i].setField(experiment.world().resPheromones().apply(tribeID));
-            warPheros[i].setField(experiment.world().warPheromones().apply(tribeID));
+            World.ColonyInfo colonyInfo = experiment.world().colonyInfos().apply(tribeID);
+            homePheros[i].setField(colonyInfo.homePheromones());
+            resPheros[i].setField(colonyInfo.resPheromones());
+            warPheros[i].setField(colonyInfo.warPheromones());
 
             homePheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));
             resPheros[i].setMap(new SimpleColorMap(0.0d, 1.0d, Color.white, Color.black));

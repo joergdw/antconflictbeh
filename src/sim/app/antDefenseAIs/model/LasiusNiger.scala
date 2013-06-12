@@ -181,11 +181,11 @@ private[antDefenseAIs] class LasiusNiger(
     * In any other case the ant cares for food.
     */
   protected def actEconomically() {
-    val backpack_full: Boolean = transporting >= AntWorker.backpackSize
+    val backpack_full: Boolean = _inBackpack >= AntWorker.backpackSize
     val isBored: Boolean = boredom == 0
 
     if (backpack_full || isBored) {
-      val queenPos: Option[(Int, Int)] = world.currentPos(myQueen)
+      val queenPos: Option[(Int, Int)] = world.currentPosOf(myQueen)
       if (queenPos.isDefined && currentPos == queenPos.get) { // queen is under the ant
         dropResources()
         boredom = notBored
@@ -287,7 +287,7 @@ private[antDefenseAIs] class LasiusNiger(
   def adaptHomePhero() {
     val bestNeighbour: world.Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
 
-    val adaptedValue = world.currentPos(myQueen) match {
+    val adaptedValue = world.currentPosOf(myQueen) match {
       case None => 0 // queen is killed an there is no home
       case Some(qPos) if currentPos == qPos => 1.0d
       case _ => gamma * homePheroOf(bestNeighbour)
@@ -353,10 +353,10 @@ private[antDefenseAIs] class LasiusNiger(
    * No boredom if try successful.
    */
   override def mineRes() {
-    val tmp = transporting
+    val tmp = _inBackpack
     super.mineRes()
 
-    if (transporting > tmp) // successfull mined
+    if (_inBackpack > tmp) // successfull mined
       boredom = notBored
     else
       boredom -= 1
