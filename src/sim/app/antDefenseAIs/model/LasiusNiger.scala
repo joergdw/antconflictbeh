@@ -27,7 +27,7 @@ package sim.app.antDefenseAIs.model
  * @param notBored Value of boredom if the ant is not bored at all
  */
 private[antDefenseAIs] class LasiusBehaviourConf(
-  val emotionalDwellTime: Int = 5,
+  val emotionalDwellTime: Int = 10,
   val maxAggressiveness: Int = 20,
   val maxAggressivenessProb: Double = 0.767d,
   val minAggressivenessProb: Double = 0.257d,

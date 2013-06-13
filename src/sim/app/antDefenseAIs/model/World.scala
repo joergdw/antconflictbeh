@@ -210,8 +210,8 @@ private[antDefenseAIs] final class World(
     def queenSurvived(): Boolean = (ants getObjectLocation queen) != null
 
     val (hit_made, hit_gotten) = (0, 1)
-    val (sit_mayority, sit_minority) = (0, 1)
-    val analyzeTable = Array.ofDim[Int](2, 2)
+    val (sit_mayority, sit_equal ,sit_minority) = (0, 1, 2)
+    val analyzeTable = Array.ofDim[Int](2, 3)
   }
 
 
@@ -472,11 +472,15 @@ private[antDefenseAIs] final class World(
 
     if (nearAttackingAnts > nearAttackedAnts) {
       cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacked.sit_mayority) += 1
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_gotten)(cInfoAttacked.sit_minority) += 1
+      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_minority) += 1
+    }
+    else if (nearAttackingAnts == nearAttackedAnts) {
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacker.sit_equal) += 1
+      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_equal) += 1
     }
     else {
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacked.sit_minority) += 1
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_gotten)(cInfoAttacked.sit_mayority) += 1
+      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacker.sit_minority) += 1
+      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_mayority) += 1
     }
 
     receiver receiveHitFrom giver

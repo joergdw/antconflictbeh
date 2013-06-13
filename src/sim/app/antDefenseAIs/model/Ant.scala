@@ -13,7 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object Ant {
-  val maximumHitpoints = 10 /** How many hitpoints an undamaged individual has */
+  val maximumHitpoints = 5 /** How many hitpoints an undamaged individual has */
 }
 
 
