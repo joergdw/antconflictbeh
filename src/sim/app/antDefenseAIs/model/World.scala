@@ -40,6 +40,7 @@ import sim.app.antDefenseAIs.setup.Experiment
  * @param width  Width of the map
  * @param maxPopulation Maximum tribe population
  * @param tribeTypes Constructors of the different types of the tribe
+ * @param maxAntsPerField Maximum number of ants permitted on a field
  */
 private[antDefenseAIs] final class World(
   val experiment: Experiment,
@@ -48,6 +49,7 @@ private[antDefenseAIs] final class World(
   val maxPopulation: Int = Int.MaxValue,
   private val startPositions: Array[(Int, Int)],
   val resources: IntGrid2D,
+  val maxAntsPerField: Int = 4,
   private val tribeTypes: Array[AntGenerator]) extends Steppable {
 
   if (experiment.numberOfTribes != tribeTypes.length)
@@ -352,7 +354,11 @@ private[antDefenseAIs] final class World(
    */
   private[model] def move(ant: Ant, direction: Direction.Value) {
     val targetPosition = Direction.inDirection(currentPosOf(ant).get, direction) // ant must live
-    ants.setObjectLocation(ant, toInd2D(targetPosition))
+
+    if (antsOn(targetPosition).size >= maxAntsPerField)
+      throw new IllegalStateException("move: Target position is already full")
+    else
+      ants.setObjectLocation(ant, toInd2D(targetPosition))
   }
 
   /**
@@ -538,13 +544,21 @@ private[antDefenseAIs] final class World(
       None
 
     else {
+      // True iff target position in that direction exists
       def isValid(dir: Direction.Value): Boolean = {
         val neighbours = neighbourhood(ant).get
         val destiny = Direction.inDirection(pos.get, dir)
         neighbours.contains(destiny)
       }
 
-      Some(Direction.values.filter(isValid).toList)
+      // True iff not too many ants already there
+      def spaceLeft(dir: Direction.Value): Boolean = {
+        val destiny = Direction.inDirection(pos.get, dir)
+        antsOn(destiny).size < maxAntsPerField
+      }
+
+      // Filtering order might be important - otherwise it could occur to examine a non existing field
+      Some(Direction.values.filter(isValid).filter(spaceLeft).toList)
     }
   }
 

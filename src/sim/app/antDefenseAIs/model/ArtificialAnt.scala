@@ -145,22 +145,25 @@ private[antDefenseAIs] class ArtificialAnt(
     emotion match {
       case Emotion.normal => {
         val warPheroDir = chooseDirectionBy(warPheroOf)
-        val bestWarPhero = warPheroOf(warPheroDir)
 
-        if (bestWarPhero > 0) {
-          if (bestWarPhero < warPheroOf()) { // End of phero route reached
-            emotion = Emotion.battlesome
-            actMilitarily()
+        if (warPheroDir.isDefined) {
+          val bestWarPhero = warPheroOf(warPheroDir.get)
+
+          if (bestWarPhero > 0) {
+            if (bestWarPhero < warPheroOf()) { // End of phero route reached
+              emotion = Emotion.battlesome
+              actMilitarily()
+            }
+            else {
+              moveTo(warPheroDir.get)
+              adaptHomePhero()
+              adaptResPhero()
+              adaptWarPhero()
+            }
           }
-          else {
-            moveTo(warPheroDir)
-            adaptHomePhero()
-            adaptResPhero()
-            adaptWarPhero()
-          }
+          else
+            actEconomically()
         }
-        else
-          actEconomically()
       }
       case Emotion.fearsome => followHomeWay()
       case Emotion.battlesome => actMilitarily()
@@ -242,10 +245,12 @@ private[antDefenseAIs] class ArtificialAnt(
    */
   final protected def followHomeWay() {
     val direction = chooseDirectionBy(valueDirectionWithPhero(homePheroOf))
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-    adaptWarPhero()
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptHomePhero()
+      adaptResPhero()
+      adaptWarPhero()
+    }
   }
 
   /**
@@ -254,13 +259,15 @@ private[antDefenseAIs] class ArtificialAnt(
    * The next field is most probable one of the neighbour-fields with the best resource-pheromones.
    * With a certain probability (in function of the world.explorationRate) it is one of the other fields
    */
-  final protected def careForFood() {
+  protected def careForFood() {
     val direction = chooseDirectionBy(valueDirectionWithPhero(resPheroOf))
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-    adaptWarPhero()
-    mineRes()
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptHomePhero()
+      adaptResPhero()
+      adaptWarPhero()
+      mineRes()
+    }
   }
 
   /**
@@ -298,16 +305,18 @@ private[antDefenseAIs] class ArtificialAnt(
    * @param evaluate Function to evaluate
    * @return Direction chosen
    */
-  protected def chooseDirectionBy(evaluate: world.Direction.Value => Double): world.Direction.Value = {
+  protected def chooseDirectionBy(evaluate: world.Direction.Value => Double): Option[world.Direction.Value] = {
     val directionsValued: List[(world.Direction.Value, Double)] =
       validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
-    if (world.random.nextDouble() <= 1.0d - explorationRate)
-      valDirsSorted.head._1
+    if (valDirsSorted.isEmpty)
+      None
+    else if (world.random.nextDouble() <= 1.0d - explorationRate)
+      Some(valDirsSorted.head._1)
     else
-      valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1
+      Some(valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1)
   }
 
   // Calculates an all over all value for a direction

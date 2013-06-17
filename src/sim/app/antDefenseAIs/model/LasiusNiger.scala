@@ -261,9 +261,11 @@ private[antDefenseAIs] class LasiusNiger(
    */
   protected def followHomeWay() {
     val direction = chooseDirectionBy(valueDirectionWithPhero(homePheroOf))
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptHomePhero()
+      adaptResPhero()
+    }
   }
 
   /**
@@ -274,10 +276,12 @@ private[antDefenseAIs] class LasiusNiger(
    */
   protected def careForFood() {
     val direction = chooseDirectionBy(valueDirectionWithPhero(resPheroOf))
-    moveTo(direction)
-    adaptHomePhero()
-    adaptResPhero()
-    mineRes()
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptHomePhero()
+      adaptResPhero()
+      mineRes()
+    }
   }
 
   /**
@@ -315,16 +319,18 @@ private[antDefenseAIs] class LasiusNiger(
    * @param evaluate Function to evaluate
    * @return Direction chosen
    */
-  protected def chooseDirectionBy(evaluate: world.Direction.Value => Double): world.Direction.Value = {
+  protected def chooseDirectionBy(evaluate: world.Direction.Value => Double): Option[world.Direction.Value] = {
     val directionsValued: List[(world.Direction.Value, Double)] =
       validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
-    if (world.random.nextDouble() <= 1.0d - explorationRate)
-      valDirsSorted.head._1
+    if (valDirsSorted.isEmpty)
+      None
+    else if (world.random.nextDouble() <= 1.0d - explorationRate)
+      Some(valDirsSorted.head._1)
     else
-      valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1
+      Some(valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1)
   }
 
   // Calculates an all over all value for a direction
