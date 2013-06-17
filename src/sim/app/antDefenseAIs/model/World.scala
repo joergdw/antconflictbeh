@@ -469,8 +469,8 @@ private[antDefenseAIs] final class World(
    * @param receiver Ant being hit
    */
   private[model] def hit(giver: Ant)(receiver: Ant) {
-    val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver) get) count (a => a.tribeID == giver.tribeID)
-    val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver) get) count (a => a.tribeID == giver.tribeID)
+    val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver).get).count(a => a.tribeID == giver.tribeID)
+    val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver).get).count(a => a.tribeID == receiver.tribeID)
 
     val cInfoAttacker = colonyInfos(giver tribeID)
     val cInfoAttacked = colonyInfos(receiver tribeID)

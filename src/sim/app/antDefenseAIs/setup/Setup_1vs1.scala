@@ -21,7 +21,7 @@ import sim.app.antDefenseAIs.model._
 
 class Setup_1vs1(var sd: Long) extends Experiment(sd) {
 
-  val (width, height) = (49, 49)
+  val (width, height) = (33, 33)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
   val lasiusNigerAggressive = new LasiusNigerGenerator(
     new LasiusBehaviourConf(
@@ -35,7 +35,7 @@ class Setup_1vs1(var sd: Long) extends Experiment(sd) {
   // Construction of the resource distribution
   {
     for (column <- 0 until height; row <- 0 until width if (column % 16 == 0) && (row % 16 == 0)) {
-      brushSoft(resDistrib, 5, 5, 10, (column, row))
+      brushSoft(a = resDistrib, width = 5, min_strength =  5, max_strength = 10, poss = (column, row))
     }
   }
 
@@ -47,5 +47,5 @@ class Setup_1vs1(var sd: Long) extends Experiment(sd) {
     tribeTypes = tribes)
 
 
-  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 2000
+  override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 1500
 }
