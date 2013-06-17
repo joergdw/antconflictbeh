@@ -25,10 +25,10 @@ package object Common {
   /**
    * Converts Int2D to (Int, Int)
    */
-  def toTuple(i: Int2D): (Int, Int) = (i.getX, i.getY)
+  implicit def toTuple(i: Int2D): (Int, Int) = (i.getX, i.getY)
 
   /** Converts (Int, Int) to Int2D */
-  def toInd2D(t: (Int, Int)): Int2D = new Int2D(t._1, t._2)
+  implicit def toInd2D(t: (Int, Int)): Int2D = new Int2D(t._1, t._2)
 
   /**
    * Converts a DoubleGrid2D to a 2-dim Double-Array
@@ -102,7 +102,7 @@ package object Common {
    * @param a 2-dim array to convert
    * @return IntGrid with same content than the given 2-dim array
    */
-  def intArray2IntGrid(a: Array[Array[Int]]): IntGrid2D = {
+  implicit def intArray2IntGrid(a: Array[Array[Int]]): IntGrid2D = {
     // ASSERT: Array not empty and 2-dim-Array has uniform width
 
     val result = new IntGrid2D(a.length, a(0).length, 0)

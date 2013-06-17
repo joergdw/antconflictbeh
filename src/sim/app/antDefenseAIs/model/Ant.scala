@@ -13,7 +13,7 @@
 package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object Ant {
-  val maximumHitpoints = 5 /** How many hitpoints an undamaged individual has */
+  val maximumHitpoints = 10 /** How many hitpoints an undamaged individual has */
 }
 
 
@@ -158,7 +158,7 @@ private[antDefenseAIs] abstract class Ant(
   /**
    * Adaptions after receiving a hit
    */
-  private[model] def receiveHitFrom(opponent: Ant) {
+  protected[model] def receiveHitFrom(opponent: Ant) {
     if (world.random.nextDouble() >= mobility) // If ant can ...
       hitpoints = hitpoints - attack
   }
@@ -168,7 +168,7 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @param opponent Opponent receiving a hit
    */
-  private[model] def hit(opponent: Ant) {
+  protected def hit(opponent: Ant) {
     world.hit(this)(opponent)
   }
 
@@ -189,7 +189,7 @@ private[antDefenseAIs] abstract class Ant(
    * @return Number of ants in the neighbourhood fulfilling the predicate p
    */
   def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
-    val ants: List[Ant] = world.neighbourhood(this, range).get.map(world.antsOn).flatten
+    val ants: List[Ant] = world.antsInNeighbourhoodOf(currentPos, range)
     def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
     ants.foldLeft(0: Int)(adder)
   }

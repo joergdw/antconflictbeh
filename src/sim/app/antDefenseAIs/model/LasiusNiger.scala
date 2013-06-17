@@ -248,7 +248,6 @@ private[antDefenseAIs] class LasiusNiger(
 
   override def receiveHitFrom(opponent: Ant) {
     super.receiveHitFrom(opponent)
-    if (this.isKilled) return // Ant dead: no more actions
 
     if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
       adaptState() // … calculate new state

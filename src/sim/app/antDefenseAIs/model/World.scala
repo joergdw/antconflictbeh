@@ -483,7 +483,7 @@ private[antDefenseAIs] final class World(
       cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_mayority) += 1
     }
 
-    receiver receiveHitFrom giver
+    receiver.receiveHitFrom(giver)
   }
 
 
@@ -562,13 +562,29 @@ private[antDefenseAIs] final class World(
     }
   }
 
-    /**
-     * Returns a reference to the queen of the given ant
-     *
-     * @param ant Ant asking for the queen
-     * @return Queen of the ant colony the ant belongs to
-     */
-    private[model] def queenOf(ant: Ant): AntQueen = colonyInfos(ant.tribeID).queen
+  /**
+   * Returns a reference to the queen of the given ant
+   *
+   * @param ant Ant asking for the queen
+   * @return Queen of the ant colony the ant belongs to
+   */
+  private[model] def queenOf(ant: Ant): AntQueen = colonyInfos(ant.tribeID).queen
+
+  private[model] def allAnts: List[Ant] = antBag2AntList (ants.getAllObjects)
+
+  /**
+   * All ants in the range-neighbourhood of a given position
+   *
+   * @param range Range of the neighbourhood
+   * @param pos Central position of the neighbourhood
+   * @return List of all ants in the given neighbourhood
+   */
+  private[model] def antsInNeighbourhoodOf(pos: (Int, Int), range: Int = 1): List[Ant] = {
+    val (xBag, yBag) = neighbourhoodBags(pos, range)
+    val bag = new Bag()
+    ants.getObjectsAtLocations(xBag, yBag, bag)
+    antBag2AntList(bag)
+  }
 
   /**
    * Places a given, new ant on the given position
@@ -618,14 +634,5 @@ private[antDefenseAIs] final class World(
       result(i)(j) = resources.get(i, j)
 
     result
-  }
-
-  private def allAnts: List[Ant] = antBag2AntList (ants.getAllObjects)
-
-  private def antsInNeighbourhoodOf(pos: (Int, Int)): List[Ant] = {
-    val (xBag, yBag) = neighbourhoodBags(pos, 1)
-    val bag = new Bag()
-    ants.getObjectsAtLocations(xBag, yBag, bag)
-    antBag2AntList(bag)
   }
 }
