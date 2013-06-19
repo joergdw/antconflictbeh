@@ -103,12 +103,15 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
          "\tSuffered losses:\t" + (cInf.beingKilled + cInf.deceased) + " (" + cInf.deceased + " of them due to age)" + "\n" +
          "\tAverage hitpoints of left ants:\t" + cInf.averageHitPoints() + "\n" +
          "\tQueen survived:\t " + cInf.queenSurvived() + "\n" +
+         "\n" +
+         "\tAverage majority situation when hit made\t" + cInf.averageMayoritySituationHitMade() + "\n" +
+         "\tAverage minority situation when hit made\t" + cInf.averageMinoritySituationHitMade() + "\n" +
          "\tGiven hits in mayority situations:\t" + cInf.hitsIn(cInf.mayority)(cInf.hit_made()) + "\n" +
          "\tGiven hits in equal situations:\t" + cInf.hitsIn(cInf.equallity)(cInf.hit_made()) + "\n" +
          "\tGiven hits in minority situations:\t" + cInf.hitsIn(cInf.minority)(cInf.hit_made()) + "\n" +
          "\tReceived hits in mayority situations:\t" + cInf.hitsIn(cInf.mayority)(cInf.hit_gotten()) + "\n" +
          "\tReceived hits in equal situations:\t" + cInf.hitsIn(cInf.equallity)(cInf.hit_gotten()) + "\n" +
-         "\tReceived hits in minority situations:\t" + cInf.hitsIn(cInf.minority)(cInf.hit_gotten()) + "\n\n"
+         "\tReceived hits in minority situations:\t" + cInf.hitsIn(cInf.minority)(cInf.hit_gotten()) + "\n\n\n"
       }
 
     header + report

@@ -220,7 +220,7 @@ private[antDefenseAIs] final class World(
      * Every list consist of tuples. The first one is the number of ants of the own colony and the second one
      * of ants of the other colony taking part in the fight.
      */
-    private[World] var _hit_made = List[(Int, Int)]()   // TODO
+    private[World] var _hit_made = List[(Int, Int)]()
     private[World] var _hit_gotten = List[(Int, Int)]()
 
     def hit_gotten() = _hit_gotten
@@ -230,8 +230,8 @@ private[antDefenseAIs] final class World(
     def hitsGotten(): Int = _hit_gotten.size
     def hitsIn(sit: ((Int, Int)) => Boolean)(l: List[(Int, Int)]): Int = l.count(sit)
 
-    def averageMayoritySituationHitMade(): (Int, Int) = averageOf(_hit_made)(mayority)
-    def averageMinoritySituationHitMade(): (Int, Int) = averageOf(_hit_made)(minority)
+    def averageMayoritySituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(mayority)
+    def averageMinoritySituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(minority)
 
     // average hitpoints of the left ants
     def averageHitPoints() = {
@@ -244,10 +244,17 @@ private[antDefenseAIs] final class World(
 
     // ---------------- Helpers --------------------------------
 
-    private def averageOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean) = {
+    // Returns None if no fight situations found
+    private def averageOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean): Option[(Int, Int)] = {
       val a = l.filter(p)
-      val sum = a.foldRight((0, 0))((x: (Int, Int), y: (Int, Int)) => (x._1 + y._1, x._2 + y._2))
-      (sum._1 / a.size, sum._2 / a.size)
+
+      if (a.size == 0)
+        None
+
+      else {
+        val sum = a.foldRight((0, 0))((x: (Int, Int), y: (Int, Int)) => (x._1 + y._1, x._2 + y._2))
+        Some((sum._1 / a.size, sum._2 / a.size))
+      }
     }
 
     def minority(x: (Int, Int)): Boolean = x._1 < x._2
@@ -507,7 +514,7 @@ private[antDefenseAIs] final class World(
    * @param giver Ant hitting an opponent
    * @param receiver Ant being hit
    */
-  private[model] def hit(giver: Ant)(receiver: Ant) {                         // TODO
+  private[model] def hit(giver: Ant)(receiver: Ant) {
     val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver).get).count(a => a.tribeID == giver.tribeID)
     val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver).get).count(a => a.tribeID == receiver.tribeID)
 
