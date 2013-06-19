@@ -101,13 +101,14 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
          "\tCurrent population:\t " + cInf.population() + "\n" +
          "\tAmount of owned resources:\t " + cInf.resources() + " (" + cInf.deposit() + " of them has the queen)" + "\n" +
          "\tSuffered losses:\t" + (cInf.beingKilled + cInf.deceased) + " (" + cInf.deceased + " of them due to age)" + "\n" +
+         "\tAverage hitpoints of left ants:\t" + cInf.averageHitPoints() + "\n" +
          "\tQueen survived:\t " + cInf.queenSurvived() + "\n" +
-         "\tGiven hits in mayority situations:\t" + cInf.analyzeTable(cInf.hit_made)(cInf.sit_mayority) + "\n" +
-         "\tGiven hits in equal situations:\t" + cInf.analyzeTable(cInf.hit_made)(cInf.sit_equal) + "\n" +
-         "\tGiven hits in minority situations:\t" + cInf.analyzeTable(cInf.hit_made)(cInf.sit_minority) + "\n" +
-         "\tReceived hits in mayority situations:\t" + cInf.analyzeTable(cInf.hit_gotten)(cInf.sit_mayority) + "\n" +
-         "\tReceived hits in equal situations:\t" + cInf.analyzeTable(cInf.hit_gotten)(cInf.sit_equal) + "\n" +
-         "\tReceived hits in minority situations:\t" + cInf.analyzeTable(cInf.hit_gotten)(cInf.sit_minority) + "\n\n"
+         "\tGiven hits in mayority situations:\t" + cInf.hitsIn(cInf.mayority)(cInf.hit_made()) + "\n" +
+         "\tGiven hits in equal situations:\t" + cInf.hitsIn(cInf.equallity)(cInf.hit_made()) + "\n" +
+         "\tGiven hits in minority situations:\t" + cInf.hitsIn(cInf.minority)(cInf.hit_made()) + "\n" +
+         "\tReceived hits in mayority situations:\t" + cInf.hitsIn(cInf.mayority)(cInf.hit_gotten()) + "\n" +
+         "\tReceived hits in equal situations:\t" + cInf.hitsIn(cInf.equallity)(cInf.hit_gotten()) + "\n" +
+         "\tReceived hits in minority situations:\t" + cInf.hitsIn(cInf.minority)(cInf.hit_gotten()) + "\n\n"
       }
 
     header + report

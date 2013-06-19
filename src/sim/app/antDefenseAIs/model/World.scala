@@ -180,6 +180,7 @@ private[antDefenseAIs] final class World(
     val homePheromones: DoubleGrid2D,
     val resPheromones: DoubleGrid2D,
     val warPheromones: DoubleGrid2D,
+    private var hasKilled: Int,
     var beingKilled: Int,
     var deceased: Int) {
 
@@ -188,7 +189,7 @@ private[antDefenseAIs] final class World(
      *
      * @return Current population of the colony
      */
-    def population(): Int = allAnts count (a => a.tribeID == queen.tribeID)
+    def population(): Int = allAnts.count(a => a.tribeID == queen.tribeID)
 
     /**
      * Total amount of resources hold by the ants of a colony
@@ -211,9 +212,47 @@ private[antDefenseAIs] final class World(
      */
     def queenSurvived(): Boolean = (ants getObjectLocation queen) != null
 
-    val (hit_made, hit_gotten) = (0, 1)
-    val (sit_mayority, sit_equal ,sit_minority) = (0, 1, 2)
-    val analyzeTable = Array.ofDim[Int](2, 3)
+    /**
+     * The following two lists contain the numbers for the fight situations:
+     * `hit_made` contains the situations where the ant gave a hit and
+     * `hit_received` contains the situations where the ant received a hit.
+     *
+     * Every list consist of tuples. The first one is the number of ants of the own colony and the second one
+     * of ants of the other colony taking part in the fight.
+     */
+    private[World] var _hit_made = List[(Int, Int)]()   // TODO
+    private[World] var _hit_gotten = List[(Int, Int)]()
+
+    def hit_gotten() = _hit_gotten
+    def hit_made() = _hit_made
+
+    def hitsMade(): Int = _hit_made.size
+    def hitsGotten(): Int = _hit_gotten.size
+    def hitsIn(sit: ((Int, Int)) => Boolean)(l: List[(Int, Int)]): Int = l.count(sit)
+
+    def averageMayoritySituationHitMade(): (Int, Int) = averageOf(_hit_made)(mayority)
+    def averageMinoritySituationHitMade(): (Int, Int) = averageOf(_hit_made)(minority)
+
+    // average hitpoints of the left ants
+    def averageHitPoints() = {
+      def summer: (Ant, Int) => Int = (a, i) => a.hitpoints() + i
+
+      val l = allAnts.filter(a => a.tribeID == queen.tribeID)
+      l.foldRight(0)(summer) / l.length
+    }
+
+
+    // ---------------- Helpers --------------------------------
+
+    private def averageOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean) = {
+      val a = l.filter(p)
+      val sum = a.foldRight((0, 0))((x: (Int, Int), y: (Int, Int)) => (x._1 + y._1, x._2 + y._2))
+      (sum._1 / a.size, sum._2 / a.size)
+    }
+
+    def minority(x: (Int, Int)): Boolean = x._1 < x._2
+    def mayority(x: (Int, Int)): Boolean = x._1 > x._2
+    def equallity(x: (Int, Int)): Boolean = x._1 == x._2
   }
 
 
@@ -238,7 +277,7 @@ private[antDefenseAIs] final class World(
       m = m + ((id, new ColonyInfo(
         startPos, queen, homePheromones,
         resPheromones, warPheromones,
-        beingKilled = 0, deceased = 0)))
+        hasKilled = 0, beingKilled = 0, deceased = 0)))
     }
 
     m
@@ -468,26 +507,18 @@ private[antDefenseAIs] final class World(
    * @param giver Ant hitting an opponent
    * @param receiver Ant being hit
    */
-  private[model] def hit(giver: Ant)(receiver: Ant) {
+  private[model] def hit(giver: Ant)(receiver: Ant) {                         // TODO
     val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver).get).count(a => a.tribeID == giver.tribeID)
     val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver).get).count(a => a.tribeID == receiver.tribeID)
 
-    val cInfoAttacker = colonyInfos(giver tribeID)
-    val cInfoAttacked = colonyInfos(receiver tribeID)
+    val cInfoAttacker = colonyInfos(giver.tribeID)
+    val cInfoAttacked = colonyInfos(receiver.tribeID)
 
+    val aList = cInfoAttacker._hit_made.::((nearAttackingAnts, nearAttackedAnts))
+    cInfoAttacker._hit_made = aList
 
-    if (nearAttackingAnts > nearAttackedAnts) {
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacked.sit_mayority) += 1
-      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_minority) += 1
-    }
-    else if (nearAttackingAnts == nearAttackedAnts) {
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacker.sit_equal) += 1
-      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_equal) += 1
-    }
-    else {
-      cInfoAttacker.analyzeTable(cInfoAttacker.hit_made)(cInfoAttacker.sit_minority) += 1
-      cInfoAttacked.analyzeTable(cInfoAttacked.hit_gotten)(cInfoAttacked.sit_mayority) += 1
-    }
+    val dList = cInfoAttacked._hit_gotten.::((nearAttackedAnts, nearAttackingAnts))
+    cInfoAttacked._hit_gotten = dList
 
     receiver.receiveHitFrom(giver)
   }

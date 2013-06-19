@@ -30,7 +30,7 @@ private[antDefenseAIs] abstract class Ant(
   val tribeID: Int,
   val world: World) extends Steppable {
 
-  protected final var hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
+  protected final var _hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
   protected final var mobility: Float = 0f /** Probability to avoid to be hit */
   protected final var attack: Int = 1 /** Damage an ant does to another */
   private[model] final var age: Int = 0 /** Current age of the ant */
@@ -48,6 +48,8 @@ private[antDefenseAIs] abstract class Ant(
    * @return Amount of resources transported by this ant
    */
   def inBackpack(): Int = _inBackpack
+
+  def hitpoints(): Int = _hitpoints // Number of current hitpoints
 
   def maximumAge(): Int /** Maximum age of an ant */
 
@@ -160,7 +162,7 @@ private[antDefenseAIs] abstract class Ant(
    */
   protected[model] def receiveHitFrom(opponent: Ant) {
     if (world.random.nextDouble() >= mobility) // If ant can ...
-      hitpoints = hitpoints - attack
+      _hitpoints = _hitpoints - attack
   }
 
   /**
@@ -177,7 +179,7 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @return True iff ant is dead
    */
-  final def isKilled: Boolean = hitpoints == 0
+  final def isKilled: Boolean = _hitpoints == 0
 
   /**
    * Counts the number of ants within the neighbourhood fulfilling a predicate.
