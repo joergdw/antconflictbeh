@@ -116,8 +116,7 @@ Ich kann mir dabei drei Varianten vorstellen:
  + [X] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [X] Veröffentlichung bei einem Quelltext-Hoster
- + [ ] Tote Ameisen werden sofort entfernt
- + [ ] In das Informationsobjekt zu einem Stamm kommen nun auch Dinge, wie die Erzeugerbeschreibung für Ameisen rein.
+ + /Optional/ Tote Ameisen werden sofort entfernt
  + /Optional:/ Dokumentationen dazu schreiben
  + /Optional:/ Monaden für „Option“ nutzen, um Fallunterscheidungen in World.scala loszuwerden.
 

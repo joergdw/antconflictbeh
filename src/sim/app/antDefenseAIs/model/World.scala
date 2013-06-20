@@ -234,11 +234,14 @@ private[antDefenseAIs] final class World(
     def averageMinoritySituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(minority)
 
     // average hitpoints of the left ants
-    def averageHitPoints() = {
+    def averageHitPoints(): Option[Int] = {
       def summer: (Ant, Int) => Int = (a, i) => a.hitpoints() + i
-
       val l = allAnts.filter(a => a.tribeID == queen.tribeID)
-      l.foldRight(0)(summer) / l.length
+
+      if (l.isEmpty)
+        None
+      else
+        Some(l.foldRight(0)(summer) / l.length)
     }
 
 
