@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [6/6]
+* Implementierungsliste [5/7]
 ** DONE Militärverhalten normaler Ameisen [7/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -25,6 +25,22 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [X] Aggressive Ameisen greifen koloniefremde Ameisen auf dem eigenen Feld an.
  + [X] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
  + [X] Neutrale Ameisen ignorieren koloniefremde Ameisen.
+
+** TODO Neue Ameisenart
+Ich kann mir dabei drei Varianten vorstellen:
+ + Ameise, die nach folgendem Schema reagiert:
+   - Bei großer gegnerischer Überzahl flieht, wenn sie sich im Kampf befindet
+   - Bei eigener Überzahl auf jeden Fall kämpft
+   - Ansonsten – also bei Gleichstand oder bei nicht so großer gegnerischer Überzahl – ein Pheromon versprüht, dass
+     über Diffussion an andere Ameisen des eigenen Stamms herangetragen wird und sozusagen als Ruf-Pheromon
+     dient. Diese folgend dann dem Gradienten und greifen bevorzugt andere Ameisen an. Wenn sie keine finden, folgen
+     sie dem Gradienten weiter. 
+
+ + Bedeutungsorientierter Ameisenstamm: Baut auf Lasius Niger auf. Es wird nicht nur in Abhängigkeit der Anzahl der nahen
+   Verbündeten gekämpft, sondern auch in Abhängigkeit von dem Rohstoffgehalt.
+
+ + Neue, offensive Ameise Hilfe wird nur geholt, wenn das Gebiet nahrungstechnisch wichtig ist und nicht zu weit weg vom
+   Nest ist. (Letzteres über Heimat-Pheromone)
 
 ** DONE Wirtschaftsverhalten [5/5]
  1) [X] Verhalten aus: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/A%20Pheromone-Based%20Utility%20Model%20for%20Collaborative%20Foraging%20-%202003.pdf][A Pheromone-Based Utility Model for Collaborative Foraging]]“
@@ -83,7 +99,7 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  14) [X] GUI-lose Simulation so bearbeiten, dass sie im batch-modus ausgeführt werden kann. (Erfordert die
      Implementierung eines Abbruchkriteriums für die Simulation)
 
-** DONE Quelltext-Arbeiten [12/12]
+** TODO Quelltext-Arbeiten [12/14]
  + [X] Sichtbarkeit einschränken
  + [X] Wirtschaftsteil zum Laufen bringen
  + [X] Konsistenzprüfung Koordinatentopologie; Siehe [[Mason Topologie]].
@@ -100,6 +116,8 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [X] Fehlerkorrekturen
  + [X] Lizenz wählen und dokumentieren
  + [X] Veröffentlichung bei einem Quelltext-Hoster
+ + [ ] Tote Ameisen werden sofort entfernt
+ + [ ] In das Informationsobjekt zu einem Stamm kommen nun auch Dinge, wie die Erzeugerbeschreibung für Ameisen rein.
  + /Optional:/ Dokumentationen dazu schreiben
  + /Optional:/ Monaden für „Option“ nutzen, um Fallunterscheidungen in World.scala loszuwerden.
 

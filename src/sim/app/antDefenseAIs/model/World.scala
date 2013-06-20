@@ -171,8 +171,8 @@ private[antDefenseAIs] final class World(
    * @param homePheromones Storage of the home-pheromones of the colony
    * @param resPheromones Storage of the resource-pheromones of the colony
    * @param warPheromones Storage of the war-pheromones of the colony
-   * @param beingKilled Number of ants being killed in conflicts
-   * @param deceased Number of ants died due to other reasons (currently only age)
+   * @param killed Number of ants being killed in conflicts
+   * @param overaged Number of ants died due to overageing
    */
   private[antDefenseAIs] class ColonyInfo(
     val initialStartPosition: (Int, Int),
@@ -181,8 +181,8 @@ private[antDefenseAIs] final class World(
     val resPheromones: DoubleGrid2D,
     val warPheromones: DoubleGrid2D,
     private var hasKilled: Int,
-    var beingKilled: Int,
-    var deceased: Int) {
+    var killed: Int,
+    var overaged: Int) {
 
     /**
      * Current population of the colony
@@ -242,7 +242,7 @@ private[antDefenseAIs] final class World(
     }
 
 
-    // ---------------- Helpers --------------------------------
+    // ---------------------------------- Helpers --------------------------------
 
     // Returns None if no fight situations found
     private def averageOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean): Option[(Int, Int)] = {
@@ -284,7 +284,7 @@ private[antDefenseAIs] final class World(
       m = m + ((id, new ColonyInfo(
         startPos, queen, homePheromones,
         resPheromones, warPheromones,
-        hasKilled = 0, beingKilled = 0, deceased = 0)))
+        hasKilled = 0, killed = 0, overaged = 0)))
     }
 
     m
@@ -304,35 +304,19 @@ private[antDefenseAIs] final class World(
   }
 
 
-  /////////////////////////// Nature behaviour ///////////////////////////////////////
+  //--------------------------- Nature behaviour ----------------------------------------
 
   // Stoppable object for each ant to take it out of scheduling
   private val stopOrders: mutable.HashMap[Ant, Stoppable] = mutable.HashMap()
 
   override def step(state: SimState) {
-    def removeAnt(ant: Ant) { // Actions to do to remove an ant
-      ant match {
-        case worker: AntWorker => worker.dropResources()
-        case queen: AntQueen => queen.dropDeposit()
-      }
 
-      stopOrders.get(ant).get.stop() // Take ant out of scheduling
-      stopOrders.-=(ant)
-      ants.remove(ant)               // Remove ant from map
-    }
 
-    // Remove dead ants and too old ants from the world and age and schedule again all other ants
+    // Remove deceased (i.e. too old) ants
     for (ant <- allAnts) {
       ant match {
-        case _ if ant.isKilled => {
-          removeAnt(ant)
-          colonyInfos(ant.tribeID).beingKilled += 1
-        }
-        case _ if ant.age >= ant.maximumAge => {
-          removeAnt(ant)
-          colonyInfos(ant.tribeID).deceased += 1
-        }
-        case other: Ant => other.age += 1  // age a living ant
+        case _ if ant.isOveraged() || ant.isKilled() => removeAnt(ant)   // TODO: Decide to do it here or in hit()
+        case other: Ant => other.mature()
       }
     }
 
@@ -354,6 +338,30 @@ private[antDefenseAIs] final class World(
     // Other evaporation can be implemented here
 
     // Diffusion can be implemented here
+  }
+
+  /**
+   * Removes an ant cleanly from this world
+   *
+   * @param ant Ant to remove
+   */
+  private def removeAnt(ant: Ant) {
+    if (!ant.isKilled() && !ant.isOveraged()) // If no reason for removing found
+      throw new IllegalStateException("No reason found")
+
+    else if (ant.isKilled())     // Adapt statistic of tribe in function of the reason
+      colonyInfos(ant.tribeID).killed += 1
+    else // ant.isOveraged
+      colonyInfos(ant.tribeID).overaged += 1
+
+    ant match {  // Drop wore resources
+      case worker: AntWorker => worker.dropResources()
+      case queen: AntQueen => queen.dropDeposit()
+    }
+
+    stopOrders.get(ant).get.stop() // Take ant out of scheduling
+    stopOrders.-=(ant)
+    ants.remove(ant)               // Remove ant from map
   }
 
 
@@ -528,6 +536,8 @@ private[antDefenseAIs] final class World(
     cInfoAttacked._hit_gotten = dList
 
     receiver.receiveHitFrom(giver)
+//    if (receiver.isKilled())  TODO: decide between this variant and the other to remove them by world scheduling
+//      removeAnt(receiver)
   }
 
 

@@ -33,8 +33,8 @@ private[antDefenseAIs] abstract class Ant(
   protected final var _hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
   protected final var mobility: Float = 0f /** Probability to avoid to be hit */
   protected final var attack: Int = 1 /** Damage an ant does to another */
-  private[model] final var age: Int = 0 /** Current age of the ant */
-  protected[this] final var _inBackpack: Int = 0 /** Amount of resources transported by this ant */
+  protected final var _age: Int = 0 /** Current age of the ant */
+  protected final var _inBackpack: Int = 0 /** Amount of resources transported by this ant */
 
   /** Last went direction */
   protected final var lastDirection: world.Direction.Value = {  // Initialise with random value
@@ -42,16 +42,20 @@ private[antDefenseAIs] abstract class Ant(
     valueList.apply(world.random.nextInt(world.Direction.values.size))
   }
 
-  /**
-   * Amount of resources transported by this ant
-   *
-   * @return Amount of resources transported by this ant
-   */
+
+  // ----------- Information revealing functions ----------------------------
+
   def inBackpack(): Int = _inBackpack
+  def hitpoints(): Int = _hitpoints
+  def maximumAge(): Int
+  def hasAge(): Int = _age
+  def mature() {_age += 1}
+  final def isKilled(): Boolean = _hitpoints <= 0
+  final def isOveraged(): Boolean = _age >= maximumAge()
 
-  def hitpoints(): Int = _hitpoints // Number of current hitpoints
 
-  def maximumAge(): Int /** Maximum age of an ant */
+
+  // -------------- Other functions --------------------------------------
 
   /**
    * Current position of that ant as (Int, Int)
@@ -173,13 +177,6 @@ private[antDefenseAIs] abstract class Ant(
   protected def hit(opponent: Ant) {
     world.hit(this)(opponent)
   }
-
-  /**
-   * Returns true if the ant is dead
-   *
-   * @return True iff ant is dead
-   */
-  final def isKilled: Boolean = _hitpoints == 0
 
   /**
    * Counts the number of ants within the neighbourhood fulfilling a predicate.

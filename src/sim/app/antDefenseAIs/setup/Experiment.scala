@@ -100,7 +100,7 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
          "\tInitial start position:\t " + cInf.initialStartPosition + "\n" +
          "\tCurrent population:\t " + cInf.population() + "\n" +
          "\tAmount of owned resources:\t " + cInf.resources() + " (" + cInf.deposit() + " of them has the queen)" + "\n" +
-         "\tSuffered losses:\t" + (cInf.beingKilled + cInf.deceased) + " (" + cInf.deceased + " of them due to age)" + "\n" +
+         "\tSuffered losses:\t" + (cInf.killed + cInf.overaged) + " (" + cInf.overaged + " of them due to age)" + "\n" +
          "\tAverage hitpoints of left ants:\t" + cInf.averageHitPoints() + "\n" +
          "\tQueen survived:\t " + cInf.queenSurvived() + "\n" +
          "\n" +
