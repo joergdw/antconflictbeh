@@ -14,21 +14,24 @@ package sim.app.antDefenseAIs.model
 
 private[antDefenseAIs] object Ant {
   val maximumHitpoints = 10 /** How many hitpoints an undamaged individual has */
+  val antsSensingRange = 2 /** Radius of the area the ant can sense other individuals */
 }
 
 
 import sim.engine.Steppable
-import Ant.maximumHitpoints
+import Ant._
 
 /**
  * Common properties and capacities of ants
  *
  * @param tribeID Tribe the ant is member of
  * @param world World the ant lives on
+ * @param behaviourConf Basic configuration parameters affecting the movemen system
  */
 private[antDefenseAIs] abstract class Ant(
   val tribeID: Int,
-  val world: World) extends Steppable {
+  val world: World,
+  val behaviourConf: BehaviourConf) extends Steppable {
 
   protected final var _hitpoints: Int = maximumHitpoints /** How much an individual can suffer before dieing */
   protected final var mobility: Float = 0f /** Probability to avoid to be hit */
@@ -36,130 +39,31 @@ private[antDefenseAIs] abstract class Ant(
   protected final var _age: Int = 0 /** Current age of the ant */
   protected final var _inBackpack: Int = 0 /** Amount of resources transported by this ant */
 
+  val pheroSystem: PheroSystem /** Pheromone System used */
+
+  import pheroSystem._
+  import world.antsInNeighbourhoodOf
+
   /** Last went direction */
-  protected final var lastDirection: world.Direction.Value = {  // Initialise with random value
-    val valueList = world.Direction.values.toList
-    valueList.apply(world.random.nextInt(world.Direction.values.size))
+  protected final var lastDirection: Direction.Value = {  // Initialise with random value
+    val valueList = Direction.values.toList
+    valueList.apply(world.random.nextInt(Direction.values.size))
   }
 
 
-  // ----------- Information revealing functions ----------------------------
+  // ----------- Information revealing functions for other classes ----------------------------
 
-  def inBackpack(): Int = _inBackpack
-  def hitpoints(): Int = _hitpoints
-  def maximumAge(): Int
-  def hasAge(): Int = _age
-  def mature() {_age += 1}
-  final def isKilled(): Boolean = _hitpoints <= 0
-  final def isOveraged(): Boolean = _age >= maximumAge()
-
+  final def inBackpack: Int = _inBackpack
+  final def hitpoints: Int = _hitpoints
+  def maximumAge: Int
+  def age: Int = _age
+  final def isKilled: Boolean = _hitpoints <= 0
+  final def isOveraged: Boolean = _age >= maximumAge
 
 
-  // -------------- Other functions --------------------------------------
+  // ------------ Basic interaction functions with World ----------------------------
 
-  /**
-   * Current position of that ant as (Int, Int)
-   *
-   * @return Current position of that ant as (Int, Int)
-   */
-  protected[this] def currentPos: (Int, Int) = world.currentPosOf(this).get
-
-  /**
-   * All directions in which the ant can go right now
-   *
-   * @return All directions in which the ant can go right now
-   */
-  protected[this] def validDirections = world.validDirections(this).get
-
-  /**
-   * Moves ant into the given direction
-   *
-   * @param direction New position of the ant
-   */
-  protected[this] def moveTo(direction: world.Direction.Value) {
-    world move(this, direction)
-    lastDirection = direction
-  }
-
-  /**
-   * Returns a reference to the queen of the ant
-   *
-   * @return Queen of the ant
-   */
-  private[model] def myQueen: AntQueen = world queenOf this
-
-  /**
-   * Home pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return Home pheromone intensity of the tribe of the ant in the given direction
-   */
-  protected[this] def homePheroOf(dir: world.Direction.Value) = world.homePheroOf(this, dir).get
-
-  /**
-   * Home pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Home pheromone intensity of the tribe of the ant at its current position
-   */
-  protected[this] def homePheroOf() = world.homePheroOf(this).get
-
-  /**
-   * Resource pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return Resource pheromone intensity of the tribe of the ant in the given direction
-   */
-  protected[this] def resPheroOf(dir: world.Direction.Value) = world.resPheroOf(this, dir).get
-
-  /**
-   * Resource pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Resource pheromone intensity of the tribe of the ant at its current position
-   */
-  protected[this] def resPheroOf() = world.resPheroOf(this).get
-
-  /**
-   * War pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return War pheromone intensity of the tribe of the ant in the given direction
-   */
-  protected[this] def warPheroOf(dir: world.Direction.Value) = world.warPheroOf(this, dir).get
-
-  /**
-   * War pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Resource pheromone intensity of the tribe of the ant at its current position
-   */
-  protected[this] def warPheroOf() = world.warPheroOf(this).get
-
-  /**
-   * Set home pheromone intensity of the tribe of the ant at its current position
-   *
-   * @param intensity New intensity
-   */
-  protected[this] def setHomePhero(intensity: Double) {
-    world setHomePheroOn(this, currentPos, intensity)
-  }
-
-  /**
-   * Set resource pheromone intensity of the tribe of the ant at its current position
-   *
-   * @param intensity New intensity
-   */
-  protected def setResPhero(intensity: Double) {
-    world setResPheroOn(this, currentPos, intensity)
-  }
-
-  /**
-   * Set war pheromone intensity of the tribe of the ant at its current position
-   *
-   * @param intensity New intensity
-   */
-  protected def setWarPhero(intensity: Double) {
-    world setWarPheroOn(this, currentPos, intensity)
-  }
-
+  private[model] final def mature() {_age += 1}
 
   /**
    * Adaptions after receiving a hit
@@ -174,22 +78,124 @@ private[antDefenseAIs] abstract class Ant(
    *
    * @param opponent Opponent receiving a hit
    */
-  protected def hit(opponent: Ant) {
+  protected[model] def hit(opponent: Ant) {
     world.hit(this)(opponent)
   }
 
   /**
-   * Counts the number of ants within the neighbourhood fulfilling a predicate.
+   * Current position of that ant as (Int, Int)
+   *
+   * @return Current position of that ant as (Int, Int)
+   */
+  protected[model] def currentPos: (Int, Int) = world.currentPosOf(this).get
+
+  /**
+   * All directions in which the ant can go right now
+   *
+   * @return All directions in which the ant can go right now
+   */
+  protected[model] def validDirections = world.validDirections(this).get
+
+  /**
+   * Returns a reference to the queen of the ant
+   *
+   * @return Queen of the ant
+   */
+  protected[model] def myQueen: AntQueen = world.queenOf(this)
+
+  /**
+   * Moves ant into the given direction
+   *
+   * @param direction New position of the ant
+   */
+  protected[model] def moveTo(direction: Direction.Value) {
+    world move(this, direction)
+    lastDirection = direction
+  }
+
+  // ------------------------ Environment observation functions -------------------------------------------
+
+  /**
+   * Counts the number of ants of the same colony within the neighbourhood.
    *
    * The size of the observed neighbourhood is indicated by `antsSensingRange`.
    *
-   * @param range Range in which will be searched
-   * @param p Predicate
-   * @return Number of ants in the neighbourhood fulfilling the predicate p
+   * @return Number of ants of the same colony in the neighbourhood
    */
-  def countAntsFullfillingPredicate(range: Int)(p: Ant => Boolean): Int = {
-    val ants: List[Ant] = world.antsInNeighbourhoodOf(currentPos, range)
-    def adder(i: Int, a: Ant): Int = i + (if (p(a)) 1 else 0)
-    ants.foldLeft(0: Int)(adder)
+  def countFriends(): Int =
+    antsInNeighbourhoodOf(pos = currentPos, range =  antsSensingRange).count(a => a.tribeID == this.tribeID)
+
+  /**
+   * Counts the number of ants of other colonies within the neighbourhood.
+   *
+   * The size of the observed neighbourhood is indicated by `antsSensingRange`.
+   *
+   * @return Number of ants of other colonies in the neighbourhood
+   */
+  def countStrangers(): Int =
+    antsInNeighbourhoodOf(pos = currentPos, range = antsSensingRange).count((a: Ant) => a.tribeID != this.tribeID)
+
+
+  //------------------------ Other common functions and procedures for ants -------------------------------
+
+  /**
+   * Follow home way.
+   *
+   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   */
+  protected[model] def followHomeWay() {
+    val direction = chooseDirectionBy(valueDirectionWithPhero(homePheroOf))
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptAllPheros()
+    }
+  }
+
+  /**
+   * Chooses a direction to go to.
+   *
+   * Works in the following way: With a probability of (1 - `explorationRate`) the (valid) direction with
+   * the best evaluation is chosen. In the other case there will be chosen a random direction.
+   *
+   * @param evaluate Function to evaluate
+   * @return Direction chosen
+   */
+  protected[model] def chooseDirectionBy(evaluate: Direction.Value => Double): Option[Direction.Value] = {
+    import behaviourConf.explorationRate
+
+    val directionsValued: List[(Direction.Value, Double)] =
+      validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
+
+    val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
+
+    if (valDirsSorted.isEmpty)
+      None
+    else if (world.random.nextDouble() <= 1.0d - explorationRate)
+      Some(valDirsSorted.head._1)
+    else
+      Some(valDirsSorted.apply(1 + world.random.nextInt(valDirsSorted.size - 1))._1)
+  }
+
+  // Calculates an all over all value for a direction
+  protected[model] def valueDirectionWithPhero(pheroInDir: Direction.Value => Double)(dir: Direction.Value): Double = {
+    import behaviourConf.alpha
+
+    // Calculates a normalized value of a direction influenced by the pheromone
+    def dirValueByPhero(dir: Direction.Value): Double = {
+
+      val bestPheroInNeighbourhood = validDirections.map(pheroInDir).max
+
+      if (bestPheroInNeighbourhood == 0)
+        0
+      else
+        pheroInDir(dir) / bestPheroInNeighbourhood
+    }
+
+    // Calculates a normalized value of a direction influenced by the last direction
+    def dirValueByDir(dir: Direction.Value): Double =
+      Direction.directionDistance(lastDirection, dir) / Direction.MaxDirDistance
+
+    alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
   }
 }

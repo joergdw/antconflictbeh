@@ -26,7 +26,8 @@ private[antDefenseAIs] object AntQueen {
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  private def apply(tribeID: Int, world: World, antGen: AntGenerator) = new AntQueen(tribeID, world, antGen)
+  private def apply(tribeID: Int, world: World, conf: BehaviourConf, antGen: AntGenerator) =
+    new AntQueen(tribeID, world, conf, antGen)
 }
 
 
@@ -35,16 +36,16 @@ import AntQueen._
 /**
  * Queen of a colony
  *
- * @param tribeID ID of the tribe the ant is member of
- * @param world World the ant lives on
  * @param antGen Constructor of the ant type the queen should use for new ants
  */
 private[antDefenseAIs] final class AntQueen(
   override val tribeID: Int,
   override val world: World,
-  private val antGen: AntGenerator) extends Ant(tribeID, world) {
+  override val behaviourConf: BehaviourConf,
+  private val antGen: AntGenerator) extends Ant(tribeID, world, behaviourConf) {
 
   override def maximumAge(): Int = AntQueen.maximumAge
+  override val pheroSystem = new StandardPheroSystem(this)
 
   _inBackpack = startRessources /** Resources the queen owns */
 
