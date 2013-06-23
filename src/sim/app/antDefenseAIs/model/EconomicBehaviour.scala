@@ -72,4 +72,18 @@ trait EconomicStandardBehaviour extends AntWorker with EconomicBehaviour with Ph
       mineRes()
     }
   }
+
+  /**
+   * Mines, if possible, resources. Boredom increased if no resources.
+   * No boredom if try successful.
+   */
+  override def mineRes() {
+    val tmp = _inBackpack
+    super.mineRes()
+
+    if (_inBackpack > tmp) // successfully mined
+      boredom = notBored
+    else
+      boredom -= 1
+  }
 }

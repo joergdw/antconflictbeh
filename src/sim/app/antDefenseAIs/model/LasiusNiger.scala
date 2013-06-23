@@ -206,18 +206,4 @@ private[antDefenseAIs] class LasiusNiger(
     if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
       adaptState() // … calculate new state
   }
-
-  /**
-   * Mines, if possible, resources. Boredom increased if no resources.
-   * No boredom if try successful.
-   */
-  override def mineRes() {
-    val tmp = _inBackpack
-    super.mineRes()
-
-    if (_inBackpack > tmp) // successfull mined
-      boredom = notBored
-    else
-      boredom -= 1
-  }
 }

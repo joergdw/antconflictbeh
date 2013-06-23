@@ -206,18 +206,4 @@ private[antDefenseAIs] class ArtificialAnt(
     if (emotion == Emotion.fearsome) // Start war pheromone route
       setWarPhero(1)
   }
-
-  /**
-   * Mines, if possible, resources. Boredom increased if no resources.
-   * No boredom if try successful.
-   */
-  override def mineRes() {
-    val tmp = _inBackpack
-    super.mineRes()
-
-    if (_inBackpack > tmp) // successfull mined
-      boredom = notBored
-    else
-      boredom -= 1
-  }
 }
