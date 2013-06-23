@@ -12,8 +12,9 @@
  */
 package sim.app.antDefenseAIs.model
 
-private[antDefenseAIs] class ArtificialAntGenerator(
-  override val behaviourConf: ArtificialAntBehaviourConf) extends AntGenerator {
+private[antDefenseAIs] class OAD_WithFetching_Generator(
+  override val behaviourConf: OAD_BehaviourConf)
+  extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
@@ -22,12 +23,13 @@ private[antDefenseAIs] class ArtificialAntGenerator(
    * @param world World the ant lives on
    * @return NormalAntWorker
    */
-  def apply(tribeID: Int, world: World, beh: ArtificialAntBehaviourConf) = new ArtificialAnt(tribeID, world, beh)
+  def apply(tribeID: Int, world: World, beh: OAD_BehaviourConf) =
+    new OpportunisticAggressiveDefender(tribeID, world, beh)
 
   def apply(ant: Ant) =
     behaviourConf match {
-      case c: ArtificialAntBehaviourConf => new ArtificialAnt(ant, behaviourConf)
-      case _                             => throw new IllegalArgumentException("Configuration not of required type.")
+      case c: OAD_BehaviourConf => new OpportunisticAggressiveDefender(ant, behaviourConf)
+      case _                    => throw new IllegalArgumentException("Configuration not of required type.")
     }
 }
 
@@ -41,12 +43,13 @@ private[antDefenseAIs] class ArtificialAntGenerator(
  * @param gamma Learning parameter according the one used paper
  * @param notBored Value of boredom if the ant is not bored at all
  */
-class ArtificialAntBehaviourConf(
+class OAD_WithFetching_BehaviourConf(
   val emotionalDwellTime: Int = 10,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
   override val gamma: Double = 0.98d,
-  val notBored: Int = 500) extends BehaviourConf(alpha, explorationRate, gamma)
+  val notBored: Int = 500)
+  extends BehaviourConf(alpha, explorationRate, gamma)
 
 
 import sim.engine.SimState
@@ -57,10 +60,10 @@ import sim.engine.SimState
  * @param tribeID Tribe the ant belongs to
  * @param world World the ant lives on
  */
-private[antDefenseAIs] class ArtificialAnt(
+private[antDefenseAIs] class OAD_WithFetching(
   override val tribeID: Int,
   override val world: World,
-  val behaviourConf: ArtificialAntBehaviourConf)
+  val behaviourConf: OAD_BehaviourConf)
   extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour {
 
   import behaviourConf._
@@ -77,7 +80,7 @@ private[antDefenseAIs] class ArtificialAnt(
    * @param ant Ant giving the information of construction
    * @return Ant of the same colony in the same simulation
    */
-  def this(ant: Ant, behaviourConf: ArtificialAntBehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
+  def this(ant: Ant, behaviourConf: OAD_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
   ///////////////////// Common variables and constants /////////////////////////////////////
 
@@ -172,9 +175,9 @@ private[antDefenseAIs] class ArtificialAnt(
         hit(foreignAntsOnNewField.head)
 
       } else {
-       val dir = validDirs(world.random.nextInt(validDirs.size)) // Choose totally random direction
-       moveTo(dir)
-       adaptAllPheros()
+        val dir = validDirs(world.random.nextInt(validDirs.size)) // Choose totally random direction
+        moveTo(dir)
+        adaptAllPheros()
       }
     }
   }

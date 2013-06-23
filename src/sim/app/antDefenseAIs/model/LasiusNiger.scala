@@ -68,13 +68,15 @@ private[antDefenseAIs] class LasiusNiger(
   override val tribeID: Int,
   override val world: World,
   val behaviourConf: LasiusBehaviourConf)
-  extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour {
+  extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour with CooldownConflictBehaviour {
 
+  // Initialise configuration
   import behaviourConf._
   override val alpha = behaviourConf.alpha
   override val explorationRate = behaviourConf.explorationRate
   override val gamma = behaviourConf.gamma
   override val notBored = behaviourConf.notBored
+  override val emotionalDwellTime = behaviourConf.emotionalDwellTime
 
   /**
    * Constructs ant with the information of the given ant
@@ -83,28 +85,6 @@ private[antDefenseAIs] class LasiusNiger(
    * @return Ant of the same colony in the same simulation
    */
   def this(ant: Ant, behaviourConf: LasiusBehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
-
-
-  ///////////////////// Common variables and constants /////////////////////////////////////
-
-
-
-  /**
-   * Possible emotional states of an ant
-   */
-  private object Emotion extends Enumeration {
-    val aggressive = Value("Aggressive") /** Ant attacks other individuals in neighbourhood */
-    val defensive = Value("Defensive") /** Ant flees into direction of its home  */
-
-    /** Ant ignores ants of stranger colonies and changes emotional state if it receives a hit  */
-    val normal = Value("Normal")
-
-    /** Ant changes emotional state as soon as it sees ants of stranger colonies or receives a hit */
-    val undecided = Value("Undecided")
-  }
-
-  private var emotion: Emotion.Value = Emotion.undecided /** Current emotional state */
-  private var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
 
 
   ///////////////////// (Additional) Basic operations /////////////////////////////////////
@@ -127,6 +107,11 @@ private[antDefenseAIs] class LasiusNiger(
 
   ///////////////////// Behaviour description /////////////////////////////////////
 
+  /**
+   * Ant acts based on its current emotional state.
+   *
+   * @param state Parameter not used
+   */
   override def step(state: SimState) {
 
     /*
@@ -149,56 +134,6 @@ private[antDefenseAIs] class LasiusNiger(
 
     relax()
   }
-
-
-
-  /**
-   * The ant tries to pursuit and to hit ants of strange colonies.
-   *
-   * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
-   * neighbour field instead, one of them will be hit, preferably in the direction the ant went the last step.
-   * If there are no enemies around, the ant will act economically.
-   */
-  protected def actMilitarily() {
-
-    val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
-    if (foreignAntsOnOwnField.size > 0)
-      hit(foreignAntsOnOwnField.head)
-    else {
-      def directionContainsEnemy(dir: Direction.Value): Boolean = {
-        val destiny = Direction.inDirection(currentPos, dir)
-        val foreignAntsInDirection = world.antsOn(destiny).filter(a => a.tribeID != tribeID)
-        foreignAntsInDirection.size > 0
-      }
-
-      val validDirs = validDirections
-      val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
-      if (directionsContainingEnemies.size > 0) {
-        def directionSorter(dir: Direction.Value) = Direction.directionDistance(lastDirection, dir)
-
-        moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
-        adaptAllPheros()
-        val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
-        hit(foreignAntsOnNewField.head)
-
-      } else
-        actEconomically()
-    }
-  }
-
-  protected def relax() {
-    if (nextEmotionChange <= 0)
-      emotion match {
-        case Emotion.aggressive => emotion = Emotion.normal; nextEmotionChange = emotionalDwellTime
-        case Emotion.defensive => emotion = Emotion.normal; nextEmotionChange = emotionalDwellTime
-        case Emotion.normal => emotion = Emotion.undecided
-        case Emotion.undecided => // do nothing
-      }
-
-    else
-      nextEmotionChange -= 1
-  }
-
 
   override def receiveHitFrom(opponent: Ant) {
     super.receiveHitFrom(opponent)

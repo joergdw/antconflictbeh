@@ -22,7 +22,7 @@ class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (90, 90)
   val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
-  val artificialNormal = new ArtificialAntGenerator(new ArtificialAntBehaviourConf())
+  val artificialNormal = new OAD_Generator(new OAD_BehaviourConf())
   val lasiusNigerAggressive = new LasiusNigerGenerator(
     new LasiusBehaviourConf(
       maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
