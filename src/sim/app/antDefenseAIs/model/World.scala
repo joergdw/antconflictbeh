@@ -75,95 +75,6 @@ private[antDefenseAIs] final class World(
   val ants: SparseGrid2D = new SparseGrid2D(width, height) /** Agents: multiples can be on one field */
 
   /**
-   * Modelling directions and its internals.
-   *
-   * Dependent of implementation of `ants` and therefore here.
-   */
-  private[model] object Direction extends Enumeration {
-
-    val SouthWest = Value("south west") /** Direction south-west */
-    val West = Value("west") /** Direction west */
-    val NorthWest = Value("north west") /** Direction north west */
-    val North = Value("north") /** Direction north */
-    val NorthEast = Value("north east") /** Direction north east */
-    val East = Value("east") /** Direction east */
-    val SouthEast = Value("south east") /** Direction south west */
-    val South = Value("south") /** Direction south */
-
-    /**
-     * Distance of directions
-     *
-     * The opposite direction always has the highest distance.
-     *
-     * @return Distance of two directions
-     */
-    def directionDistance(dir1: Value, dir2: Value): Int = {
-      import StrictMath.{abs, min}
-
-      /* Directions are ordered with their values like in a circle of the ring Z_8 of eight elements.
-       * Therefore their distance towards each other is their distance in Z_8.
-       */
-      val a = dir1.id; val b = dir2.id
-      min(abs(a - b), abs(a - abs(values.size - b)))
-    }
-
-    val MaxDirDistance: Int = directionDistance(North, South) /** Maximum distance of two directions */
-
-
-    /* Internal associations between direction and element of Z_3 x Z_3 which is used to generate
-     * a new position out of a given position and a direction
-     * two directions. It should be like that, that the opposite direction of a given direction has the highest distance.
-     *
-     * Important knowledge for Mason topology: Field (x, y) is in column x, row y.
-     */
-    private val assocs = HashMap(
-      NorthWest -> (-1, -1),
-      North -> (0, -1),
-      NorthEast -> (1, -1),
-      West -> (-1, 0),
-      East -> (1, 0),
-      SouthWest -> (-1, 1),
-      South -> (0, 1),
-      SouthEast -> (1, 1)
-    )
-
-    private val assocsm1 = HashMap( // assocs inverse
-      (-1, -1) -> NorthWest,
-      (0, -1) -> North,
-      (1, -1) -> NorthEast,
-      (-1, 0) -> West,
-      (1, 0) -> East,
-      (-1, 1) -> SouthWest,
-      (0, 1) -> South,
-      (1, 1) -> SouthEast
-    )
-
-    /**
-     * The first position in direction `dir` from position `pos`
-     *
-     * @param pos Start position
-     * @param dir Direction to go to
-     * @return First position in direction `dir` from position `pos`
-     */
-    def inDirection(pos: (Int, Int), dir: Value): (Int, Int) = {
-      val (x, y) = assocs(dir)
-      (pos._1 + x, pos._2 + y)
-    }
-
-    /**
-     * Given two neighbour positions a direction from the first to the second will be calculated.
-     *
-     * @param start Start position
-     * @param target Target position
-     * @return Direction between start and target position
-     */
-    def directionIs(start: (Int, Int), target: (Int, Int)): Direction.Value = {
-      val diff = (target._1 - start._1, target._2 - start._2)
-      assocsm1(diff)
-    }
-  }
-
-  /**
    * Info-Datatype containing all the necessary information associated with each colony
    *
    * @param initialStartPosition Start position of the colony at the beginning of the simulation
@@ -196,21 +107,21 @@ private[antDefenseAIs] final class World(
      *
      * @return Total amount of resources hold by the ants of a colony
      */
-    def resources(): Int = (allAnts filter (a => a.tribeID == queen.tribeID)).foldLeft(0)((i, a) => i + a.inBackpack())
+    def resources(): Int = (allAnts filter (a => a.tribeID == queen.tribeID)).foldLeft(0)((i, a) => i + a.inBackpack)
 
     /**
      * Total amount of resources hold by the queen of a colony
      *
      * @return Total amount of resources hold by the queen of a colony
      */
-    def deposit(): Int = queen inBackpack()
+    def deposit(): Int = queen.inBackpack
 
     /**
      * True iff the queen has survived until now
      *
      * @return True iff the queen has survived until now
      */
-    def queenSurvived(): Boolean = (ants getObjectLocation queen) != null
+    def queenSurvived(): Boolean = ants.getObjectLocation(queen) != null
 
     /**
      * The following two lists contain the numbers for the fight situations:
@@ -235,7 +146,7 @@ private[antDefenseAIs] final class World(
 
     // average hitpoints of the left ants
     def averageHitPoints(): Option[Int] = {
-      def summer: (Ant, Int) => Int = (a, i) => a.hitpoints() + i
+      def summer: (Ant, Int) => Int = (a, i) => a.hitpoints + i
       val l = allAnts.filter(a => a.tribeID == queen.tribeID)
 
       if (l.isEmpty)
@@ -275,7 +186,7 @@ private[antDefenseAIs] final class World(
       val id = nextTribeID()
 
       val startPos = startPositions(i)
-      val queen = new AntQueen(id, this, tribeTypes(i)) // generate queen
+      val queen = new AntQueen(id, this, tribeTypes(i).behaviourConf, tribeTypes(i)) // generate queen
       assert(ants setObjectLocation (queen, startPos._1, startPos._2)) // Place queen on world
 
       val homePheromones = new DoubleGrid2D(width, height, 0.0d)
@@ -318,7 +229,7 @@ private[antDefenseAIs] final class World(
     // Remove deceased (i.e. too old) ants
     for (ant <- allAnts) {
       ant match {
-        case _ if ant.isOveraged() || ant.isKilled() => removeAnt(ant)   // TODO: Decide to do it here or in hit()
+        case _ if ant.isOveraged || ant.isKilled => removeAnt(ant)   // TODO: Decide to do it here or in hit()
         case other: Ant => other.mature()
       }
     }
@@ -349,10 +260,10 @@ private[antDefenseAIs] final class World(
    * @param ant Ant to remove
    */
   private def removeAnt(ant: Ant) {
-    if (!ant.isKilled() && !ant.isOveraged()) // If no reason for removing found
+    if (! ant.isKilled && ! ant.isOveraged) // If no reason for removing found
       throw new IllegalStateException("No reason found")
 
-    else if (ant.isKilled())     // Adapt statistic of tribe in function of the reason
+    else if (ant.isKilled)     // Adapt statistic of tribe in function of the reason
       colonyInfos(ant.tribeID).killed += 1
     else // ant.isOveraged
       colonyInfos(ant.tribeID).overaged += 1

@@ -22,16 +22,12 @@ import AntWorker._
 
 /**
  * What have all ant workers have in common
- *
- * @param tribeID Tribe the ant belongs to
- * @param world World the ant lives on
  */
-private[antDefenseAIs] abstract class AntWorker(
-  override val tribeID: Int,
-  override val world: World) extends Ant(tribeID, world) {
+private[antDefenseAIs] abstract class AntWorker extends Ant {
+
 
   //------------------- Common variables and constants -----------------------------------
-  override final def maximumAge(): Int = AntWorker.maximumAge
+  override final def maximumAge: Int = AntWorker.maximumAge
 
 
   //------------------- Basic operations of ant workers-----------------------------------
@@ -40,14 +36,14 @@ private[antDefenseAIs] abstract class AntWorker(
    * Drops the resources on the current place. If the queen is there, she
    * receives them.
    */
-  final def dropResources() {
+  final protected[model] def dropResources() {
     val pos = currentPos
-    val qPos: Option[(Int, Int)] = world currentPosOf myQueen
+    val qPos: Option[(Int, Int)] = world.currentPosOf(myQueen)
     if (qPos.isDefined && pos == qPos.get)
-      myQueen receiveRes _inBackpack
+      myQueen.receiveRes(_inBackpack)
     else {
       val res = world.resOn(pos) + _inBackpack
-      world setResOn(pos, res)
+      world.setResOn(pos, res)
     }
 
     _inBackpack = 0
@@ -56,7 +52,7 @@ private[antDefenseAIs] abstract class AntWorker(
   /**
    * Mines, if possible, resources.
    */
-  def mineRes() {
+  protected[model] def mineRes() {
     val pos = currentPos
     val spaceLeft: Boolean = backpackSize > _inBackpack // space left in bag?
     if (spaceLeft && world.resOn(pos) > 0) {
