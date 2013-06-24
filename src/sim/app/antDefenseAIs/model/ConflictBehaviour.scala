@@ -17,17 +17,28 @@ package sim.app.antDefenseAIs.model
 trait ConflictBehaviour extends Ant with PheroSystem with EconomicBehaviour {
 
   /**
+   * True iff at least one enemy is in range
+   *
+   * @return True iff at least one enemy is in range
+   */
+  protected[this] def enemyClose(): Boolean = {
+    val ants = world.antsInNeighbourhoodOf(pos = currentPos, range = 1)
+
+    ants.count(a => a.tribeID != this.tribeID) >= 1
+  }
+
+  /**
    * The ant tries to pursuit and to hit ants of strange colonies.
    *
    * If an foreign ant is on own field, it will be hit. If there are no foreign ants on the own field but on an
    * neighbour field instead, one of them will be hit, preferably in the direction the ant went the last step.
-   * If there are no enemies around, the ant will act economically.
+   * If there are no enemies around, an exception will be thrown.
    */
-  protected[this] def actMilitarily() {
-
+  protected[this] def attackNearEnemy() {
     val foreignAntsOnOwnField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
-    if (foreignAntsOnOwnField.size > 0)
+    if (foreignAntsOnOwnField.size > 0) // Hit ant preferably on own field
       hit(foreignAntsOnOwnField.head)
+
     else {
       def directionContainsEnemy(dir: Direction.Value): Boolean = {
         val destiny = Direction.inDirection(currentPos, dir)
@@ -37,6 +48,7 @@ trait ConflictBehaviour extends Ant with PheroSystem with EconomicBehaviour {
 
       val validDirs = validDirections
       val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
+
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: Direction.Value) = Direction.directionDistance(lastDirection, dir)
 
@@ -46,7 +58,7 @@ trait ConflictBehaviour extends Ant with PheroSystem with EconomicBehaviour {
         hit(foreignAntsOnNewField.head)
 
       } else
-        actEconomically()
+        throw new IllegalStateException("No foreign colony ant around which can be hit")
     }
   }
 }

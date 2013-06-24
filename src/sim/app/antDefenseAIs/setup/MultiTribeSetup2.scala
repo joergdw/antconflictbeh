@@ -21,9 +21,9 @@ import sim.app.antDefenseAIs.model._
 class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (90, 90)
-  val lasiusNigerNormal = new LasiusNigerGenerator(new LasiusBehaviourConf())
+  val lasiusNigerNormal = new LN_Generator(new LasiusBehaviourConf())
   val artificialNormal = new OAD_Generator(new OAD_BehaviourConf())
-  val lasiusNigerAggressive = new LasiusNigerGenerator(
+  val lasiusNigerAggressive = new LN_Generator(
     new LasiusBehaviourConf(
       maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
   private val tribes: Array[AntGenerator] = Array(artificialNormal, lasiusNigerNormal, lasiusNigerNormal,

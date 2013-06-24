@@ -28,6 +28,7 @@ trait PheroSystem extends Ant {
    * @param dir Direction where to investigate the pheromone intensity
    * @return Home pheromone intensity of the tribe of the ant in the given direction
    */
+  @deprecated
   protected[model] def homePheroOf(dir: Direction.Value): Double = world.homePheroOf(this, dir).get
 
   /**
@@ -35,7 +36,21 @@ trait PheroSystem extends Ant {
    *
    * @return Home pheromone intensity of the tribe of the ant at its current position
    */
+  @deprecated
   protected[model] def homePheroOf(): Double = world.homePheroOf(this).get
+
+  /**
+   * Home pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
+   * otherwise.
+   *
+   * @param oDir Direction where to investigate the pheromone intensity
+   * @return Home pheromone intensity of the tribe of the ant in the given direction
+   */
+  protected[model] def homePheroOf(oDir: Option[Direction.Value]): Double =
+    oDir match {
+      case None => homePheroOf()
+      case Some(dir) => homePheroOf(dir)
+    }
 
   /**
    * Resource pheromone intensity of the tribe of the ant in the given direction
@@ -43,6 +58,7 @@ trait PheroSystem extends Ant {
    * @param dir Direction where to investigate the pheromone intensity
    * @return Resource pheromone intensity of the tribe of the ant in the given direction
    */
+  @deprecated
   protected[model] def resPheroOf(dir: Direction.Value): Double = world.resPheroOf(this, dir).get
 
   /**
@@ -50,7 +66,21 @@ trait PheroSystem extends Ant {
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
+  @deprecated
   protected[model] def resPheroOf(): Double = world.resPheroOf(this).get
+
+  /**
+   * Resource pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
+   * otherwise.
+   *
+   * @param oDir Direction where to investigate the pheromone intensity
+   * @return Home pheromone intensity of the tribe of the ant in the given direction
+   */
+  protected[model] def resPheroOf(oDir: Option[Direction.Value]): Double =
+    oDir match {
+      case None => resPheroOf()
+      case Some(dir) => resPheroOf(dir)
+    }
 
   /**
    * War pheromone intensity of the tribe of the ant in the given direction
@@ -58,6 +88,7 @@ trait PheroSystem extends Ant {
    * @param dir Direction where to investigate the pheromone intensity
    * @return War pheromone intensity of the tribe of the ant in the given direction
    */
+  @deprecated
   protected[model] def warPheroOf(dir: Direction.Value): Double = world.warPheroOf(this, dir).get
 
   /**
@@ -65,7 +96,21 @@ trait PheroSystem extends Ant {
    *
    * @return Resource pheromone intensity of the tribe of the ant at its current position
    */
+  @deprecated
   protected[model] def warPheroOf(): Double = world.warPheroOf(this).get
+
+  /**
+   * War pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
+   * otherwise.
+   *
+   * @param oDir Direction where to investigate the pheromone intensity
+   * @return Home pheromone intensity of the tribe of the ant in the given direction
+   */
+  protected[model] def warPheroOf(oDir: Option[Direction.Value]): Double =
+    oDir match {
+      case None => warPheroOf()
+      case Some(dir) => warPheroOf(dir)
+    }
 
   /**
    * Set home pheromone intensity of the tribe of the ant at its current position
@@ -122,20 +167,24 @@ trait PheroSystem extends Ant {
   }
 
 
-  //---------------------------- Procedures making use of the pheromone system -----------------
+  //------------------------------- Other stuff ----------------------------------
 
   /**
-   * Follow home way.
+   * Gradient for the given pheromone map
    *
-   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
-   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   * @param f Maps direction to a pheromone value
+   * @return None, if no neighbour field has a higher value and Some direction otherwise
    */
-  protected[model] def followHomeWay() {
-    val direction = chooseDirectionBy(valueDirectionWithFunction(homePheroOf))
-    if (direction.isDefined) {
-      moveTo(direction.get)
-      adaptAllPheros()
+  def gradientOf(f: Option[Direction.Value] => Double): Option[Direction.Value] = {
+    val current = (None, f(None)): (Option[Direction.Value], Double)
+    var best = current
+    for (dir <- validDirections) {
+      val tmp = (Some(dir), f(Some(dir)))
+      if (tmp._2 > best._2)
+        best = tmp
     }
+
+    best._1
   }
 }
 

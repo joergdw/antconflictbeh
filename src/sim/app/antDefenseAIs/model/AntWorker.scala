@@ -23,7 +23,7 @@ import AntWorker._
 /**
  * What have all ant workers have in common
  */
-private[antDefenseAIs] abstract class AntWorker extends Ant {
+private[antDefenseAIs] abstract class AntWorker extends Ant with PheroSystem {
 
 
   //------------------- Common variables and constants -----------------------------------
@@ -58,6 +58,20 @@ private[antDefenseAIs] abstract class AntWorker extends Ant {
     if (spaceLeft && world.resOn(pos) > 0) {
       world setResOn(pos, world.resOn(pos) - 1)
       _inBackpack += 1
+    }
+  }
+
+  /**
+   * Follow home way.
+   *
+   * The next field is most probable one of the neighbour-fields with the best home-pheromones.
+   * With a certain probability (in function of the world.explorationRate) it is one of the other fields.
+   */
+  protected[model] def followHomeWay() {
+    val direction = chooseDirectionBy(valueDirectionWithFunction(homePheroOf))
+    if (direction.isDefined) {
+      moveTo(direction.get)
+      adaptAllPheros()
     }
   }
 }

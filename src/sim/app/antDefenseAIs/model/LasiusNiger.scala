@@ -34,7 +34,7 @@ private[antDefenseAIs] class LasiusBehaviourConf(
   val notBored: Int = 500) extends BehaviourConf(alpha, explorationRate, gamma)
 
 
-private[antDefenseAIs] class LasiusNigerGenerator(
+private[antDefenseAIs] class LN_Generator(
   override val behaviourConf: LasiusBehaviourConf) extends AntGenerator {
 
   /**
@@ -116,18 +116,16 @@ private[antDefenseAIs] class LasiusNiger(
 
     /*
      * If the ant is deeply neutral (i.e. emotion == 0) it adapts its state when there are more than
-     * `threshold_strangers` ants of other colonies and more than `threshold_friends` ants of the own
-     * colony in the neighbourhood. The first condition ensures that the ant does not change every simulation
-     * step its behaviour.
+     * `threshold_strangers` ants of other colonies in the neighbourhood. This ensures that the ant does
+     * not change every simulation step its behaviour.
      */
     val threshold_strangers = 1
-    val threshold_friends = min(5, maxAggressiveness) // should be <= than `maxAggressiveness`
 
-    if (emotion == Emotion.undecided && countStrangers() >= threshold_strangers && countFriends() >= threshold_friends)
+    if (emotion == Emotion.undecided && countStrangers() >= threshold_strangers)
       adaptState()
 
     emotion match {
-      case Emotion.aggressive => actMilitarily()
+      case Emotion.aggressive => if (enemyClose()) attackNearEnemy() else actEconomically()
       case Emotion.defensive => followHomeWay()
       case e if e == Emotion.normal || e == Emotion.undecided => actEconomically()
     }
