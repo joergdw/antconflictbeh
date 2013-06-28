@@ -80,10 +80,10 @@ private[antDefenseAIs] class OpportunisticAggressiveDefender(
    */
   def this(ant: Ant, behaviourConf: OAD_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
+  //------------------- Common variables and constants -------------------------------------
 
 
-  //////////////////// (Additional) Basic operations ////////////////////////////////
+  //------------------- (Additional) Basic operations --------------------------------------
 
   /**
    * Evaluates the relationship in the area `antsSensingRange`
@@ -101,13 +101,13 @@ private[antDefenseAIs] class OpportunisticAggressiveDefender(
   }
 
 
-  ///////////////////// Behaviour description /////////////////////////////////////
+  //-------------------------------- Behaviour description -------------------------------------------
 
   def step(state: SimState) {
     emotion match {
       case Emotion.undecided => actEconomically()
       case Emotion.defensive => followHomeWay()
-      case Emotion.aggressive => actMilitarily()
+      case Emotion.aggressive => if (enemyClose()) attackNearEnemy() else actEconomically()
     }
 
     adaptState()

@@ -84,11 +84,18 @@ private[antDefenseAIs] abstract class Ant extends Steppable {
   protected[model] def currentPos: (Int, Int) = world.currentPosOf(this).get
 
   /**
-   * All directions in which the ant can go right now
+   * All directions in which exists another field of the map
    *
-   * @return All directions in which the ant can go right now
+   * @return All directions in which exists another field of the map
    */
-  protected[model] def validDirections = world.validDirections(this).get
+  protected[model] def validDirections: List[Direction.Value] = world.validDirections(this).get
+
+  /**
+   * All directions in which exists another field of the map
+   *
+   * @return All directions in which exists another field of the map
+   */
+  protected[model] def accsessibleDirections: List[Direction.Value] = world.accessibleDirections(this).get
 
   /**
    * Returns a reference to the queen of the ant
@@ -142,9 +149,9 @@ private[antDefenseAIs] abstract class Ant extends Steppable {
    * @param evaluate Function to evaluate
    * @return Direction chosen
    */
-  protected[model] def chooseDirectionBy(evaluate: Direction.Value => Double): Option[Direction.Value] = {
+  protected def chooseDirectionBy(evaluate: Option[Direction.Value] => Double): Option[Direction.Value] = {
     val directionsValued: List[(Direction.Value, Double)] =
-      validDirections.map(dir => (dir, evaluate(dir))) // Add to every direction its value
+      accsessibleDirections.map(dir => (dir, evaluate(Some(dir)))) // Add to every direction its value
 
     val valDirsSorted = directionsValued.sortBy(x => x._2).reverse // descending order
 
@@ -157,22 +164,24 @@ private[antDefenseAIs] abstract class Ant extends Steppable {
   }
 
   // Calculates an all over all value for a direction
-  protected[model] def valueDirectionWithFunction(f: Direction.Value => Double)(dir: Direction.Value): Double = {
+  protected def valueDirectionWithFunction
+    (f: Option[Direction.Value] => Double)(oDir: Option[Direction.Value]): Double = {
+
     // Calculates a normalized value of a direction influenced by the pheromone
-    def dirValueByPhero(dir: Direction.Value): Double = {
+    def dirValueByPhero(oDir: Option[Direction.Value]): Double = {
+      val someDirs: List[Option[Direction.Value]] = validDirections.map(Some.apply)
+      val bestPheroInNeighbourhood = someDirs.map(f).max
 
-      val bestPheroInNeighbourhood = validDirections.map(f).max
-
-      if (bestPheroInNeighbourhood == 0)
-        0
-      else
-        f(dir) / bestPheroInNeighbourhood
+      if (bestPheroInNeighbourhood == 0) 0 else f(oDir) / bestPheroInNeighbourhood
     }
 
     // Calculates a normalized value of a direction influenced by the last direction
-    def dirValueByDir(dir: Direction.Value): Double =
-      Direction.directionDistance(lastDirection, dir) / Direction.MaxDirDistance
+    def dirValueByDir(oDir: Option[Direction.Value]): Double =
+      oDir match {
+        case None => 1
+        case Some(dir) => Direction.directionDistance(lastDirection, dir) / Direction.MaxDirDistance
+      }
 
-    alpha * dirValueByPhero(dir) + (1 - alpha) * dirValueByDir(dir)
+    alpha * dirValueByPhero(oDir) + (1 - alpha) * dirValueByDir(oDir)
   }
 }

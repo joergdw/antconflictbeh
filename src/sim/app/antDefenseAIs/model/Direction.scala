@@ -80,11 +80,11 @@ private[model] object Direction extends Enumeration {
   )
 
   /**
-   * The first position in direction `dir` from position `pos`
+   * The first position in direction `oDir` from position `pos`
    *
    * @param pos Start position
    * @param dir Direction to go to
-   * @return First position in direction `dir` from position `pos`
+   * @return First position in direction `oDir` from position `pos`
    */
   def inDirection(pos: (Int, Int), dir: Value): (Int, Int) = {
     val (x, y) = assocs(dir)

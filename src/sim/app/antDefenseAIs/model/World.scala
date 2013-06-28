@@ -229,7 +229,7 @@ private[antDefenseAIs] final class World(
     // Remove deceased (i.e. too old) ants
     for (ant <- allAnts) {
       ant match {
-        case _ if ant.isOveraged || ant.isKilled => removeAnt(ant)   // TODO: Decide to do it here or in hit()
+        case _ if ant.isOveraged || ant.isKilled => removeAnt(ant)
         case other: Ant => other.mature()
       }
     }
@@ -337,7 +337,7 @@ private[antDefenseAIs] final class World(
    * @return Home pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def homePheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPosOf(ant) flatMap(pos => {
+    currentPosOf(ant).flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
       Some(colonyInfos(ant.tribeID).homePheromones get (pheroPos._1, pheroPos._2))
     })
@@ -349,7 +349,7 @@ private[antDefenseAIs] final class World(
    * @return Home pheromone intensity of the tribe of the given at its current position
    */
   private[model] def homePheroOf(ant: Ant): Option[Double] =
-    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).homePheromones.get(pos._1, pos._2)))
+    currentPosOf(ant).flatMap(pos => Some(colonyInfos(ant.tribeID).homePheromones.get(pos._1, pos._2)))
 
   /**
    * Resource pheromone intensity of the tribe of the given ant in the given direction
@@ -359,7 +359,7 @@ private[antDefenseAIs] final class World(
    * @return Resource pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def resPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPosOf(ant) flatMap(pos => {
+    currentPosOf(ant).flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
       Some(colonyInfos(ant.tribeID).resPheromones.get(pheroPos._1, pheroPos._2))
     })
@@ -371,7 +371,7 @@ private[antDefenseAIs] final class World(
    * @return Resource pheromone intensity of the tribe of the given at its current position
    */
   private[model] def resPheroOf(ant: Ant): Option[Double] =
-    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).resPheromones.get(pos._1, pos._2)))
+    currentPosOf(ant).flatMap(pos => Some(colonyInfos(ant.tribeID).resPheromones.get(pos._1, pos._2)))
 
   /**
    * War pheromone intensity of the tribe of the given ant in the given direction
@@ -381,7 +381,7 @@ private[antDefenseAIs] final class World(
    * @return War pheromone intensity of the tribe of the given ant in the given position
    */
   private[model] def warPheroOf(ant: Ant, dir: Direction.Value): Option[Double] =
-    currentPosOf(ant) flatMap (pos => {
+    currentPosOf(ant).flatMap(pos => {
       val pheroPos = Direction.inDirection(pos, dir)
       Some(colonyInfos(ant.tribeID).warPheromones.get(pheroPos._1, pheroPos._2))
     })
@@ -393,7 +393,7 @@ private[antDefenseAIs] final class World(
    * @return War pheromone intensity of the tribe of the given at its current position
    */
   private[model] def warPheroOf(ant: Ant): Option[Double] =
-    currentPosOf(ant) flatMap (pos => Some(colonyInfos(ant.tribeID).warPheromones.get(pos._1, pos._2)))
+    currentPosOf(ant).flatMap(pos => Some(colonyInfos(ant.tribeID).warPheromones.get(pos._1, pos._2)))
 
   /**
    * Set home pheromone intensity of the tribe of the given ant at the given position
@@ -431,12 +431,13 @@ private[antDefenseAIs] final class World(
   /**
    * Give a hit from one ant to the other
    *
-   * Internals of ant behaviour routed via World-class to collect statistical data.
-   *
    * @param giver Ant hitting an opponent
    * @param receiver Ant being hit
    */
   private[model] def hit(giver: Ant)(receiver: Ant) {
+    if (! antsInNeighbourhoodOf(currentPosOf(giver).get).contains(receiver))
+      throw new IllegalStateException("Hit over distance tried")
+
     val nearAttackingAnts = antsInNeighbourhoodOf(currentPosOf(giver).get).count(a => a.tribeID == giver.tribeID)
     val nearAttackedAnts = antsInNeighbourhoodOf(currentPosOf(receiver).get).count(a => a.tribeID == receiver.tribeID)
 
@@ -450,8 +451,6 @@ private[antDefenseAIs] final class World(
     cInfoAttacked._hit_gotten = dList
 
     receiver.receiveHitFrom(giver)
-//    if (receiver.isKilled())  TODO: decide between this variant and the other to remove them by world scheduling
-//      removeAnt(receiver)
   }
 
 
@@ -494,10 +493,10 @@ private[antDefenseAIs] final class World(
   }
 
   /**
-   * All directions in which a given ant can move from its current position
+   * All directions from the current position of the given ant in which exists a field on this world
    *
-   * @param ant Ant for which all possible movement directions are calculated
-   * @return All directions in which an given ant can move from its current position
+   * @param ant Ant for which all valid directions are calculated
+   * @return All directions from the current position of the given ant in which exists a field on this world
    */
   private[model] def validDirections(ant: Ant): Option[List[Direction.Value]] = {
     val pos = currentPosOf(ant)
@@ -513,14 +512,26 @@ private[antDefenseAIs] final class World(
         neighbours.contains(destiny)
       }
 
-      // True iff not too many ants already there
-      def spaceLeft(dir: Direction.Value): Boolean = {
-        val destiny = Direction.inDirection(pos.get, dir)
-        antsOn(destiny).size < maxAntsPerField
-      }
+      Some(Direction.values.filter(isValid).toList)
+    }
+  }
 
-      // Filtering order might be important - otherwise it could occur to examine a non existing field
-      Some(Direction.values.filter(isValid).filter(spaceLeft).toList)
+  /**
+   * All directions in which a given ant can move from its current position
+   *
+   * @param ant Ant for which all possible movement directions are calculated
+   * @return All directions in which an given ant can move from its current position
+   */
+  private[model] def accessibleDirections(ant: Ant): Option[List[Direction.Value]] = {
+    // True iff not too many ants already there
+    def spaceLeft(dir: Direction.Value): Boolean = {
+      val destiny = Direction.inDirection(currentPosOf(ant).get, dir) // If function called then ant exists
+      antsOn(destiny).size < maxAntsPerField
+    }
+
+    validDirections(ant) match {
+      case None            => None
+      case Some(validDirs) => Some(validDirs.filter(spaceLeft))
     }
   }
 

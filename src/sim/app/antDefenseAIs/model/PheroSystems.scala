@@ -23,23 +23,6 @@ trait PheroSystem extends Ant {
   //---------------------------- Primitives ------------------------------------------------
 
   /**
-   * Home pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return Home pheromone intensity of the tribe of the ant in the given direction
-   */
-  @deprecated
-  protected[model] def homePheroOf(dir: Direction.Value): Double = world.homePheroOf(this, dir).get
-
-  /**
-   * Home pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Home pheromone intensity of the tribe of the ant at its current position
-   */
-  @deprecated
-  protected[model] def homePheroOf(): Double = world.homePheroOf(this).get
-
-  /**
    * Home pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
    * otherwise.
    *
@@ -48,26 +31,9 @@ trait PheroSystem extends Ant {
    */
   protected[model] def homePheroOf(oDir: Option[Direction.Value]): Double =
     oDir match {
-      case None => homePheroOf()
-      case Some(dir) => homePheroOf(dir)
+      case None => world.homePheroOf(this).get
+      case Some(dir) => world.homePheroOf(this, dir).get
     }
-
-  /**
-   * Resource pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return Resource pheromone intensity of the tribe of the ant in the given direction
-   */
-  @deprecated
-  protected[model] def resPheroOf(dir: Direction.Value): Double = world.resPheroOf(this, dir).get
-
-  /**
-   * Resource pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Resource pheromone intensity of the tribe of the ant at its current position
-   */
-  @deprecated
-  protected[model] def resPheroOf(): Double = world.resPheroOf(this).get
 
   /**
    * Resource pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
@@ -78,26 +44,9 @@ trait PheroSystem extends Ant {
    */
   protected[model] def resPheroOf(oDir: Option[Direction.Value]): Double =
     oDir match {
-      case None => resPheroOf()
-      case Some(dir) => resPheroOf(dir)
+      case None => world.resPheroOf(this).get
+      case Some(dir) => world.resPheroOf(this, dir).get
     }
-
-  /**
-   * War pheromone intensity of the tribe of the ant in the given direction
-   *
-   * @param dir Direction where to investigate the pheromone intensity
-   * @return War pheromone intensity of the tribe of the ant in the given direction
-   */
-  @deprecated
-  protected[model] def warPheroOf(dir: Direction.Value): Double = world.warPheroOf(this, dir).get
-
-  /**
-   * War pheromone intensity of the tribe of the ant at its current position
-   *
-   * @return Resource pheromone intensity of the tribe of the ant at its current position
-   */
-  @deprecated
-  protected[model] def warPheroOf(): Double = world.warPheroOf(this).get
 
   /**
    * War pheromone intensity of the tribe of the ant in the given direction, if given. On the current position
@@ -108,8 +57,8 @@ trait PheroSystem extends Ant {
    */
   protected[model] def warPheroOf(oDir: Option[Direction.Value]): Double =
     oDir match {
-      case None => warPheroOf()
-      case Some(dir) => warPheroOf(dir)
+      case None => world.warPheroOf(this).get
+      case Some(dir) => world.warPheroOf(this, dir).get
     }
 
   /**
@@ -201,29 +150,32 @@ trait StandardPheroSystem extends PheroSystem {
   import world.{currentPosOf, resOn, maxResAmount}
 
   override protected[model] def adaptHomePhero() {
-    val bestNeighbour: Direction.Value = validDirections.sortBy(homePheroOf).reverse.head
+    val someDirs: List[Option[Direction.Value]] = validDirections.map(Some.apply)
+    val bestNeighbour: Direction.Value = someDirs.sortBy(homePheroOf).reverse.head.get
 
     val adaptedValue = currentPosOf(myQueen) match {
       case None => 0 // queen is killed an there is no home
       case Some(qPos) if currentPos == qPos => 1.0d
-      case _ => gamma * homePheroOf(bestNeighbour)
+      case _ => gamma * homePheroOf(Some(bestNeighbour))
     }
 
     // To avoid pheromone value > 1 and worse value than before
-    setHomePhero(min(1, max(homePheroOf(), adaptedValue)))
+    setHomePhero(min(1, max(homePheroOf(None), adaptedValue)))
   }
 
   override protected[model] def adaptResPhero() {
-    val bestNeighbour: Direction.Value = validDirections.sortBy(resPheroOf).reverse.head
-    val adaptedValue = resOn(currentPos) + gamma * resPheroOf(bestNeighbour) / maxResAmount
+    val someDirs = validDirections.map(Some.apply)
+    val bestNeighbour: Direction.Value = someDirs.sortBy(resPheroOf).reverse.head.get
+    val adaptedValue = resOn(currentPos) + gamma * resPheroOf(Some(bestNeighbour)) / maxResAmount
 
     setResPhero(min(1, adaptedValue))
   }
 
   override protected[model] def adaptWarPhero() {
-    val bestNeighbour: Direction.Value = validDirections.sortBy(warPheroOf).reverse.head
-    val adaptedValue = gamma * warPheroOf(bestNeighbour)
+    val someDirs = validDirections.map(Some.apply)
+    val bestNeighbour: Direction.Value = someDirs.sortBy(warPheroOf).reverse.head.get
+    val adaptedValue = gamma * warPheroOf(Some(bestNeighbour))
 
-    setWarPhero(min(warPheroOf(), adaptedValue))
+    setWarPhero(min(warPheroOf(None), adaptedValue))
   }
 }

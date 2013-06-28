@@ -19,7 +19,7 @@ import sim.engine.SimState
 class LN_WithFetching(
   override val tribeID: Int,
   override val world: World,
-  override val behaviourConf: LasiusBehaviourConf)
+  override val behaviourConf: LN_BehaviourConf)
   extends LasiusNiger(tribeID, world, behaviourConf) {
 
   import behaviourConf._
@@ -53,7 +53,7 @@ class LN_WithFetching(
         if (enemyClose())
           attackNearEnemy()
         else if (gradientOf(warPheroOf).isDefined) {
-          moveTo(gradientOf(warPheroOf))
+          moveTo(gradientOf(warPheroOf).get)
           adaptAllPheros()
         }
         else

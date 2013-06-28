@@ -46,16 +46,15 @@ trait ConflictBehaviour extends Ant with PheroSystem with EconomicBehaviour {
         foreignAntsInDirection.size > 0
       }
 
-      val validDirs = validDirections
-      val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
+      val dirs = validDirections
+      val directionsContainingEnemies = dirs.filter(directionContainsEnemy)
 
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: Direction.Value) = Direction.directionDistance(lastDirection, dir)
 
-        moveTo(directionsContainingEnemies.sortBy(directionSorter).head)
-        adaptAllPheros()
-        val foreignAntsOnNewField = world.antsOn(currentPos).filter(a => a.tribeID != tribeID)
-        hit(foreignAntsOnNewField.head)
+        val attackedField = Direction.inDirection(currentPos, directionsContainingEnemies.sortBy(directionSorter).head)
+        val foreignAntsOnAttackedField = world.antsOn(attackedField).filter(a => a.tribeID != tribeID)
+        hit(foreignAntsOnAttackedField.head)
 
       } else
         throw new IllegalStateException("No foreign colony ant around which can be hit")

@@ -69,8 +69,8 @@ trait EconomicStandardBehaviour extends AntWorker with EconomicBehaviour with Ph
     if (direction.isDefined) {
       moveTo(direction.get)
       adaptAllPheros()
-      mineRes()
     }
+    mineRes()
   }
 
   /**

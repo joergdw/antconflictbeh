@@ -23,7 +23,7 @@ package sim.app.antDefenseAIs.model
  * @param minAggressivenessProb Lowest possible probability that an ant gets aggressive
  * @param notBored Value of boredom if the ant is not bored at all
  */
-private[antDefenseAIs] class LasiusBehaviourConf(
+private[antDefenseAIs] class LN_BehaviourConf(
   val emotionalDwellTime: Int = 10,
   val maxAggressiveness: Int = 20,
   val maxAggressivenessProb: Double = 0.767d,
@@ -35,7 +35,7 @@ private[antDefenseAIs] class LasiusBehaviourConf(
 
 
 private[antDefenseAIs] class LN_Generator(
-  override val behaviourConf: LasiusBehaviourConf) extends AntGenerator {
+  override val behaviourConf: LN_BehaviourConf) extends AntGenerator {
 
   /**
    * Creates an NormalAntWorker
@@ -48,7 +48,7 @@ private[antDefenseAIs] class LN_Generator(
 
   def apply(ant: Ant) =
     behaviourConf match {
-      case c: LasiusBehaviourConf => new LasiusNiger(ant, behaviourConf)
+      case c: LN_BehaviourConf => new LasiusNiger(ant, behaviourConf)
       case _                      => throw new IllegalArgumentException("Configuration not of required type.")
     }
 }
@@ -67,7 +67,7 @@ import sim.engine.SimState
 private[antDefenseAIs] class LasiusNiger(
   override val tribeID: Int,
   override val world: World,
-  val behaviourConf: LasiusBehaviourConf)
+  val behaviourConf: LN_BehaviourConf)
   extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour with CooldownConflictBehaviour {
 
   // Initialise configuration
@@ -84,7 +84,7 @@ private[antDefenseAIs] class LasiusNiger(
    * @param ant Ant ant giving the information of construction
    * @return Ant of the same colony in the same simulation
    */
-  def this(ant: Ant, behaviourConf: LasiusBehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
+  def this(ant: Ant, behaviourConf: LN_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
 
   ///////////////////// (Additional) Basic operations /////////////////////////////////////

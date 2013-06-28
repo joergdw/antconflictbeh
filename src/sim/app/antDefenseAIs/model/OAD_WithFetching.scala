@@ -82,7 +82,7 @@ private[antDefenseAIs] class OAD_WithFetching(
    */
   def this(ant: Ant, behaviourConf: OAD_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
-  ///////////////////// Common variables and constants /////////////////////////////////////
+  //------------------- Common variables and constants -------------------------------
 
   private object Emotion extends Enumeration {
     val battlesome = Value("Battlesome")
@@ -93,7 +93,7 @@ private[antDefenseAIs] class OAD_WithFetching(
   private var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
 
 
-  //////////////////// (Additional) Basic operations ////////////////////////////////
+  //--------------------- (Additional) Basic operations ---------------------------------
 
   /**
    * Evaluates the relationship in the area `antsSensingRange`
@@ -111,7 +111,7 @@ private[antDefenseAIs] class OAD_WithFetching(
   }
 
 
-  ///////////////////// Behaviour description /////////////////////////////////////
+  //------------------------------ Behaviour description -----------------------------------
 
   def step(state: SimState) {
 
@@ -120,10 +120,10 @@ private[antDefenseAIs] class OAD_WithFetching(
         val warPheroDir = chooseDirectionBy(valueDirectionWithFunction(warPheroOf))
 
         if (warPheroDir.isDefined) {
-          val bestWarPhero = warPheroOf(warPheroDir.get)
+          val bestWarPhero = warPheroOf(warPheroDir)
 
           if (bestWarPhero > 0) {
-            if (bestWarPhero < warPheroOf()) { // End of phero route reached
+            if (bestWarPhero < warPheroOf(None)) { // End of phero route reached
               emotion = Emotion.battlesome
               actMilitarily()
             }
@@ -163,9 +163,9 @@ private[antDefenseAIs] class OAD_WithFetching(
         foreignAntsInDirection.size > 0
       }
 
-      val validDirs = validDirections
+      val dirs = accsessibleDirections
 
-      val directionsContainingEnemies = validDirs.filter(directionContainsEnemy)
+      val directionsContainingEnemies = dirs.filter(directionContainsEnemy)
       if (directionsContainingEnemies.size > 0) {
         def directionSorter(dir: Direction.Value) = Direction.directionDistance(lastDirection, dir)
 
@@ -175,7 +175,7 @@ private[antDefenseAIs] class OAD_WithFetching(
         hit(foreignAntsOnNewField.head)
 
       } else {
-        val dir = validDirs(world.random.nextInt(validDirs.size)) // Choose totally random direction
+        val dir = dirs(world.random.nextInt(dirs.size)) // Choose totally random direction
         moveTo(dir)
         adaptAllPheros()
       }
