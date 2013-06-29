@@ -19,15 +19,19 @@ package sim.app.antDefenseAIs.model
  * @param emotionalDwellTime How long an individual stays in an individual state before going to another
  * @param maxAggressiveness As of this value of other ants of the same colony, the ant changes state with probability
  *                          `maxAggressivenessProb`.
- * @param maxAggressivenessProb Highest possible probability that an ant gets aggressive
+ * @param minNeutralnessProb Lowest possible probability that an ant ignores others
+ * @param maxNeutralnessProb Highest possible probability that an ant ignores others
  * @param minAggressivenessProb Lowest possible probability that an ant gets aggressive
+ * @param maxAggressivenessProb Highest possible probability that an ant gets aggressive
  * @param notBored Value of boredom if the ant is not bored at all
  */
 private[antDefenseAIs] class LN_BehaviourConf(
-  val emotionalDwellTime: Int = 10,
-  val maxAggressiveness: Int = 20,
-  val maxAggressivenessProb: Double = 0.767d,
+  val emotionalDwellTime: Int = 8,
+  val maxAggressiveness: Int = 10,
+  val minNeutralnessProb: Double = 0.33,
+  val maxNeutralnessProb: Double = 0.2,
   val minAggressivenessProb: Double = 0.257d,
+  val maxAggressivenessProb: Double = 0.767d,
   override val alpha: Double = 0.98d,
   override val explorationRate: Double = 0.3d,
   override val gamma: Double = 0.98d,
@@ -68,15 +72,18 @@ private[antDefenseAIs] class LasiusNiger(
   override val tribeID: Int,
   override val world: World,
   val behaviourConf: LN_BehaviourConf)
-  extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour with CooldownConflictBehaviour {
+  extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour with ConflictBehaviour {
 
   // Initialise configuration
-  import behaviourConf._
+  import behaviourConf.{maxAggressiveness, maxAggressivenessProb,
+    minAggressivenessProb, maxNeutralnessProb, minNeutralnessProb}
   override val alpha = behaviourConf.alpha
   override val explorationRate = behaviourConf.explorationRate
   override val gamma = behaviourConf.gamma
   override val notBored = behaviourConf.notBored
-  override val emotionalDwellTime = behaviourConf.emotionalDwellTime
+
+  /** How long an individual stays in an individual state before going to another */
+  val emotionalDwellTime = behaviourConf.emotionalDwellTime
 
   /**
    * Constructs ant with the information of the given ant
@@ -86,8 +93,41 @@ private[antDefenseAIs] class LasiusNiger(
    */
   def this(ant: Ant, behaviourConf: LN_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
 
+  /**
+   * Possible emotional states of an ant
+   */
+  protected[this] object Emotion extends Enumeration {
+    val aggressive = Value("Aggressive") /** Ant attacks near foreign-colony ants */
+    val fleeing = Value("Fleeing") /** Ant flees into direction of its home  */
 
-  ///////////////////// (Additional) Basic operations /////////////////////////////////////
+    /** Ant ignores ants of stranger colonies and changes emotional state if it receives a hit  */
+    val normal = Value("Normal")
+
+    /** Ant changes emotional state as soon as it sees ants of stranger colonies or receives a hit */
+    val undecided = Value("Undecided")
+  }
+
+  protected[this] var emotion: Emotion.Value = Emotion.undecided /** Current emotional state */
+  protected[this] var nextEmotionChange = emotionalDwellTime /** Time until the next state relaxation */
+
+  /**
+   * Cools down the emotional state of the ant until `undecided`
+   */
+  protected[this] def relax() {
+    if (nextEmotionChange <= 0)
+      emotion match {
+        case Emotion.aggressive => emotion = Emotion.undecided
+        case Emotion.fleeing => emotion = Emotion.undecided
+        case Emotion.normal => emotion = Emotion.undecided
+        case Emotion.undecided => // do nothing
+      }
+
+    else
+      nextEmotionChange -= 1
+  }
+
+
+  //-------------------------- (Additional) Basic operations ----------------------------------------
 
   /**
    * Adapts the emotional state of the ant.
@@ -98,9 +138,18 @@ private[antDefenseAIs] class LasiusNiger(
    * It is assumed that the chance that an ant gets aggressive grows linearly.
    */
   def adaptState() {
-    val alpha = min(1, countFriends() / maxAggressiveness)
+    val alpha:Double = min(1, countFriends() / maxAggressiveness)
     val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
-    emotion = if (world.random.nextDouble() <= aggressivenessProb) Emotion.aggressive else Emotion.defensive
+    val neutralnessProb = alpha * maxNeutralnessProb + (1 - alpha) * minNeutralnessProb
+    assert (aggressivenessProb + neutralnessProb <= 1)
+
+    val random = world.random.nextDouble()
+    emotion = if (random <= aggressivenessProb)
+                Emotion.aggressive
+              else if (random <= aggressivenessProb + neutralnessProb)
+                Emotion.normal
+              else
+                Emotion.fleeing
     nextEmotionChange = emotionalDwellTime
   }
 
@@ -126,7 +175,7 @@ private[antDefenseAIs] class LasiusNiger(
 
     emotion match {
       case Emotion.aggressive => if (enemyClose()) attackNearEnemy() else actEconomically()
-      case Emotion.defensive => followHomeWay()
+      case Emotion.fleeing => followHomeWay()
       case e if e == Emotion.normal || e == Emotion.undecided => actEconomically()
     }
 
@@ -136,7 +185,14 @@ private[antDefenseAIs] class LasiusNiger(
   override def receiveHitFrom(opponent: Ant) {
     super.receiveHitFrom(opponent)
 
-    if (emotion == Emotion.normal || emotion == Emotion.undecided) // If ant normal or undecided
-      adaptState() // … calculate new state
+    // If ant normal or undecided there are now only two choices to adapt the state
+    if (emotion == Emotion.normal || emotion == Emotion.undecided) {
+      val alpha: Double = min(1d, countFriends() / maxAggressiveness)
+      val minAggProb: Double = (minNeutralnessProb + minAggressivenessProb) / 2
+      val maxAggProb: Double = (maxNeutralnessProb + maxAggressivenessProb) / 2
+      val aggProb: Double = alpha * maxAggProb + (1 - alpha) * minAggProb
+
+      emotion = if (world.random.nextDouble() <= aggProb) Emotion.aggressive else Emotion.fleeing
+    }
   }
 }

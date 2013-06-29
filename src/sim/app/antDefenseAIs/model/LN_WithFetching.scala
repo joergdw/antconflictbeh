@@ -32,7 +32,7 @@ class LN_WithFetching(
                 Emotion.aggressive
               else {
                 setWarPhero(1.0d)
-                Emotion.defensive
+                Emotion.fleeing
               }
     nextEmotionChange = emotionalDwellTime
   }
@@ -59,7 +59,7 @@ class LN_WithFetching(
         else
           actEconomically()
       }
-      case Emotion.defensive => followHomeWay()
+      case Emotion.fleeing => followHomeWay()
       case e if e == Emotion.normal || e == Emotion.undecided => actEconomically()
     }
 

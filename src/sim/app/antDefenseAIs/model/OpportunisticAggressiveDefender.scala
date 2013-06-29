@@ -64,8 +64,6 @@ private[antDefenseAIs] class OpportunisticAggressiveDefender(
   val behaviourConf: OAD_BehaviourConf)
   extends AntWorker with StandardPheroSystem with EconomicStandardBehaviour with CooldownConflictBehaviour {
 
-  import behaviourConf._
-
   override val alpha = behaviourConf.alpha
   override val explorationRate = behaviourConf.explorationRate
   override val gamma = behaviourConf.gamma
