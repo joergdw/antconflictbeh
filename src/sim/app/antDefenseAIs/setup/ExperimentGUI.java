@@ -58,7 +58,10 @@ public class ExperimentGUI extends GUIState {
 
 ////////// Constructors and constructor related helpers ////////////////////////////////////// ////////////////
     public ExperimentGUI() {
-        super(new Setup_1vs1(System.currentTimeMillis()));
+        super(new SingleMatchSetup(System.currentTimeMillis()));
+        if (true) {
+          throw new IllegalStateException("Constructor mustn't be used. Only existing for compatibility reasons");
+        }
         initialiseDisplays();
     }
 

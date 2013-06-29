@@ -89,9 +89,9 @@ object SimulationRunner {
       if (opt.isDefined) {
         opt.get match {
           case Options.nox => withGUI = false
-          case Options.sim1vs1 => experimentType = Some(classOf[Setup_1vs1])
-          case Options.normalOnMulti => experimentType = Some(classOf[MultiTribeSetup1])
-          case Options.modOnMulti => experimentType = Some(classOf[MultiTribeSetup2])
+          case Options.sim1vs1 => experimentType = Some(classOf[SingleMatchSetup])
+          case Options.normalOnMulti => experimentType = Some(classOf[MultiTribeSetup])
+          case Options.modOnMulti => experimentType = Some(classOf[MultiTribeSetup])
           case Options.help => println(helpMessage)
         }
         restArgs = restArgs - option

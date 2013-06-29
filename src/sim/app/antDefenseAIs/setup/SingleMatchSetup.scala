@@ -14,24 +14,29 @@ package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
 
-import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
 import sim.app.antDefenseAIs.setup.MapCreationHelpers._
 import sim.app.antDefenseAIs.model._
+import sim.app.antDefenseAIs._
 
 
-class Setup_1vs1(var sd: Long) extends Experiment(sd) {
+class SingleMatchSetup(
+  var sd: Long,
+  val participant_1: AntGenerator = new LN_Normal_Generator(new LN_Normal_BehaviourConf()),
+  val participant_2: AntGenerator = new LN_PB_Generator(new LN_PB_BehaviourConf()))
+  extends Experiment(sd) {
+
+  // Compatibility constructor
+  def this(s: Long) = this(sd = s)
 
   val (width, height) = (33, 33)
-  val lasiusNigerNormal = new LN_Normal_Generator(new LN_Normal_BehaviourConf())
-  val lasiusNigerPB = new LN_PB_Generator(new LN_PB_BehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerPB)
+  private val tribes: Array[AntGenerator] = Array(participant_1, participant_2)
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(width, height)
 
   // Construction of the resource distribution
   {
-    for (column <- 0 until height; row <- 0 until width if (column % 16 == 0) && (row % 16 == 0)) {
+    for (column <- 0 until height; row <- 0 until width if column % 16 == 0 && row % 16 == 0) {
       brushSoft(a = resDistrib, width = 5, min_strength =  5, max_strength = 10, poss = (column, row))
     }
   }

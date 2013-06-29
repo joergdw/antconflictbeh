@@ -15,7 +15,7 @@ package sim.app.antDefenseAIs.setup
 
 import StrictMath.max
 
-import sim.app.antDefenseAIs.common.Common.{neighbourhoodOf, maxDistance}
+import sim.app.antDefenseAIs._
 
 /**
  * Offers help methods for map creations

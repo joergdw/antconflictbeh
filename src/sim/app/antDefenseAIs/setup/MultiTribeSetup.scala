@@ -14,16 +14,22 @@
 package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
-import sim.app.antDefenseAIs.common.Common.intArray2IntGrid
+
 import sim.app.antDefenseAIs.setup.MapCreationHelpers._
 import sim.app.antDefenseAIs.model._
+import sim.app.antDefenseAIs._
 
-class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
+class MultiTribeSetup(
+  var sd: Long,
+  val participant: AntGenerator = new LN_Normal_Generator(new LN_Normal_BehaviourConf()))
+  extends Experiment(sd) {
+
+  // Compatibility constructor
+  def this(s: Long) = this(sd = s)
 
   val (width, height) = (90, 90)
   val lasiusNigerNormal = new LN_Normal_Generator(new LN_Normal_BehaviourConf())
-  val lasiusNigerPB = new LN_PB_Generator(new LN_PB_BehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal,
+  private val tribes: Array[AntGenerator] = Array(participant, lasiusNigerNormal, lasiusNigerNormal,
     lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
@@ -33,7 +39,7 @@ class MultiTribeSetup1(var sd: Long) extends Experiment(sd) {
    * A map-pattern consisting of horizontal lines of resource-spots
    */
   {
-    for (column <- 0 until height; row <- 0 until width if ((column - 5) % 16 == 0) && ((row + 12) % 16 == 0)) {
+    for (column <- 0 until height; row <- 0 until width if (column - 5) % 16 == 0 && (row + 12) % 16 == 0) {
       brushSoft(resDistrib, 5, 5, 10, (column, row))
     }
   }

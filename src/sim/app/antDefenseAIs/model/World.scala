@@ -20,7 +20,7 @@ import sim.field.grid.{DoubleGrid2D, IntGrid2D, SparseGrid2D}
 import sim.engine.{Stoppable, SimState, Steppable}
 import sim.util.{Bag, IntBag}
 
-import sim.app.antDefenseAIs.common.Common._
+import sim.app.antDefenseAIs._
 import sim.app.antDefenseAIs.setup.Experiment
 
 /**

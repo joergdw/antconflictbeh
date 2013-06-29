@@ -10,7 +10,7 @@
  *
  * See the License.txt file for more details.
  */
-package sim.app.antDefenseAIs.common
+package sim.app
 
 import StrictMath.{abs, max}
 
@@ -20,7 +20,7 @@ import sim.field.grid.{DoubleGrid2D, IntGrid2D}
 import sim.app.antDefenseAIs.model.Ant
 
 /** Helping functions and constants */
-package object Common {
+package object antDefenseAIs {
 
   /**
    * Converts Int2D to (Int, Int)
