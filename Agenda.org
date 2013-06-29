@@ -28,17 +28,18 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
 ** TODO Neue Ameisenart
 Ich kann mir dabei drei Varianten vorstellen:
- 1) Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren
+ + [X] Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren
 
- 2) Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren, der aber noch bei Normaler Stimmung,
-    falls gegnerische Ameisen anwesend sind (d.h. die Verhältnisse sind noch nicht so klar) ein Ruf-Pheromon versprüht,
-    dass über Diffussion an andere Ameisen des eigenen Stamms herangetragen wird. Diese folgend dann dem Gradienten.
+ + [ ] Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren, der aber noch bei Normaler
+   Stimmung, falls gegnerische Ameisen anwesend sind (d.h. die Verhältnisse sind noch nicht so klar) ein Ruf-Pheromon
+   versprüht, dass über Diffussion an andere Ameisen des eigenen Stamms herangetragen wird. Diese folgend dann dem
+   Gradienten.
 
- 3) Bedeutungsorientierter Ameisenstamm: Baut auf Lasius Niger auf. Es wird nicht nur in Abhängigkeit der Anzahl der nahen
-    Verbündeten gekämpft, sondern auch in Abhängigkeit von dem Rohstoffgehalt.
+ + Bedeutungsorientierter Ameisenstamm: Baut auf Lasius Niger auf. Es wird nicht nur in Abhängigkeit der Anzahl der nahen
+   Verbündeten gekämpft, sondern auch in Abhängigkeit von dem Rohstoffgehalt.
 
- 4) Neue, offensive Ameise Hilfe wird nur geholt, wenn das Gebiet nahrungstechnisch wichtig ist und nicht zu weit weg vom
-    Nest ist. (Letzteres über Heimat-Pheromone)
+ + Neue, offensive Ameise Hilfe wird nur geholt, wenn das Gebiet nahrungstechnisch wichtig ist und nicht zu weit weg vom
+   Nest ist. (Letzteres über Heimat-Pheromone)
 
 
 ** DONE Wirtschaftsverhalten [5/5]

@@ -19,8 +19,8 @@ import sim.engine.SimState
 class LN_WithFetching(
   override val tribeID: Int,
   override val world: World,
-  override val behaviourConf: LN_BehaviourConf)
-  extends LasiusNiger(tribeID, world, behaviourConf) {
+  override val behaviourConf: LN_Normal_BehaviourConf)
+  extends LN_Normal(tribeID, world, behaviourConf) {
 
   import behaviourConf._
 

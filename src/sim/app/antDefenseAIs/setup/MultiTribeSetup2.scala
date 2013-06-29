@@ -21,12 +21,12 @@ import sim.app.antDefenseAIs.model._
 class MultiTribeSetup2(var sd: Long) extends Experiment(sd) {
 
   val (width, height) = (90, 90)
-  val lasiusNigerNormal = new LN_Generator(new LN_BehaviourConf())
-  val artificialNormal = new OAD_Generator(new OAD_BehaviourConf())
-  val lasiusNigerAggressive = new LN_Generator(
-    new LN_BehaviourConf(
+  val lasiusNigerNormal = new LN_Normal_Generator(new LN_Normal_BehaviourConf())
+  val lasiusNigerPB = new LN_PB_Generator(new LN_PB_BehaviourConf())
+  val lasiusNigerAggressive = new LN_Normal_Generator(
+    new LN_Normal_BehaviourConf(
       maxAggressiveness = 10, maxAggressivenessProb = 0.9, minAggressivenessProb = 0.5))
-  private val tribes: Array[AntGenerator] = Array(artificialNormal, lasiusNigerNormal, lasiusNigerNormal,
+  private val tribes: Array[AntGenerator] = Array(lasiusNigerPB, lasiusNigerNormal, lasiusNigerNormal,
     lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
   override val numberOfTribes = tribes.length
 
