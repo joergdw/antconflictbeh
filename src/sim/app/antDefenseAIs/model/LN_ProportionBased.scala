@@ -46,7 +46,6 @@ private[antDefenseAIs] class LN_PB_Generator(
   def apply(ant: Ant) =
     behaviourConf match {
       case c: LN_PB_BehaviourConf => new LN_ProportionBased(ant, behaviourConf)
-      case _                      => throw new IllegalArgumentException("Configuration not of required type.")
     }
 }
 
@@ -65,22 +64,6 @@ private[antDefenseAIs] class LN_ProportionBased(
    * @return Ant of the same colony in the same simulation
    */
   def this(ant: Ant, behaviourConf: LN_PB_BehaviourConf) = this(ant.tribeID, ant.world, behaviourConf)
-
-
-  /**
-   * Evaluates the relationship in the area `antsSensingRange`
-   *
-   * @return `Some` < 1 iff ants from foreign colonies outnumber the ones from the own, (>= 1 else) â if no strangers in
-   *         the neighbourhood `None will be returned`.
-   */
-  def evalueSituation(): Option[Double] = {
-    val strangers = countStrangers()
-
-    if (strangers == 0)
-      None
-    else
-      Some(countFriends() / strangers)
-  }
 
   override def adaptState() {
     evalueSituation() match {

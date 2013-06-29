@@ -106,15 +106,7 @@ private[antDefenseAIs] abstract class LasiusNiger(
    * @param state Parameter not used
    */
   override def step(state: SimState) {
-
-    /*
-     * If the ant is deeply neutral (i.e. emotion == 0) it adapts its state when there are more than
-     * `threshold_strangers` ants of other colonies in the neighbourhood. This ensures that the ant does
-     * not change every simulation step its behaviour.
-     */
-    val threshold_strangers = 1
-
-    if (emotion == Emotion.undecided && countStrangers() >= threshold_strangers)
+    if (emotion == Emotion.undecided && enemyClose())
       adaptState()
 
     emotion match {

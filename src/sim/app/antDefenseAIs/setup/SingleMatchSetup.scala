@@ -22,7 +22,7 @@ import sim.app.antDefenseAIs._
 class SingleMatchSetup(
   var sd: Long,
   val participant_1: AntGenerator = new LN_Normal_Generator(new LN_Normal_BehaviourConf()),
-  val participant_2: AntGenerator = new LN_PB_Generator(new LN_PB_BehaviourConf()))
+  val participant_2: AntGenerator = new LN_RPB_Generator(new LN_RPB_BehaviourConf()))
   extends Experiment(sd) {
 
   // Compatibility constructor

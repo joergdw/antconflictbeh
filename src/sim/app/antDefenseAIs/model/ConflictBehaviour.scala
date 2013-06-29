@@ -60,4 +60,19 @@ trait ConflictBehaviour extends Ant with PheroSystem with EconomicBehaviour {
         throw new IllegalStateException("No foreign colony ant around which can be hit")
     }
   }
+
+  /**
+   * Evaluates the relationship in the area `antsSensingRange`
+   *
+   * @return `Some` < 1 iff ants from foreign colonies outnumber the ones from the own, (>= 1 else) â if no strangers in
+   *         the neighbourhood `None will be returned`.
+   */
+  protected[this] def evalueSituation(): Option[Double] = {
+    val strangers = countStrangers()
+
+    if (strangers == 0)
+      None
+    else
+      Some(countFriends() / strangers)
+  }
 }
