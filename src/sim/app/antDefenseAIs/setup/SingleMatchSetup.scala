@@ -20,7 +20,7 @@ import sim.app.antDefenseAIs._
 
 class SingleMatchSetup(
   var sd: Long,
-  override val tribeTypes: List[AntGenerator] = List(ln_normal_std, ln_rpb_std)) // TODO ln_normal_std, ln_rpb_wf_std
+  override val tribeTypes: List[AntGenerator] = List(ln_normal_std, ln_rpb_wf_std))
   extends Experiment(sd, tribeTypes) {
 
   if (tribeTypes.length != 2)
