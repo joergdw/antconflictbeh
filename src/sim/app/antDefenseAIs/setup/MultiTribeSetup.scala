@@ -20,29 +20,20 @@ import sim.app.antDefenseAIs._
 
 class MultiTribeSetup(
   var sd: Long,
-  val proband: AntGenerator = ln_normal_std,
-  val participating: Array[AntGenerator] = Array())
-  extends Experiment(sd) {
+  override val tribeTypes: List[AntGenerator] = List(ln_normal_std, ln_normal_std, ln_normal_std,
+    ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std))
+  extends Experiment(sd, tribeTypes) {
 
-  // Compatibility constructor
+  if (tribeTypes.length != 9)
+    throw new IllegalArgumentException("MultiTribeSetup only defined for exactly 9 colonies")
+
+  //--------------------------------- Compatibility constructors ----------------------------------
   def this(s: Long) = this(sd = s)
 
+
+  //--------------------------------- World settings -----------------------------------------------
+
   val (width, height) = (90, 90)
-  private val tribes: Array[AntGenerator] = {
-    val tribes = Array(proband, ln_normal_std, ln_normal_std,
-      ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std)
-
-    if (participating.length > tribes.length - 1)
-      throw new IllegalArgumentException("Too many participating colonies defined!")
-
-    for (i <- 0 until participating.length) {
-      tribes(i + 1) = participating(i)
-    }
-
-    tribes
-  }
-  override val numberOfTribes = tribes.length
-
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
 
   /* Construction of the resource distribution.
@@ -70,7 +61,7 @@ class MultiTribeSetup(
 
   val world: World = new World(experiment = this, height = height, width = width,
     startPositions = startPositions, resources = resourceMap,
-    tribeTypes = tribes)
+    tribeTypes = tribeTypes)
 
   override def stopCriteriaFulfilled(): Boolean = schedule.getSteps >= 2000
 }

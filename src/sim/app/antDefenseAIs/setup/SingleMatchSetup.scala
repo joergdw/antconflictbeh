@@ -20,16 +20,19 @@ import sim.app.antDefenseAIs._
 
 class SingleMatchSetup(
   var sd: Long,
-  val proband_1: AntGenerator = ln_rpb_std,
-  val probant_2: AntGenerator = ln_rpb_wf_std)
-  extends Experiment(sd) {
+  override val tribeTypes: List[AntGenerator] = List(ln_normal_std, ln_rpb_wf_std))
+  extends Experiment(sd, tribeTypes) {
 
-  // Compatibility constructor
+  if (tribeTypes.length != 2)
+    throw new IllegalArgumentException("SinglePathSetup only defined for exactly 2 colonies")
+
+  //--------------------------------- Compatibility constructors ----------------------------------
   def this(s: Long) = this(sd = s)
 
+
+  //--------------------------------- World settings -----------------------------------------------
+
   val (width, height) = (33, 33)
-  private val tribes: Array[AntGenerator] = Array(proband_1, probant_2)
-  override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(width, height)
 
@@ -45,7 +48,7 @@ class SingleMatchSetup(
 
   val world: World = new World(experiment = this, height = height, width = width,
     startPositions = Array((0, height / 2), (width - 1, height / 2)), resources = resourceMap,
-    tribeTypes = tribes)
+    tribeTypes = tribeTypes)
 
 
   override def stopCriteriaFulfilled(): Boolean = {

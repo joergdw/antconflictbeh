@@ -50,7 +50,7 @@ private[antDefenseAIs] final class World(
   private val startPositions: Array[(Int, Int)],
   val resources: IntGrid2D,
   val maxAntsPerField: Int = 4,
-  private val tribeTypes: Array[AntGenerator]) extends Steppable {
+  private val tribeTypes: List[AntGenerator]) extends Steppable {
 
   if (experiment.numberOfTribes != tribeTypes.length)
     throw new IllegalArgumentException("Not exactly as many colony types as colonies")

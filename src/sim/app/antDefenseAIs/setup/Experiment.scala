@@ -14,14 +14,18 @@ package sim.app.antDefenseAIs.setup
 
 import sim.engine.{Steppable, SimState}
 
-import sim.app.antDefenseAIs.model.World
+import sim.app.antDefenseAIs.model.{AntGenerator, World}
 
 /**
  * Contains some preferences for the simulation
  *
  * @param s Seed for random data generator
+ * @param tribeTypes Generator list for the participating colony types
  */
-abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
+abstract class Experiment(
+  var s: Long,
+  val tribeTypes: List[AntGenerator])
+  extends SimState(s) with Steppable {
 
   val name: String = getClass.getName
 
@@ -34,7 +38,7 @@ abstract class Experiment(var s: Long) extends SimState(s) with Steppable {
    */
   def maxResAmount = world.maxResAmount
 
-  val numberOfTribes: Int /** Number of tribes on this world */
+  final def numberOfTribes: Int = tribeTypes.length /** Number of tribes on this world */
 
   override def start() {
     super.start()

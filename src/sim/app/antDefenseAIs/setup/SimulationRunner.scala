@@ -14,12 +14,17 @@ package sim.app.antDefenseAIs.setup
 
 import sim.engine.SimState
 import sim.display.Console
+import sim.app.antDefenseAIs.model.AntGenerator
 
 object SimulationRunner {
+
   /**
    * Experiment which will be executed
    */
   private var experimentType: Option[Class[_ <: Experiment]] = None: Option[java.lang.Class[_ <: Experiment]]
+
+  private var colonyTypes: List[AntGenerator] = List() // TODO: Here to save the colony types that should be used
+
   /**
    * True if the experiment should be run with graphical user interface
    */
@@ -46,7 +51,7 @@ object SimulationRunner {
         case `nox` => "Run experiment without user interface (for commandline use)"
         case `sim1vs1` => "Duel between one normal tribe and one modified tribe"
         case `normalOnMulti` => "Simulation of a normal tribe among many other normal tribes"
-        case `modOnMulti` => "Simulation of a modyfied tribe among many other normal tribes"
+        case `modOnMulti` => "Simulation of a modified tribe among many other normal tribes"
         case `help` => "This message"
       }
     }
@@ -87,11 +92,17 @@ object SimulationRunner {
       val opt = Options.parse(option)
 
       if (opt.isDefined) {
-        opt.get match {
+        opt.get match {           // TODO: Adapt here the colony types
           case Options.nox => withGUI = false
-          case Options.sim1vs1 => experimentType = Some(classOf[SingleMatchSetup])
-          case Options.normalOnMulti => experimentType = Some(classOf[MultiTribeSetup])
-          case Options.modOnMulti => experimentType = Some(classOf[MultiTribeSetup])
+          case Options.sim1vs1 => {
+            experimentType = Some(classOf[SingleMatchSetup])
+          }
+          case Options.normalOnMulti => {
+            experimentType = Some(classOf[MultiTribeSetup])
+          }
+          case Options.modOnMulti => {
+            experimentType = Some(classOf[MultiTribeSetup])
+          }
           case Options.help => println(helpMessage)
         }
         restArgs = restArgs - option
@@ -104,7 +115,7 @@ object SimulationRunner {
       System.exit(1)
     }
     else if (withGUI) {
-      val experiment: Experiment =
+      val experiment: Experiment =   // TODO: give here the colony type
         experimentType.get.getConstructor(classOf[Long]).newInstance(new java.lang.Long(System.currentTimeMillis()))
 
       val video: ExperimentGUI = new ExperimentGUI(experiment)
