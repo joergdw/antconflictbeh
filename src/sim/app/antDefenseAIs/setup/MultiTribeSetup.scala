@@ -15,22 +15,32 @@ package sim.app.antDefenseAIs.setup
 
 import sim.field.grid.IntGrid2D
 
-import sim.app.antDefenseAIs.setup.MapCreationHelpers._
 import sim.app.antDefenseAIs.model._
 import sim.app.antDefenseAIs._
 
 class MultiTribeSetup(
   var sd: Long,
-  val participant: AntGenerator = new LN_Normal_Generator(new LN_Normal_BehaviourConf()))
+  val proband: AntGenerator = ln_normal_std,
+  val participating: Array[AntGenerator] = Array())
   extends Experiment(sd) {
 
   // Compatibility constructor
   def this(s: Long) = this(sd = s)
 
   val (width, height) = (90, 90)
-  val lasiusNigerNormal = new LN_Normal_Generator(new LN_Normal_BehaviourConf())
-  private val tribes: Array[AntGenerator] = Array(participant, lasiusNigerNormal, lasiusNigerNormal,
-    lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal, lasiusNigerNormal)
+  private val tribes: Array[AntGenerator] = {
+    val tribes = Array(proband, ln_normal_std, ln_normal_std,
+      ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std, ln_normal_std)
+
+    if (participating.length > tribes.length - 1)
+      throw new IllegalArgumentException("Too many participating colonies defined!")
+
+    for (i <- 0 until participating.length) {
+      tribes(i + 1) = participating(i)
+    }
+
+    tribes
+  }
   override val numberOfTribes = tribes.length
 
   val resDistrib: Array[Array[Int]] = Array.ofDim(height, width)
@@ -40,7 +50,7 @@ class MultiTribeSetup(
    */
   {
     for (column <- 0 until height; row <- 0 until width if (column - 5) % 16 == 0 && (row + 12) % 16 == 0) {
-      brushSoft(resDistrib, 5, 5, 10, (column, row))
+      brushSoft(a = resDistrib, width = 5, min_strength = 5, max_strength = 10, poss = List((column, row)))
     }
   }
 

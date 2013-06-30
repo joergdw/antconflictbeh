@@ -141,8 +141,13 @@ private[antDefenseAIs] final class World(
     def hitsGotten(): Int = _hit_gotten.size
     def hitsIn(sit: ((Int, Int)) => Boolean)(l: List[(Int, Int)]): Int = l.count(sit)
 
+    def averageSituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(_ => true)
     def averageMayoritySituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(mayority)
     def averageMinoritySituationHitMade(): Option[(Int, Int)] = averageOf(_hit_made)(minority)
+    def bestAbsMayoritySituationHitMade(): Option[(Int, Int)] = bestAbsoluteOf(_hit_made)(mayority)
+    def bestRelMayoritySituationHitMade(): Option[(Int, Int)] = bestRelativeOf(_hit_made)(mayority)
+    def bestAbsMinoritySituationHitMade(): Option[(Int, Int)] = bestAbsoluteOf(_hit_made)(minority)
+    def bestRelMinoritySituationHitMade(): Option[(Int, Int)] = bestRelativeOf(_hit_made)(minority)
 
     // average hitpoints of the left ants
     def averageHitPoints(): Option[Int] = {
@@ -158,17 +163,40 @@ private[antDefenseAIs] final class World(
 
     // ---------------------------------- Helpers --------------------------------
 
-    // Returns None if no fight situations found
+    // Returns None if no fight situations found and otherwise the average of the situations
     private def averageOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean): Option[(Int, Int)] = {
       val a = l.filter(p)
 
       if (a.size == 0)
         None
-
       else {
         val sum = a.foldRight((0, 0))((x: (Int, Int), y: (Int, Int)) => (x._1 + y._1, x._2 + y._2))
         Some((sum._1 / a.size, sum._2 / a.size))
       }
+    }
+
+    // Returns None if no fight situations found and otherwise the situation with the highest difference
+    private def bestAbsoluteOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean): Option[(Int, Int)] = {
+      def dist(t: (Int, Int)): Int = StrictMath.abs(t._1 - t._2)
+
+      val a = l.filter(p)
+
+      if (a.size == 0)
+        None
+      else
+        Some(a.sortBy(dist).reverse.head)
+    }
+
+    // Returns None if no fight situations found and otherwise the situation with the highest relationship
+    private def bestRelativeOf(l: List[(Int, Int)])(p: ((Int, Int)) => Boolean): Option[(Int, Int)] = {
+      def dist(t: (Int, Int)): Double = t._1 / t._2
+
+      val a = l.filter(p)
+
+      if (a.size == 0)
+        None
+      else
+        Some(a.sortBy(dist).reverse.head)
     }
 
     def minority(x: (Int, Int)): Boolean = x._1 < x._2

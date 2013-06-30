@@ -24,9 +24,9 @@ package sim.app.antDefenseAIs.model
  * @param maxAggressivenessProb Highest possible probability that an ant gets aggressive
  */
 private[antDefenseAIs] class LN_Normal_BehaviourConf(
-  val maxAggressiveness: Int = 5,
-  val minNeutralnessProb: Double = 0.33,
-  val maxNeutralnessProb: Double = 0.2,
+  val maxAggressiveness: Int = 6,
+  val minNeutralnessProb: Double = 0.33d,
+  val maxNeutralnessProb: Double = 0.2d,
   val minAggressivenessProb: Double = 0.257d,
   val maxAggressivenessProb: Double = 0.767d,
   override val emotionalDwellTime: Int = 8,

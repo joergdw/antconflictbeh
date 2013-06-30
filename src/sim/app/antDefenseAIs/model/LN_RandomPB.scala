@@ -26,9 +26,9 @@ import java.lang.StrictMath._
  * @param maxAggressivenessProb Highest possible probability that an ant gets aggressive
  */
 private[antDefenseAIs] class LN_RPB_BehaviourConf(
-  val maxAggressiveness: Double = 4,
-  val minNeutralnessProb: Double = 0.33,
-  val maxNeutralnessProb: Double = 0.2,
+  val maxAggressiveness: Double = 6d,
+  val minNeutralnessProb: Double = 0.33d,
+  val maxNeutralnessProb: Double = 0.2d,
   val minAggressivenessProb: Double = 0.257d,
   val maxAggressivenessProb: Double = 0.767d,
   override val emotionalDwellTime: Int = 8,

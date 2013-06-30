@@ -11,17 +11,29 @@
  * See the License.txt file for more details.
  */
 
-package sim.app.antDefenseAIs.setup
+package sim.app.antDefenseAIs
 
-import StrictMath.max
-
-import sim.app.antDefenseAIs._
+import sim.app.antDefenseAIs.model._
+import java.lang.StrictMath._
 
 /**
- * Offers help methods for map creations
+ * Common ant creators and map design utilities
  */
-private object MapCreationHelpers {
+package object setup {
 
+
+  //------------------------- Ant creators --------------------------------------------
+
+  // The naming convention is: <ant-family>_<subfamily>_<configuration> abbreviations could be used.
+
+  val ln_normal_std = new LN_Normal_Generator(new LN_Normal_BehaviourConf())
+
+  val ln_rpb_std = new LN_RPB_Generator(new LN_RPB_BehaviourConf())
+
+  val ln_pb_std = new LN_PB_Generator(new LN_PB_BehaviourConf())
+
+
+  //-------------------------- Map design utilities ------------------------------------
   /**
    * Sets the value `strength` on all positions within a certain distance (`width`) towards one of the points in `poss`.
    *
@@ -31,21 +43,7 @@ private object MapCreationHelpers {
    * @param poss Positions in the center of the brush
    */
   def brush(a: Array[Array[Int]], width: Int, strength: Int, poss: (Int, Int)*) {
-    brushSoft(a, width, strength, strength, poss.toList)
-  }
-
-  /**
-   * Sets an value interpolated between `min_strength` and `max_strength` on all positions within a certain distance
-   * (`width`) towards one of the points in `poss`.
-   *
-   * @param a 2-dim Array to operate on
-   * @param width Brush-width
-   * @param min_strength Minimum brush-strength  (lowest value to be placed)
-   * @param max_strength Maximum brush-strength (highest value to be placed)
-   * @param poss Positions in the center of the brush
-   */
-  def brushSoft(a: Array[Array[Int]], width: Int, min_strength: Int, max_strength: Int, poss: (Int, Int)*) {
-    brushSoft(a, width, min_strength, max_strength, poss.toList)
+    brushSoft(a = a, width = width, min_strength = strength, max_strength = strength, poss = poss.toList)
   }
 
   /**
