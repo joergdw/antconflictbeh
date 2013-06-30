@@ -453,7 +453,7 @@ private[antDefenseAIs] final class World(
    * @param amount New intensity
    */
   private[model] def setWarPheroOn(ant: Ant, pos: (Int, Int), amount: Double) {
-    colonyInfos(ant.tribeID).warPheromones set (pos._1, pos._2, amount)
+    colonyInfos(ant.tribeID).warPheromones.set(pos._1, pos._2, amount)
   }
 
   /**

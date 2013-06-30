@@ -32,6 +32,8 @@ package object setup {
 
   val ln_pb_std = new LN_PB_Generator(new LN_PB_BehaviourConf())
 
+  val ln_rpb_wf_std = new LN_RPB_WF_Generator(new LN_RPB_WF_BehaviourConf())
+
 
   //-------------------------- Map design utilities ------------------------------------
   /**

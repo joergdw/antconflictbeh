@@ -20,8 +20,8 @@ import sim.app.antDefenseAIs._
 
 class SingleMatchSetup(
   var sd: Long,
-  val proband_1: AntGenerator = ln_normal_std,
-  val probant_2: AntGenerator = ln_rpb_std)
+  val proband_1: AntGenerator = ln_rpb_std,
+  val probant_2: AntGenerator = ln_rpb_wf_std)
   extends Experiment(sd) {
 
   // Compatibility constructor

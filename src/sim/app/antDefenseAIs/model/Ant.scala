@@ -124,7 +124,7 @@ private[antDefenseAIs] abstract class Ant extends Steppable {
    * @return Number of ants of the same colony in the neighbourhood
    */
   def countFriends(): Int =
-    world.antsInNeighbourhoodOf(pos = currentPos, range =  antsSensingRange).count(a => a.tribeID == this.tribeID)
+    world.antsInNeighbourhoodOf(pos = currentPos, range = antsSensingRange).count(a => a.tribeID == this.tribeID)
 
   /**
    * Counts the number of ants of other colonies within the neighbourhood.

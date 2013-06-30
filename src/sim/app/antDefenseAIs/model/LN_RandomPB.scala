@@ -13,7 +13,7 @@
 
 package sim.app.antDefenseAIs.model
 
-import java.lang.StrictMath._
+import java.lang.StrictMath.min
 
 /**
  * Behaviour configuration of an normal Lasius Niger ant
@@ -57,7 +57,7 @@ private[antDefenseAIs] class LN_RPB_Generator(
     }
 }
 
-class LN_RandomPB(
+private[antDefenseAIs] class LN_RandomPB(
   override val tribeID: Int,
   override val world: World,
   override val behaviourConf: LN_RPB_BehaviourConf)
@@ -83,7 +83,7 @@ class LN_RandomPB(
    *
    * It is assumed that the chance that an ant gets aggressive grows linearly.
    */
-  def adaptState() {
+  override def adaptState() {
     val alpha:Double = min(1d, evalueSituation().get / maxAggressiveness)
     val aggressivenessProb = alpha * maxAggressivenessProb + (1 - alpha) * minAggressivenessProb
     val neutralnessProb = alpha * maxNeutralnessProb + (1 - alpha) * minNeutralnessProb
@@ -107,7 +107,7 @@ class LN_RandomPB(
     super.receiveHitFrom(opponent)
 
     // If ant normal or undecided there are now only two choices to adapt the state
-    if (emotion == Emotion.normal || emotion == Emotion.undecided) {
+    if (emotion != Emotion.aggressive || emotion != Emotion.fleeing) {
       val alpha: Double = min(1d, evalueSituation().get / maxAggressiveness)
       val minAggProb: Double = (minNeutralnessProb + minAggressivenessProb) / 2
       val maxAggProb: Double = (maxNeutralnessProb + maxAggressivenessProb) / 2
