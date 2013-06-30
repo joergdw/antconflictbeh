@@ -2,7 +2,7 @@ Taktisches Kampfverhalten von Ameisen
 
 Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
 
-* Implementierungsliste [6/7]
+* Implementierungsliste [7/7]
 ** DONE Militärverhalten normaler Ameisen [7/7]
  + [X] Siehe dazu: „[[/home/kairos/Daten/Universit%C3%A4t/K%C3%BCnstliche%20Intelligenz/Agentes%20Inteligentes%20y%20Sistemas%20Multiagente/%C3%9Cbungsbetrieb/Abschlussprojekt/Literatur%20die%20wirklich%20verwendet%20wird/Ant%20defence%20system:%20A%20mechanism%20organizing%20individual%20responses%20into%20efficient%20collective%20behavior%20-%202001.pdf][Ant defence system]]“ Es folgt die Fallunterscheidung:
    - Wenige Koloniemitglieder in der Nähe :: 25,7% Aggressivität
@@ -26,11 +26,11 @@ Projekt zur Evaluation des Kampfverhaltens von Ameisen in der freien Natur
  + [X] Aggressive Ameisen folgen koloniefremde Ameisen auf benachbarte Felder.
  + [X] Neutrale Ameisen ignorieren koloniefremde Ameisen.
 
-** TODO Neue Ameisenart
+** DONE Neue Ameisenart
 Ich kann mir dabei drei Varianten vorstellen:
  + [X] Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren
 
- + [ ] Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren, der aber noch bei Normaler
+ + [X] Lasius Niger, dessen Emotionswechsel immer auf Verhältnisschätzungen basieren, der aber noch bei Normaler
    Stimmung, falls gegnerische Ameisen anwesend sind (d.h. die Verhältnisse sind noch nicht so klar) ein Ruf-Pheromon
    versprüht, dass über Diffussion an andere Ameisen des eigenen Stamms herangetragen wird. Diese folgend dann dem
    Gradienten.
