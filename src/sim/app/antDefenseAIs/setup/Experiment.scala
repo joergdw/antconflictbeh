@@ -108,13 +108,13 @@ abstract class Experiment(
          "\tAverage hitpoints of left ants:\t" + cInf.averageHitPoints() + "\n" +
          "\tQueen survived:\t " + cInf.queenSurvived() + "\n" +
          "\n" +
-         "\tAverage situation when hit made" + cInf.averageSituationHitMade() + "\n" +
-         "\tBest absolute majority situation when hit made\t" + cInf.bestAbsMayoritySituationHitMade() + "\n" +
-         "\tBest relative majority situation when hit made\t" + cInf.bestRelMayoritySituationHitMade() + "\n" +
-         "\tAverage majority situation when hit made\t" + cInf.averageMayoritySituationHitMade() + "\n" +
-         "\tWorst absolute minority situation when hit made\t" + cInf.bestAbsMinoritySituationHitMade() + "\n" +
-         "\tWorst relative minority situation when hit made\t" + cInf.bestRelMinoritySituationHitMade() + "\n" +
-         "\tAverage minority situation when hit made\t" + cInf.averageMinoritySituationHitMade() + "\n" +
+         "\tAverage situation when hit made:\t" + cInf.averageSituationHitMade() + "\n" +
+         "\tBest absolute majority situation when hit made:\t" + cInf.bestAbsMayoritySituationHitMade() + "\n" +
+         "\tBest relative majority situation when hit made:\t" + cInf.bestRelMayoritySituationHitMade() + "\n" +
+         "\tAverage majority situation when hit made:\t" + cInf.averageMayoritySituationHitMade() + "\n" +
+         "\tWorst absolute minority situation when hit made:\t" + cInf.bestAbsMinoritySituationHitMade() + "\n" +
+         "\tWorst relative minority situation when hit made:\t" + cInf.bestRelMinoritySituationHitMade() + "\n" +
+         "\tAverage minority situation when hit made:\t" + cInf.averageMinoritySituationHitMade() + "\n" +
          "\n" +
          "\tGiven hits in mayority situations:\t" + cInf.hitsIn(cInf.mayority)(cInf.hit_made()) + "\n" +
          "\tGiven hits in equal situations:\t" + cInf.hitsIn(cInf.equallity)(cInf.hit_made()) + "\n" +
